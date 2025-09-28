@@ -1,6 +1,13 @@
 <template>
 	<div>
-		<img src="/logo.png" alt="EventEase SG" width="200" height="80" />
+		<!-- Logo -->
+		<router-link to="/" class="navbar-brand poppins-bold d-flex align-items-center">
+                <div class="d-flex bg-black align-items-center justify-content-center rounded-2 me-2" 
+                    style="width: 28px; height: 28px">
+                <span style="color: white">E</span>
+                </div>
+                <span class="fw-bold fs-6">EventEase SG</span>
+            </router-link>
 		<div id="container" class="container">
 			<div class="form">
 				<div class="image-side">
