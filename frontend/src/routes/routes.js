@@ -1,8 +1,10 @@
 import { createWebHistory, createRouter } from 'vue-router'
 
-import Home from '../components/Home.vue'
-import Login from '../components/Login.vue'
-import Register from '../components/Register.vue'
+import Home from '../components/home/Home.vue'
+import Login from '../components/onboarding/Login.vue'
+import Register from '../components/onboarding/Register.vue'
+import Friends from '../components/friends/Friends.vue'
+import EventDetail from '../components/events/EventDetails.vue'
 
 const history = createWebHistory()
 
@@ -18,6 +20,14 @@ const routes = [
   {
     path: '/register',
     component: Register,
+  },
+  {
+    path: '/friends',
+    component: Friends,
+  },
+  {
+    path: '/eventDetail',
+    component: EventDetail,
   },
 ]
 

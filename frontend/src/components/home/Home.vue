@@ -1,4 +1,11 @@
-<script setup></script>
+<script setup>
+  import { ref } from 'vue'
+  import Trending from './Trending.vue';
+  import ForYou from './ForYou.vue';
+  import SpinTheWheel from './SpinTheWheel.vue';
+
+  const activeTab = ref('trending')
+</script>
 
 <template>
   <main class="container-fluid px-4 py-4">
@@ -28,6 +35,56 @@
     </div>
 
     <hr class="w-75 text-center mx-auto my-4">
+
+    <div class="d-flex justify-content-center mb-4">
+      <!-- Search Bar -->
+      <form @submit.prevent="handleSearch" class="flex-grow-1 mx-3" style="max-width: 500px; min-width: 300px;">
+        <div class="position-relative">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
+                stroke-width="1.5" stroke="currentColor" 
+                class="icon position-absolute top-50 start-0 translate-middle-y ms-3">
+                <path stroke-linecap="round" stroke-linejoin="round" 
+                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+        <input
+            type="search"
+            class="form-control ps-5"
+            placeholder="Search events"
+            v-model="searchQuery"
+        />
+        </div>
+      </form>
+
+        <!-- Location -->
+        <div class="d-none d-md-flex align-items-center me-3">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon me-1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+            </svg>
+      
+            <div class="dropdown">
+                <button 
+                    class="btn btn-link text-decoration-none p-0 dropdown-toggle text-black" 
+                    type="button" 
+                    data-bs-toggle="dropdown"
+                >
+                    {{ currentLocation }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><h6 class="dropdown-header">Select location</h6></li>
+                    <li v-for="location in locations" :key="location">
+                    <button 
+                        class="dropdown-item" 
+                        :class="{ active: currentLocation === location }"
+                        @click="selectLocation(location)"
+                    >
+                        {{ location }}
+                    </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <!-- Filters -->
     <div class="row g-4">
@@ -61,7 +118,7 @@
       </div>
 
       <!-- Tabs -->
-      <div class="mb-4 d-flex justify-content-center">
+      <div class="d-flex justify-content-center">
         <ul class="nav nav-justified nav-pills max-w-50">
           <li class="nav-item">
             <button 
@@ -89,20 +146,30 @@
             </button>
           </li>
         </ul>
+        <div>
+        </div>
       </div>
+      <Trending v-if="activeTab === 'trending'" />
+      <ForYou v-if="activeTab === 'foryou'" />
     </div>
   </main>
 </template>
 
 <script>
-    
     export default {
       props: ["isLoggedIn"],
       data() {
           return {
-            activeTab: 'trending'
+            locations: ["All", "Central", "North", "Northeast", "East", "West"],
+            currentLocation: "All",
+            searchQuery: ""
           }
       },
+      methods: {
+        selectLocation(location) {
+          this.currentLocation = location
+        },
+      }
     }
 </script>
 
