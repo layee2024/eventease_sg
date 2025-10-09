@@ -1,6 +1,6 @@
 <script>
 export const description
-  = "A login form with email and password. There's an option to login with Google and a link to sign up if you don't have an account."
+  = "A sign up form with first name, last name, email and password inside a card. There's an option to sign up with GitHub and a link to login if you already have an account"
 export const iframeHeight = "600px"
 export const containerClass = "w-full h-screen flex items-center justify-center px-4"
 </script>
@@ -15,15 +15,25 @@ export const containerClass = "w-full h-screen flex items-center justify-center 
 <template>
   <Card class="mx-auto max-w-sm">
     <CardHeader>
-      <CardTitle class="text-2xl">
-        Login
+      <CardTitle class="text-xl">
+        Register
       </CardTitle>
       <CardDescription>
-        Enter your email below to login to your account
+        Enter your information to create an account
       </CardDescription>
     </CardHeader>
     <CardContent>
       <div class="grid gap-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="grid gap-2">
+            <Label for="first-name">First name</Label>
+            <Input id="first-name" placeholder="Max" required />
+          </div>
+          <div class="grid gap-2">
+            <Label for="last-name">Last name</Label>
+            <Input id="last-name" placeholder="Robinson" required />
+          </div>
+        </div>
         <div class="grid gap-2">
           <Label for="email">Email</Label>
           <Input
@@ -34,22 +44,17 @@ export const containerClass = "w-full h-screen flex items-center justify-center 
           />
         </div>
         <div class="grid gap-2">
-          <div class="flex items-center">
-            <Label for="password">Password</Label>
-            <a href="#" class="ml-auto inline-block text-sm underline">
-              Forgot your password?
-            </a>
-          </div>
-          <Input id="password" type="password" required />
+          <Label for="password">Password</Label>
+          <Input id="password" type="password" />
         </div>
         <Button type="submit" class="w-full">
-          Login
+          Create an account
         </Button>
       </div>
       <div class="mt-4 text-center text-sm">
-        Don't have an account?
-        <RouterLink to="/register" class="underline">
-          Register here
+        Already have an account?
+        <RouterLink to="/login" class="underline">
+          Login
         </RouterLink>
       </div>
     </CardContent>
