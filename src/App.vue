@@ -5,6 +5,21 @@
   </div>
 </template>
 
+<script setup>
+  import { supabase } from "./utils/supabase";
+  const todos = ref([])
+
+  async function getTodos() {
+    const { data } = await supabase.from('user').select()
+    todos.value = data
+    console.log(data)
+  }
+
+  onMounted(() => {
+    getTodos()
+  })
+</script>
+
 <script>
   import { useRoute } from "vue-router";
   import { computed } from "vue";
