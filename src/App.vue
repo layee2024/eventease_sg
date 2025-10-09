@@ -6,12 +6,11 @@
 </template>
 
 <script setup>
+  import { onMounted } from "vue";
   import { supabase } from "./utils/supabase";
-  const todos = ref([])
 
   async function getTodos() {
-    const { data } = await supabase.from('user').select()
-    todos.value = data
+    const { data } = await supabase.from('events').select()
     console.log(data)
   }
 
