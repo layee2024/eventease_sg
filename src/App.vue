@@ -3,7 +3,8 @@
   import { onMounted } from "vue";
   import { supabase } from './utils/supabase';
   import { Toaster } from '@/components/ui/sonner';
-  import 'vue-sonner/style.css' // vue-sonner v2 requires this import
+  import NavBar from './components/comp/NavBar.vue';
+  import 'vue-sonner/style.css'
 
 
   async function getTodos() {
@@ -19,8 +20,11 @@
 </script>
 
 <template>
-  <div id="app">
+  <div id="app" class="min-h-screen h-full">
+    <NavBar />
     <Toaster />
-    <RouterView />
+    <div class="h-[90vh]">
+      <RouterView />
+    </div>
   </div>
 </template>

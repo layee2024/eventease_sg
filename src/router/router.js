@@ -1,10 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import LoginView from '@/views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
-import OTPView from '../views/OTPView.vue';
+import VerifyView from '../views/VerifyView.vue';
+import HomeView from '../views/HomeView.vue';
 
 
 const routes = [
+  {
+    path: '/',
+    name: 'HomeView',
+    component: HomeView,
+  },
   {
     path: '/login',
     name: 'LoginView',
@@ -16,9 +22,9 @@ const routes = [
     component: RegisterView,
   },
   {
-    path: '/otp',
-    name: 'OTPView',
-    component: OTPView,
+    path: '/verify',
+    name: 'VerifyView',
+    component: VerifyView,
   },
 ];
 
