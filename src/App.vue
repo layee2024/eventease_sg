@@ -1,7 +1,7 @@
 <template>
-  <div id="app">
-    <Navbar v-if="showNavbar" :isLoggedIn="isLoggedIn" />
-    <router-view class="min-vw-100 min-vh-100 poppins-regular"></router-view>
+  <div id="app" class="w-full min-h-screen">
+    <Navbar />
+    <router-view class="w-full poppins-regular"></router-view>
   </div>
 </template>
 
@@ -29,14 +29,6 @@
     components: { Navbar },
     setup() {
       const route = useRoute();
-
-      // Hide navbar on login/register pages
-      const hideOn = ["/login", "/register"];
-
-      const showNavbar = computed(() => !hideOn.includes(route.path));
-
-      // TODO: authenticate this
-      const isLoggedIn = false;
 
       return { showNavbar, isLoggedIn };
     },
