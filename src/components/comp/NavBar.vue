@@ -54,7 +54,7 @@ function isActive(path) {
     <div class="flex items-center space-x-6">
       <router-link
         to="/"
-        class="flex justify-center items-center gap-1 cursor-pointer text-gray-700 font-medium hover:text-blue-600 transition-colors"
+        class="flex justify-center items-center gap-1 cursor-pointer font-medium hover:text-blue-600 transition-colors"
         :class="{ 'text-blue-600 border-b-2 border-blue-600': route.path === '/' }"
       >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
@@ -67,7 +67,7 @@ function isActive(path) {
 
       <router-link
         to="/events"
-        class="flex justify-center items-center gap-1 cursor-pointer text-gray-700 font-medium hover:text-blue-600 transition-colors"
+        class="flex justify-center items-center gap-1 cursor-pointer font-medium hover:text-blue-600 transition-colors"
         :class="{ 'text-blue-600 border-b-2 border-blue-600': route.path === '/events' }"
       >
 
@@ -80,7 +80,7 @@ function isActive(path) {
       
       <router-link
         to="/map"
-        class="flex justify-center items-center gap-1 cursor-pointer text-gray-700 font-medium hover:text-blue-600 transition-colors"
+        class="flex justify-center items-center gap-1 cursor-pointer font-medium hover:text-blue-600 transition-colors"
         :class="{ 'text-blue-600 border-b-2 border-blue-600': route.path === '/map' }"
       >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
