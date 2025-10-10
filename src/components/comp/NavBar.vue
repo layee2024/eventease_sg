@@ -5,14 +5,10 @@ import { supabase } from "../../utils/supabase"
 import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  NavigationMenuViewport,
-} from '@/components/ui/navigation-menu'
+} from "@/components/ui/navigation-menu"
 
 const router = useRouter()
 const isLoggedIn = ref(false)
@@ -34,15 +30,20 @@ async function logout() {
 </script>
 
 <template>
-  <nav class="w-full bg-white shadow-sm py-3 px-6 flex items-center justify-between font-poppins">
+  <nav
+    class="w-full bg-white shadow-sm py-3 px-6 flex items-center justify-between font-poppins"
+  >
     <!-- Logo -->
     <router-link to="/" class="flex items-center space-x-2">
-      <div class="flex items-center justify-center bg-black text-white rounded-md w-7 h-7 font-bold">
+      <div
+        class="flex items-center justify-center bg-black text-white rounded-md w-7 h-7 font-bold"
+      >
         <span>E</span>
       </div>
       <span class="font-bold text-base text-gray-800">EventEase SG</span>
     </router-link>
-    
+
+    <!-- Navigation Menu -->
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
@@ -58,42 +59,45 @@ async function logout() {
           <NavigationMenuTrigger>Saved</NavigationMenuTrigger>
         </NavigationMenuItem>
       </NavigationMenuList>
-  </NavigationMenu>
+    </NavigationMenu>
 
-    <!-- Right side buttons -->
+    <!-- Right Side -->
     <div class="flex items-center space-x-3">
       <!-- If NOT logged in -->
       <template v-if="!isLoggedIn">
-        <router-link 
-          to="/login" 
-          class="border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium px-4 py-1.5 rounded-md transition-colors"
-        >
-          Login
-        </router-link>
-        <router-link 
-          to="/register" 
-          class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-1.5 rounded-md transition-colors"
+        <Button
+          variant="outline"
+          @click="router.push('/register')"
+          class="px-4 py-1.5 font-medium"
         >
           Register
-        </router-link>
+        </Button>
+        <Button
+          @click="router.push('/login')"
+          class="px-4 py-1.5 font-medium"
+        >
+          Login
+        </Button>
       </template>
 
       <!-- If logged in -->
       <template v-else>
-        <router-link 
-          to="/profile"
-          class="border border-gray-400 text-gray-700 hover:bg-gray-100 font-medium px-4 py-1.5 rounded-md transition-colors"
+        <Button
+          @click="router.push('/profile')"
+          class="px-4 py-1.5 font-medium"
         >
           Profile
-        </router-link>
-        <Button variant="outline" @click="logout">Logout</Button>
+        </Button>
+        <Button variant="ghost" @click="logout" class="px-4 py-1.5 font-medium">
+          Logout
+        </Button>
       </template>
     </div>
   </nav>
 </template>
 
 <style scoped>
-    .font-poppins {
-    font-family: 'Poppins', sans-serif;
-    }
+.font-poppins {
+  font-family: "Poppins", sans-serif;
+}
 </style>

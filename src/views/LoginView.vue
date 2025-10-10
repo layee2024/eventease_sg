@@ -14,10 +14,11 @@
   const password = ref("")
   const loading = ref(false)
 
-  onMounted(() => {
-    const type = route.query.type
-    if (type === "signup") {
-      toast.success("Your email has been verified! You can now log in.")
+  onMounted(async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
+      router.push("/")
+      return
     }
   })
 

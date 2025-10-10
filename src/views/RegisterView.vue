@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,7 +16,15 @@ const email = ref("")
 const password = ref("")
 const loading = ref(false)
 
-async function handleRegister() {
+onMounted(async () => {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session) {
+    router.push("/")
+    return
+  }}
+)
+
+async function register() {
   try {
     loading.value = true
 
@@ -53,7 +61,7 @@ async function handleRegister() {
         <CardDescription>Enter your information to create an account</CardDescription>
       </CardHeader>
       <CardContent>
-        <form @submit.prevent="handleRegister" class="grid gap-4">
+        <form @submit.prevent="register" class="grid gap-4">
           <div class="grid grid-cols-2 gap-4">
             <div class="grid gap-2">
               <Label for="first-name">First name</Label>

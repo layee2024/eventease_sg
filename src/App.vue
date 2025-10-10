@@ -1,21 +1,8 @@
 <script setup>
   import { RouterView } from 'vue-router';
-  import { onMounted } from "vue";
-  import { supabase } from './utils/supabase';
   import { Toaster } from '@/components/ui/sonner';
   import NavBar from './components/comp/NavBar.vue';
   import 'vue-sonner/style.css'
-
-
-  async function getTodos() {
-    const { data } = await supabase.from('events').select()
-
-    console.log(data)
-  }
-
-  onMounted(() => {
-    getTodos()
-  })
 
 </script>
 
@@ -24,7 +11,24 @@
     <NavBar />
     <Toaster />
     <div class="h-[90vh]">
-      <RouterView />
+      <RouterView class="router-view" v-slot="{ Component }">
+        <Transition name="page-slide" mode="out-in" >
+          <component :is="Component" />
+        </Transition>
+      </RouterView>
     </div>
   </div>
 </template>
+
+<style>
+  .page-slide-enter-active,
+  .page-slide-leave-active {
+    transition: 600ms ease all;
+  }
+
+  .page-slide-enter-from,
+  .page-slide-leave-to {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+</style>
