@@ -1,5 +1,5 @@
 <script setup>
-
+  
 </script>
 
 <script>
@@ -9,14 +9,10 @@
 <template>
   <section>
     <div class="">
-      <h2></h2>
-      <div>
-        <img src="../assets/cover.png" alt="" class="w-full h-[75vh]">
-      </div>
+        <h2>Saved</h2>
     </div>
   </section>
 </template>
   
 <style scoped>
 </style>
-  

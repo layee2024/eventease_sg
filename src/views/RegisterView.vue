@@ -83,14 +83,14 @@ async function register() {
             <Input id="password" type="password" v-model="password" required />
           </div>
 
-          <Button type="submit" class="w-full" :disabled="loading">
+          <Button type="submit" class="cursor-pointer w-full" :disabled="loading">
             {{ loading ? "Creating..." : "Create an account" }}
           </Button>
         </form>
 
         <div class="mt-4 text-center text-sm">
           Already have an account?
-          <RouterLink to="/login" class="underline">Login</RouterLink>
+          <RouterLink to="/login" class="cursor-pointer underline">Login</RouterLink>
         </div>
       </CardContent>
     </Card>

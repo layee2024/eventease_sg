@@ -69,17 +69,17 @@
           <div class="grid gap-2">
             <Label for="password">Password</Label>
             <Input id="password" type="password" v-model="password" required />
-            <a href="#" class="ml-auto inline-block text-sm underline">
+            <RouterLink to="#" class="cursor-pointer underline ml-auto inline-block text-sm">
               Forgot your password?
-            </a>
+            </RouterLink>
           </div>
           
-          <Button type="submit" class="w-full" :disabled="loading">
+          <Button type="submit" class="cursor-pointer w-full" :disabled="loading">
             {{ loading ? "Logging in..." : "Login" }}
           </Button>
           <div class="mt-4 text-center text-sm">
             Don't have an account?
-            <RouterLink to="/register" class="underline">
+            <RouterLink to="/register" class="cursor-pointer underline">
               Register here
             </RouterLink>
           </div>

@@ -10,7 +10,7 @@
   <div id="app" class="min-h-screen h-full">
     <NavBar />
     <Toaster />
-    <div class="h-[90vh]">
+    <div class="h-[90vh] w-screen">
       <RouterView class="router-view" v-slot="{ Component }">
         <Transition name="page-slide" mode="out-in" >
           <component :is="Component" />
