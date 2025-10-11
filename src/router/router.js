@@ -7,7 +7,8 @@ import MapView from '../views/MapView.vue';
 import SavedView from '../views/SavedView.vue';
 import FriendsView from '../views/FriendsView.vue';
 import ProfileView from '../views/ProfileView.vue';
-import EventsView from '../views/EventsView.vue';
+import EventsView from '../views/events/EventsView.vue';
+import TrendingView from '../views/events/TrendingView.vue';
 
 
 const routes = [
@@ -32,8 +33,8 @@ const routes = [
     component: VerifyView,
   },
   {
-    path: '/events',
-    name: 'EventsView',
+    path: "/events",
+    name: "events",
     component: EventsView,
   },
   {
@@ -61,6 +62,9 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior() {
+    return { top: 0 }
+  },
 });
 
 export default router;

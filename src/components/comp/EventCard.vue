@@ -74,7 +74,7 @@ const crowdColor = computed(() => {
       </button>
     </div>
 
-    <CardContent class="p-4">
+    <CardContent class="px-4">
       <h3 class="font-semibold text-gray-900 text-base truncate">{{ title }}</h3>
       <p class="text-sm text-gray-500">{{ location }}</p>
 
