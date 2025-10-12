@@ -1,13 +1,15 @@
 <script setup>
 import { ref, onMounted } from "vue"
-import EventCard from "@/components/comp/EventCard.vue"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "vue-router"
 import { supabase } from "@/utils/supabase"
+import { useRouter } from "vue-router"
+import { Button } from "@/components/ui/button"
+import EventCard from "@/components/comp/EventCard.vue"
 
 const trendingEvents = ref([])
+const savedIds = ref([]) // user’s saved events
 const router = useRouter()
 
+// Get trending events
 async function getTrendingEvents() {
   const { data, error } = await supabase.from("events").select("*")
   if (error) {
@@ -17,17 +19,48 @@ async function getTrendingEvents() {
   trendingEvents.value = data.filter((x) => x.crowd_level === "High")
 }
 
+// Load user's saved list
+async function loadUserSaved() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const { data, error } = await supabase
+    .from("preferences")
+    .select("saved")
+    .eq("id", user.id)
+    .single()
+
+  if (error) {
+    console.error("Error loading preferences:", error)
+    return
+  }
+
+  savedIds.value = data?.saved || []
+}
+
+// Update saved list
+function handleSavedUpdate({ id, liked }) {
+  if (liked) {
+    if (!savedIds.value.includes(id)) savedIds.value.push(id)
+  } else {
+    savedIds.value = savedIds.value.filter((x) => x !== id)
+  }
+}
+
 const viewAll = () => router.push("/events/trending")
 
-onMounted(getTrendingEvents)
+onMounted(async () => {
+  await getTrendingEvents()
+  await loadUserSaved()
+})
 </script>
 
 <template>
   <section class="py-12 px-6 md:px-12 xl:px-20 bg-white">
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h2 class="text-3xl font-bold text-gray-900">🔥 Trending Events</h2>
-        <p class="text-gray-500 mt-1">What’s hot in Singapore right now</p>
+        <h2 class="text-3xl font-bold text-gray-900">Trending Events</h2>
+        <p class="text-gray-500 mt-1">What's hot in Singapore right now</p>
       </div>
       <Button
         variant="link"
@@ -45,6 +78,7 @@ onMounted(getTrendingEvents)
       <EventCard
         v-for="event in trendingEvents.slice(0, 4)"
         :key="event.id"
+        :id="event.id"
         :title="event.title"
         :category="event.category"
         :categoryColor="{
@@ -59,6 +93,8 @@ onMounted(getTrendingEvents)
         :date="new Date(event.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })"
         :crowd="event.crowd_level"
         :image="event.image_url"
+        :liked="savedIds.includes(event.id)"
+        @update-saved="handleSavedUpdate"
       />
     </div>
 

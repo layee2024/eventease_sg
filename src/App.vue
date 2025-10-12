@@ -9,7 +9,7 @@
 <template>
   <div id="app" class="min-h-screen h-full">
     <NavBar />
-    <Toaster />
+    <Toaster position="top-right" />
     <div class="h-[90vh] w-screen">
       <RouterView class="router-view" v-slot="{ Component }">
         <Transition name="page-slide" mode="out-in" >
