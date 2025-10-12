@@ -1,36 +1,66 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue"
-import Typewriter from "../components/comp/Typewriter.vue"
-import { Button } from "@/components/ui/button"
+  import { ref, onMounted, onUnmounted, nextTick } from "vue"
+  import Typewriter from "../components/comp/Typewriter.vue"
+  import { Button } from "@/components/ui/button"
 
-const problem = ref(null)
-const isVisible = ref(false)
+  const problem = ref(null)
+  const isVisible = ref(false)
 
-onMounted(() => {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          isVisible.value = true
-          observer.disconnect() // run animation once
-        }
-      })
-    },
-    { threshold: 0.7 } // trigger
-  )
+  onMounted(async () => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            isVisible.value = true
+            observer.disconnect()
+          }
+        })
+      },
+      { threshold: 0.7 }
+    )
 
-  if (problem.value) observer.observe(problem.value)
-})
+    if (problem.value) observer.observe(problem.value)
 
-const scrollToNext = () => {
-  if (problem.value) {
-    problem.value.scrollIntoView({ behavior: "smooth" })
+    await nextTick()
+    initStarAnimation()
+  })
+
+  const scrollToNext = () => {
+    if (problem.value) {
+      problem.value.scrollIntoView({ behavior: "smooth" })
+    }
   }
-}
 
-onUnmounted(() => {
-  if (problem.value) observer.unobserve(problem.value)
-})
+  onUnmounted(() => {
+    if (problem.value) observer.unobserve(problem.value)
+  })
+
+  // Star animation
+  function initStarAnimation() {
+    let index = 0
+    const interval = 1000
+
+    const rand = (min, max) =>
+      Math.floor(Math.random() * (max - min + 1)) + min
+
+    const animate = (star) => {
+      star.style.setProperty("--star-left", `${rand(-10, 100)}%`)
+      star.style.setProperty("--star-top", `${rand(-40, 80)}%`)
+
+      // reset animation
+      star.style.animation = "none"
+      star.offsetHeight
+      star.style.animation = ""
+    }
+
+    const stars = document.getElementsByClassName("stars")
+    for (const star of stars) {
+      setTimeout(() => {
+        animate(star)
+        setInterval(() => animate(star), interval)
+      }, index++ * (interval / 3))
+    }
+  }
 </script>
 
 <template>
@@ -85,7 +115,24 @@ onUnmounted(() => {
         <div class="flex flex-col justify-center items-center xl:items-start h-full">
           <h2 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
             We Built EventEase SG to
-            <span class="gradient-text">Solve Real Problems</span>
+            <span class="stars-animation">
+              <span class="stars">
+                <svg viewBox="0 0 512 512">
+                  <path d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
+                </svg>
+              </span>
+              <span class="stars">
+                <svg viewBox="0 0 512 512">
+                  <path d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
+                </svg>
+              </span>
+              <span class="stars">
+                <svg viewBox="0 0 512 512">
+                <path d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
+                </svg>
+              </span>
+              <span class="stars-animation-text">Solve Real Problems</span>
+            </span>
           </h2>
           <p class="text-slate-800 text-lg leading-relaxed xl:max-w-lg">
             EventEase SG is your all-in-one platform for discovering and experiencing Singapore's most exciting events. 
@@ -95,7 +142,7 @@ onUnmounted(() => {
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div
-            class="flex flex-col"
+            class="flex flex-col group relative overflow-hidden p-6 rounded-xl shadow-md transition-all duration-500 ease-out transform border border-gray-100 bg-white/70 backdrop-blur-sm hover:-translate-y-2 hover:shadow-2xl hover:border-violet-300 hover:bg-white/90"
             v-for="(card, i) in [
               {
                 title: 'Discover Effortlessly',
@@ -136,11 +183,11 @@ onUnmounted(() => {
                   stroke="currentColor"
                   v-html="card.icon"
                   class="w-6 h-6"
-                />
+                ></svg>
               </div>
-              <h3 class="font-semibold text-lg text-gray-900">{{ card.title }}</h3>
+              <h3 class="font-semibold text-lg text-gray-900 group-hover:text-violet-600">{{ card.title }}</h3>
             </div>
-            <p class="text-gray-600 text-sm mt-3">{{ card.text }}</p>
+            <p class="text-gray-600 text-sm mt-3 group-hover:text-gray-800">{{ card.text }}</p>
           </div>
         </div>
       </div>
@@ -149,37 +196,93 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-  @media (min-width: 768px) {
-    .-mt-10 {
-      margin-top: -2.5rem;
+  .group::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+    z-index: 0;
+  }
+
+  .group:hover::before {
+    opacity: 1;
+    filter: blur(20px);
+  }
+
+  .group:hover {
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2), 0 0 10px rgba(244, 143, 177, 0.15);
+  }
+
+  @keyframes background-pan {
+    from {
+      background-position: 0% center;
+    }
+    
+    to {
+      background-position: -200% center;
     }
   }
 
-  @property --color-1 {
-  syntax: "<color>";
-  inherits: false;
-  initial-value: hsl(98 100% 62%);
-}
-
-@property --color-2 {
-  syntax: "<color>";
-  inherits: false;
-  initial-value: hsl(204 100% 59%);
-}
-
-@keyframes gradient-shift {
-  to {
-    --color-1: hsl(210 100% 59%);
-    --color-2: hsl(310 100% 59%);
+  @keyframes scale {
+    from, to {
+      transform: scale(0);
+    }
+    
+    50% {
+      transform: scale(1);
+    }
   }
-}
 
-.gradient-text {
-  animation: gradient-shift 3s ease-in-out infinite alternate;
-  background: linear-gradient(to right in oklch, var(--color-1), var(--color-2));
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    
+    to {
+      transform: rotate(180deg);
+    }
+  }
+
+  .stars-animation {
+    display: inline-block;
+    position: relative;
+  }
+
+  .stars-animation > .stars {
+    
+    animation: scale 700ms ease forwards;
+    display: block;
+    height: clamp(20px, 1.5vw, 30px);
+    left: var(--star-left);
+    position: absolute;
+    top: var(--star-top);
+    width: clamp(20px, 1.5vw, 30px);
+  }
+
+  .stars-animation > .stars > svg {
+    animation: rotate 1000ms linear infinite;
+    display: block;
+    opacity: 0.7;
+  }
+
+  .stars-animation > .stars > svg > path {
+    fill: rgb(103, 58, 183);
+  }
+
+  .stars-animation > .stars-animation-text {
+    animation: background-pan 3s linear infinite;
+    background: linear-gradient(
+      to right,
+      rgb(123, 31, 162),
+      rgb(103, 58, 183),
+      rgb(244, 143, 177),
+      rgb(123, 31, 162)
+    );
+    background-size: 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    white-space: nowrap;
+  }
 </style>
