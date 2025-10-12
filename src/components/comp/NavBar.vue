@@ -36,10 +36,10 @@ function isActive(path) {
 </script>
 
 <template>
-  <nav class="sticky top-0 z-50 h-[7vh] w-full bg-white shadow-sm py-3 px-6 flex items-center justify-between">
+  <nav class="sticky top-0 z-50 h-[7vh] w-full bg-white shadow-sm py-2 px-6 flex items-center justify-between">
     <!-- Logo -->
     <router-link to="/" class="flex items-center space-x-2">
-      <div class="flex items-center justify-center rounded-md w-14 h-14">
+      <div class="flex items-center justify-center rounded-md w-12 h-12">
         <!-- <span>E</span> -->
          <img src="../../assets/logo.png" alt="">
       </div>
