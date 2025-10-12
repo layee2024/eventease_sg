@@ -6,8 +6,13 @@ EventEase SG is an online event discovery and planning website created for Singa
 [Deployed URL](deployed_link_here)
 
 ## Setup
-1. Under the eventease_sg directory, run `npm i` in the terminal
-2. Then, run `npm run dev` to run the application
+1. Create a `.env` file under the root directory, with the following code inside:
+```
+VITE_SUPABASE_URL=https://psalmiccuppsdgkvdezt.supabase.co
+VITE_SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzYWxtaWNjdXBwc2Rna3ZkZXp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwNTAyNzgsImV4cCI6MjA3NTYyNjI3OH0.C07Y_5uj37t9ldSMmBM2yHAsQsT1QEwH3Eo3cjLsObs
+```
+2. Under the eventease_sg directory, run `npm i` in the terminal
+3. Then, run `npm run dev` to run the application
 
 ## Usernames and Passwords
 > You can create your own user using the /register page
