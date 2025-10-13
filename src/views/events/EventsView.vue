@@ -4,10 +4,15 @@ import { supabase } from "@/utils/supabase"
 import { useRouter } from "vue-router"
 import { Button } from "@/components/ui/button"
 import EventCard from "@/components/comp/EventCard.vue"
+//for eventfilter.vue file import 
+import EventFilter from "@/components/comp/EventFilter.vue"
+
 
 const trendingEvents = ref([])
 const savedIds = ref([]) // user’s saved events
 const router = useRouter()
+//for filteredevents
+const filteredEvents = ref([...trendingEvents.value])
 
 // Get trending events
 async function getTrendingEvents() {
@@ -16,7 +21,8 @@ async function getTrendingEvents() {
     console.error("Error fetching trending events:", error)
     return
   }
-  trendingEvents.value = data.filter((x) => x.crowd_level === "High")
+  // trendingEvents.value = data.filter((x) => x.crowd_level === "High")
+  trendingEvents.value=data //keep all the events
 }
 
 // Load user's saved list
@@ -46,17 +52,30 @@ function handleSavedUpdate({ id, liked }) {
     savedIds.value = savedIds.value.filter((x) => x !== id)
   }
 }
+//function for the event filter 
+function handleFilterChange(filter) {
+  filteredEvents.value = trendingEvents.value.filter((event) => {
+    const matchCategory = filter.category ? event.category === filter.category : true
+    const matchPrice = filter.maxPrice != null ? event.ticket_price <= filter.maxPrice : true
+    const matchCrowd = filter.crowdLevel ? event.crowd_level === filter.crowdLevel : true
+    return matchCategory && matchPrice && matchCrowd
+  })
+}
+
 
 const viewAll = () => router.push("/events/trending")
 
 onMounted(async () => {
   await getTrendingEvents()
+  filteredEvents.value = [...trendingEvents.value]
   await loadUserSaved()
 })
+
 </script>
 
 <template>
   <section class="py-12 px-6 md:px-12 xl:px-20 bg-white">
+    <!-- header -->
     <div class="flex items-center justify-between mb-6">
       <div>
         <h2 class="text-3xl font-bold text-gray-900">Trending Events</h2>
@@ -71,12 +90,15 @@ onMounted(async () => {
       </Button>
     </div>
 
+     <!-- Filter Bar -->
+    <EventFilter @update-filter="handleFilterChange" />
+
     <div
-      v-if="trendingEvents.length"
+      v-if="filteredEvents.length"
       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
     >
       <EventCard
-        v-for="event in trendingEvents.slice(0, 4)"
+        v-for="event in filteredEvents"
         :key="event.id"
         :id="event.id"
         :title="event.title"
@@ -98,8 +120,11 @@ onMounted(async () => {
       />
     </div>
 
-    <div v-else class="text-gray-500 text-center py-10">
-      No trending events found.
+    <!-- Empty State -->
+    <div v-else class="text-gray-500 text-center py-10 mt-6">
+      No events match the selected filters.
     </div>
   </section>
+
+
 </template>
