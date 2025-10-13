@@ -11,9 +11,9 @@ const crowdLevel = ref("")
 // Emit filter changes
 function applyFilter() {
   emits("update-filter", {
-    category,
-    maxPrice: maxPrice ? parseFloat(maxPrice) : null,
-    crowdLevel
+    category: category.value,
+    maxPrice: maxPrice.value ? parseFloat(maxPrice.value) : null,
+    crowdLevel: crowdLevel.value
   })
 }
 
@@ -33,8 +33,14 @@ function resetFilter() {
       <option value="Music">Music</option>
       <option value="Food">Food</option>
       <option value="Arts">Arts</option>
-      <option value="Tech">Tech</option>
+      <option value="Technology">Technology</option>
       <option value="Sports">Sports</option>
+      <option value="Education">Education</option>
+      <option value="Business">Business</option>
+      <option value="Culture">Culture</option>
+      <option value="Health">Health</option>
+      <option value="Social">Social</option>
+      <option value="Environment">Environment</option>
     </select>
 
     <input
@@ -47,7 +53,7 @@ function resetFilter() {
     <select v-model="crowdLevel" class="border rounded px-3 py-1">
       <option value="">Any Crowd</option>
       <option value="High">High</option>
-      <option value="Medium">Medium</option>
+      <option value="Moderate">Moderate</option>
       <option value="Low">Low</option>
     </select>
 

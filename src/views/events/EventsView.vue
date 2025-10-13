@@ -8,11 +8,10 @@ import EventCard from "@/components/comp/EventCard.vue"
 import EventFilter from "@/components/comp/EventFilter.vue"
 
 
-const trendingEvents = ref([])
-const savedIds = ref([]) // user’s saved events
-const router = useRouter()
-//for filteredevents
-const filteredEvents = ref([...trendingEvents.value])
+const trendingEvents = ref([]);
+const filteredEvents = ref([]);
+const savedIds = ref([]);
+const router = useRouter();
 
 // Get trending events
 async function getTrendingEvents() {
@@ -21,8 +20,24 @@ async function getTrendingEvents() {
     console.error("Error fetching trending events:", error)
     return
   }
+  trendingEvents.value = data || [];
+  filteredEvents.value = [...trendingEvents.value];
+  //to check the supabase data type 
+    console.log("Supabase events data:", data) 
+//eg of one object of the supabase data 
+  // { "id": "e1ec6caf-ef92-42ff-a6bc-a56b6eb37d9f", 
+  // "title": "Mindfulness Retreat", 
+  // "category": "Health", 
+  // "description": "Weekend retreat for meditation and relaxation.", 
+  // "start_date": "2025-11-22T09:00:00",
+  //  "end_date": "2025-11-24T17:00:00",
+  //  "venue": "Changi Beach Resort", 
+  // "latitude": 1.39, "longitude": 103.987, "image_url": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+  //  "ticket_price": 180, 
+  // "crowd_level": "Low" }
+
   // trendingEvents.value = data.filter((x) => x.crowd_level === "High")
-  trendingEvents.value=data //keep all the events
+  // trendingEvents.value=data //keep all the events
 }
 
 // Load user's saved list
@@ -54,22 +69,26 @@ function handleSavedUpdate({ id, liked }) {
 }
 //function for the event filter 
 function handleFilterChange(filter) {
-  filteredEvents.value = trendingEvents.value.filter((event) => {
-    const matchCategory = filter.category ? event.category === filter.category : true
-    const matchPrice = filter.maxPrice != null ? event.ticket_price <= filter.maxPrice : true
-    const matchCrowd = filter.crowdLevel ? event.crowd_level === filter.crowdLevel : true
-    return matchCategory && matchPrice && matchCrowd
-  })
+ filteredEvents.value = trendingEvents.value.filter((event) => {
+  const matchCategory = !filter.category || event.category === filter.category
+  const matchPrice = filter.maxPrice == null || isNaN(filter.maxPrice) || event.ticket_price <= filter.maxPrice
+  const matchCrowd = !filter.crowdLevel || event.crowd_level === filter.crowdLevel
+
+  return matchCategory && matchPrice && matchCrowd
+})
+
 }
+
 
 
 const viewAll = () => router.push("/events/trending")
 
 onMounted(async () => {
   await getTrendingEvents()
-  filteredEvents.value = [...trendingEvents.value]
   await loadUserSaved()
 })
+
+
 
 </script>
 
