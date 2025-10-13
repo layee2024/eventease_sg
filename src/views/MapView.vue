@@ -1,143 +1,5 @@
 <script setup>
-// import { onMounted, onUnmounted, ref, watch } from 'vue'
-// import { displayGoogleMap } from '../utils/map'
-
-
-// const eventCat = ref('All Events')
-// const map = ref(null)
-// const categories = ref([])
-// let infoWindow = null
-// const markers = ref([])
-
-// const onload = async () => {
-//   const apiKey = import.meta.env.VITE_Google_map_API_key
-//   try {
-//     const { maps, AdvancedMarkerElement } = await displayGoogleMap(apiKey)
-//     map.value = new maps.Map(document.getElementById('map'), {
-//       center: { lat: 1.3035107, lng: 103.872791653661 },
-//       zoom: 15,
-//       gestureHandling: 'cooperative',
-//       mapId: '6e19782457baaaf583dee02a'
-//     })
-//   } catch (error) {
-//     console.error(error)
-//   }
-// }
-
-// async function getCat() {
-//   markers.value.forEach(({ marker }) => marker?.setMap(null));
-//   markers.value = [];
-
-//   const { data, error } = await supabase.from("events").select("*");
-//   if (error) {
-//     console.error("Error fetching events:", error);
-//     return;
-//   }
-
-//   categories.value = ['All Events', ...new Set(data.map(event => event.category).filter(Boolean))];
-
-//   for (let event of data) {
-//     const marker = await markEvent(event);
-//     if (marker) {
-//       markers.value.push({ marker, category: event.category, event });
-//     }
-//   }
-
-//   filterMarkersByCategory();
-// }
-
-// function filterMarkersByCategory() {
-//   markers.value.forEach(({ marker, category }) => {
-//     if (!marker) return;
-//     const visible = eventCat.value === "All Events" || eventCat.value === category;
-//     visible ? marker.setMap(map.value) : marker.setMap(null);
-//   });
-// }
-
-// async function markEvent(event) {
-//   const { latitude: lat, longitude: long, title, description, image_url, start_date, end_date, venue } = event;
-
-//   if (!lat || !long) {
-//     console.warn(`Event ${title} missing coordinates, skipping marker.`);
-//     return null;
-//   }
-
-//   if (!google.maps.marker || !google.maps.marker.AdvancedMarkerView) {
-//     console.error('AdvancedMarkerView is not available yet');
-//     return null;
-//   }
-
-//   const contentDiv = document.createElement('div');
-//   contentDiv.style.backgroundColor = 'white';
-//   contentDiv.style.border = '1px solid #ccc';
-//   contentDiv.style.borderRadius = '8px';
-//   contentDiv.style.padding = '4px 8px';
-//   contentDiv.style.fontWeight = 'bold';
-//   contentDiv.style.fontSize = '14px';
-//   contentDiv.style.cursor = 'pointer';
-//   contentDiv.style.whiteSpace = 'nowrap';
-//   contentDiv.textContent = title;
-
-//   const marker = new google.maps.marker.AdvancedMarkerView({
-//     map: map.value,
-//     position: { lat, lng: long },
-//     title,
-//     content: contentDiv,
-//   });
-
-//   if (!infoWindow) {
-//     infoWindow = new google.maps.InfoWindow();
-//   }
-
-//   marker.addListener('click', () => {
-//     infoWindow.close();
-
-//     const { date: startDate, time: startTime } = convertTimeDate(start_date);
-//     const { date: endDate, time: endTime } = convertTimeDate(end_date);
-
-//     infoWindow.setContent(`
-//       <div style="min-width: 200px;">
-//         <div class="container relative"> 
-//           <img src="${image_url}" style="width: 300px; display: block; margin: 0 auto 8px auto; border: 1px solid black; border-radius: 5px" />
-//         </div>
-//         <h2 style="margin:0 0 8px 0; font-weight: bold; font-size:large">${title}</h2>
-//         <p><strong>Venue:</strong> ${venue || 'To Be Confirmed'}</p>
-//         <p><strong>Date:</strong> ${startDate || 'Not available'} - ${endDate || 'Not available'}</p>
-//         <p><strong>Time:</strong> ${startTime || 'Not available'} - ${endTime || 'Not available'}</p>
-//         <p><strong>Description:</strong> ${description || 'No description available.'}</p>
-//       </div>
-//     `);
-
-//     infoWindow.open({ anchor: marker, map: map.value, shouldFocus: false });
-//   });
-
-//   return marker;
-// }
-
-// function convertTimeDate(timeDate) {
-//   if (!timeDate) return { date: null, time: null };
-//   const dateObj = parseISO(timeDate);
-//   return {
-//     date: format(dateObj, 'MMM d, yyyy'),
-//     time: format(dateObj, 'h:mm a')
-//   }
-// }
-
-// onMounted(async () => {
-//   document.body.style.overflow = 'hidden';
-//   await onload();
-//   await getCat();
-// });
-
-// watch(eventCat, () => {
-//   filterMarkersByCategory();
-// }, { immediate: true });
-
-// onUnmounted(() => {
-//   document.body.style.overflow = '';
-// });
-
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch , onUnmounted} from 'vue';
 import { supabase } from "@/utils/supabase";
 import { format, parseISO } from 'date-fns'
 
@@ -312,6 +174,10 @@ watch(eventCat, (newCat) => {
       makeMarker(event, map)
     });
 })
+
+onUnmounted(() => {
+  document.body.style.overflow = '';
+});
 </script>
 
 <template>
