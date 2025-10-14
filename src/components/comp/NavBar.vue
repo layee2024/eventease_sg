@@ -36,7 +36,7 @@ function isActive(path) {
 </script>
 
 <template>
-  <nav class="sticky top-0 z-50 h-[7vh] w-full bg-white shadow-sm py-2 px-6 flex items-center justify-between">
+  <nav class="sticky top-0 z-50 h-[7vh] w-full bg-white/95 backdrop-blur-lg shadow-lg border-b border-gray-100 py-2 px-6 flex items-center justify-between transition-all duration-300">
     <!-- Logo -->
     <router-link to="/" class="flex items-center space-x-2">
       <div class="flex items-center justify-center rounded-md w-12 h-12">
@@ -55,8 +55,8 @@ function isActive(path) {
     <div class="flex items-center space-x-6">
       <router-link
         to="/"
-        class="flex justify-center items-center gap-1 cursor-pointer font-medium hover:text-blue-600 transition-colors"
-        :class="{ 'text-blue-600 border-b-2 border-blue-600': route.path === '/' }"
+        class="flex justify-center items-center gap-1 cursor-pointer font-medium text-gray-700 hover:text-purple-600 transition-all duration-300 px-2 py-1 rounded-lg hover:bg-purple-50"
+        :class="{ 'text-purple-600 bg-purple-50 font-semibold': route.path === '/' }"
       >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
         <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
@@ -68,8 +68,8 @@ function isActive(path) {
 
       <router-link
         to="/events"
-        class="flex justify-center items-center gap-1 cursor-pointer font-medium hover:text-blue-600 transition-colors"
-        :class="{ 'text-blue-600 border-b-2 border-blue-600': route.path === '/events' }"
+        class="flex justify-center items-center gap-1 cursor-pointer font-medium text-gray-700 hover:text-purple-600 transition-all duration-300 px-2 py-1 rounded-lg hover:bg-purple-50"
+        :class="{ 'text-purple-600 bg-purple-50 font-semibold': route.path === '/events' }"
       >
 
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
@@ -81,8 +81,8 @@ function isActive(path) {
       
       <router-link
         to="/map"
-        class="flex justify-center items-center gap-1 cursor-pointer font-medium hover:text-blue-600 transition-colors"
-        :class="{ 'text-blue-600 border-b-2 border-blue-600': route.path === '/map' }"
+        class="flex justify-center items-center gap-1 cursor-pointer font-medium text-gray-700 hover:text-purple-600 transition-all duration-300 px-2 py-1 rounded-lg hover:bg-purple-50"
+        :class="{ 'text-purple-600 bg-purple-50 font-semibold': route.path === '/map' }"
       >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
         <path fill-rule="evenodd" d="M8.161 2.58a1.875 1.875 0 0 1 1.678 0l4.993 2.498c.106.052.23.052.336 0l3.869-1.935A1.875 1.875 0 0 1 21.75 4.82v12.485c0 .71-.401 1.36-1.037 1.677l-4.875 2.437a1.875 1.875 0 0 1-1.676 0l-4.994-2.497a.375.375 0 0 0-.336 0l-3.868 1.935A1.875 1.875 0 0 1 2.25 19.18V6.695c0-.71.401-1.36 1.036-1.677l4.875-2.437ZM9 6a.75.75 0 0 1 .75.75V15a.75.75 0 0 1-1.5 0V6.75A.75.75 0 0 1 9 6Zm6.75 3a.75.75 0 0 0-1.5 0v8.25a.75.75 0 0 0 1.5 0V9Z" clip-rule="evenodd" />
@@ -92,8 +92,8 @@ function isActive(path) {
 
       <router-link
         to="/shuffle"
-        class="flex justify-center items-center gap-1 cursor-pointer font-medium hover:text-blue-600 transition-colors"
-        :class="{ 'text-blue-600 border-b-2 border-blue-600': route.path === '/shuffle' }"
+        class="flex justify-center items-center gap-1 cursor-pointer font-medium text-gray-700 hover:text-purple-600 transition-all duration-300 px-2 py-1 rounded-lg hover:bg-purple-50"
+        :class="{ 'text-purple-600 bg-purple-50 font-semibold': route.path === '/shuffle' }"
       >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
         <path d="M17.25 3a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V4.81l-5.78 5.78a.75.75 0 0 1-1.06-1.06l5.78-5.78h-.69a.75.75 0 0 1 0-1.5h1.5ZM3 8.25a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H4.81l5.78 5.78a.75.75 0 0 1-1.06 1.06L3.75 10.06v.69a.75.75 0 0 1-1.5 0v-1.5ZM17.25 16.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-.69l-5.78-5.78a.75.75 0 0 1 1.06-1.06l5.78 5.78h.69a.75.75 0 0 1 0 1.5h-1.5Z" />
@@ -110,13 +110,13 @@ function isActive(path) {
         <Button
           variant="outline"
           @click="router.push('/register')"
-          class="cursor-pointer px-4 py-1.5 font-medium"
+          class="cursor-pointer px-5 py-2 font-medium border-purple-300 text-purple-600 hover:bg-purple-50 hover:border-purple-400 transition-all duration-300"
         >
           Register
         </Button>
         <Button
           @click="router.push('/login')"
-          class="cursor-pointer px-4 py-1.5 font-medium"
+          class="cursor-pointer px-5 py-2 font-medium bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
         >
           Login
         </Button>
@@ -126,7 +126,7 @@ function isActive(path) {
       <template v-else>
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <Button variant="outline" class="cursor-pointer px-4 py-1.5 font-medium flex items-center gap-1">
+            <Button variant="outline" class="cursor-pointer px-5 py-2 font-medium flex items-center gap-2 border-purple-300 text-purple-600 hover:bg-purple-50 hover:border-purple-400 transition-all duration-300">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                 <path
                   fill-rule="evenodd"
@@ -140,9 +140,9 @@ function isActive(path) {
 
           <DropdownMenuContent align="end" class="w-44">
             <DropdownMenuItem
-              class="cursor-pointer flex items-center gap-1"
+              class="cursor-pointer flex items-center gap-2 hover:bg-purple-50 transition-colors"
               @click="router.push('/profile')"
-              :class="{ 'bg-blue-100 text-blue-700 font-medium': isActive('/profile') }"
+              :class="{ 'bg-purple-100 text-purple-700 font-medium': isActive('/profile') }"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                 <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
@@ -152,9 +152,9 @@ function isActive(path) {
             </DropdownMenuItem>
 
             <DropdownMenuItem
-              class="cursor-pointer flex items-center gap-1"
+              class="cursor-pointer flex items-center gap-2 hover:bg-purple-50 transition-colors"
               @click="router.push('/saved')"
-              :class="{ 'bg-blue-100 text-blue-700 font-medium': isActive('/saved') }"
+              :class="{ 'bg-purple-100 text-purple-700 font-medium': isActive('/saved') }"
             >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
               <path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clip-rule="evenodd" />
@@ -163,9 +163,9 @@ function isActive(path) {
             </DropdownMenuItem>
 
             <DropdownMenuItem
-              class="cursor-pointer flex items-center gap-1"
+              class="cursor-pointer flex items-center gap-2 hover:bg-purple-50 transition-colors"
               @click="router.push('/friends')"
-              :class="{ 'bg-blue-100 text-blue-700 font-medium': isActive('/friends') }"
+              :class="{ 'bg-purple-100 text-purple-700 font-medium': isActive('/friends') }"
             >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
               <path d="M4.5 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM14.25 8.625a3.375 3.375 0 1 1 6.75 0 3.375 3.375 0 0 1-6.75 0ZM1.5 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM17.25 19.128l-.001.144a2.25 2.25 0 0 1-.233.96 10.088 10.088 0 0 0 5.06-1.01.75.75 0 0 0 .42-.643 4.875 4.875 0 0 0-6.957-4.611 8.586 8.586 0 0 1 1.71 5.157v.003Z" />
@@ -175,7 +175,7 @@ function isActive(path) {
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem @click="logout" class="flex items-center gap-1 cursor-pointer text-red-600 focus:text-red-600">
+            <DropdownMenuItem @click="logout" class="flex items-center gap-2 cursor-pointer text-red-600 hover:bg-red-50 focus:text-red-600 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
               </svg>

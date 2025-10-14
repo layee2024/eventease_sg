@@ -1,10 +1,14 @@
 <script setup>
   import { ref, onMounted, onUnmounted, nextTick } from "vue"
+  import { useRouter } from "vue-router"
   import Typewriter from "../components/comp/Typewriter.vue"
   import { Button } from "@/components/ui/button"
 
+  const router = useRouter()
   const problem = ref(null)
   const isVisible = ref(false)
+  const searchQuery = ref("")
+  const heroElementsVisible = ref(false)
 
   onMounted(async () => {
     const observer = new IntersectionObserver(
@@ -23,11 +27,39 @@
 
     await nextTick()
     initStarAnimation()
+
+    // Trigger hero animations
+    setTimeout(() => {
+      heroElementsVisible.value = true
+    }, 100)
+
+    // Ensure video plays on mount
+    const video = document.querySelector('video')
+    if (video) {
+      video.play().catch(err => console.log('Video autoplay prevented:', err))
+    }
   })
 
   const scrollToNext = () => {
     if (problem.value) {
       problem.value.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
+  const handleSearch = () => {
+    if (searchQuery.value.trim()) {
+      router.push({
+        path: '/events',
+        query: { search: searchQuery.value.trim() }
+      })
+    } else {
+      router.push('/events')
+    }
+  }
+
+  const handleSearchKeypress = (event) => {
+    if (event.key === 'Enter') {
+      handleSearch()
     }
   }
 
@@ -66,16 +98,28 @@
 <template>
   <main class="relative w-full">
     <!-- Hero -->
-    <section class="relative w-full h-[93vh]">
-      <img
-        src="../assets/cover.png"
-        alt="Singapore Events Crowd"
+    <section class="relative w-full h-[93vh] overflow-hidden">
+      <!-- Background Video -->
+      <video
+        autoplay
+        loop
+        muted
+        playsinline
         class="absolute inset-0 w-full h-full object-cover"
-      />
-      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+      >
+        <source src="../assets/pikaso-project-2025-10-14.mp4" type="video/mp4" />
+      </video>
+      <!-- Subtle Black Overlay -->
+      <div class="absolute inset-0 bg-black/50"></div>
+      <!-- Gradient Overlay for text readability -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30"></div>
 
       <div class="relative z-10 flex flex-col justify-center w-full h-full px-6 md:px-16">
-        <h1 class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight">
+        <!-- Main Headline with animation -->
+        <h1
+          class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight transition-all duration-700 ease-out"
+          :class="heroElementsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
+        >
           Discover Amazing <br />
           <Typewriter
             text="Events in Singapore"
@@ -83,13 +127,53 @@
             cursorColor="bg-yellow-400"
           />
         </h1>
-        <p class="mt-6 text-lg text-gray-100 leading-relaxed max-w-2xl">
+
+        <!-- Subheadline with Stats -->
+        <p
+          class="mt-4 text-base sm:text-lg text-gray-300/90 font-medium transition-all duration-700 ease-out delay-150"
+          :class="heroElementsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
+        >
+          Join <span class="text-yellow-400 font-bold">5,000+ students</span> discovering
+          <span class="text-yellow-400 font-bold">200+ events</span> across Singapore's universities
+        </p>
+
+        <!-- Description -->
+        <p
+          class="mt-6 text-base sm:text-lg text-gray-100 leading-relaxed max-w-2xl transition-all duration-700 ease-out delay-300"
+          :class="heroElementsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
+        >
           Find events that match your mood, budget, and interests — all in one place.
           Connect with friends and never miss out on the best experiences.
         </p>
-        <RouterLink to="/events">
-          <Button variant="secondary" class="mt-4">Start Exploring</Button>
-        </RouterLink>
+
+        <!-- Search Bar -->
+        <div
+          class="mt-8 max-w-2xl transition-all duration-700 ease-out delay-500"
+          :class="heroElementsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
+        >
+          <div class="relative flex items-center">
+            <div class="absolute left-4 text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.2-5.2m0 0A7.5 7.5 0 105.2 5.2a7.5 7.5 0 0010.6 10.6z" />
+              </svg>
+            </div>
+            <input
+              v-model="searchQuery"
+              @keypress="handleSearchKeypress"
+              type="text"
+              placeholder="Search for events, categories, or venues..."
+              class="w-full pl-12 pr-32 py-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-300 focus:bg-white/20 focus:shadow-xl"
+            />
+            <button
+              @click="handleSearch"
+              class="absolute right-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+
+        <!-- Scroll Arrow -->
         <div
           class="absolute bottom-10 left-1/2 transform -translate-x-1/2 cursor-pointer animate-bounce text-white hover:text-yellow-400 transition-colors duration-300"
           @click="scrollToNext"
@@ -196,6 +280,29 @@
 </template>
 
 <style scoped>
+  /* Search input autofill styling */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: white;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.1) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* Responsive search bar */
+  @media (max-width: 640px) {
+    input[type="text"] {
+      padding-right: 100px;
+      font-size: 14px;
+    }
+
+    button {
+      padding-left: 1rem;
+      padding-right: 1rem;
+      font-size: 14px;
+    }
+  }
+
   .group::before {
     content: "";
     position: absolute;
