@@ -4,12 +4,13 @@ import { supabase } from "@/utils/supabase";
 import { format, parseISO } from 'date-fns'
 
 let map;
+let infowindow;
 const center = { lat: 1.3051299, lng: 103.8317011 };
 const categories = ref([]);
 const eventCat = ref("All Events");
 const markers = ref([]);
 const allEvents = ref([]);
-let infowindow;
+const searchVal = ref("")
 
 function loadGoogleMapsAPI(apiKey) {
   return new Promise((resolve, reject) => {
@@ -66,7 +67,11 @@ async function initMap() {
       makeMarker(event, map)
     }
 
-   
+    map.addListener("click", () => {
+      infowindow.close();
+    })
+
+    document.addEventListener("click", handleGlobalClick);
     
   } catch (error) {
     console.error('Google Maps failed:', error);
@@ -106,7 +111,7 @@ async function makeMarker(event, map) {
     gmpClickable: true
   })
 
-  marker.addEventListener('click', (e) =>{
+  marker.addEventListener('click', () =>{
     infowindow.close()
     infowindow.setContent(createEventPopupContent(event))
     infowindow.setPosition(marker.position);
@@ -150,7 +155,6 @@ function getEventMarkerByCat(chosenCat, eventObjList){
   if (chosenCat == 'All Events'){
     return eventObjList;
   }
-
   return eventObjList.filter(event => event.category === chosenCat);
 }
 
@@ -160,24 +164,70 @@ function clearMarkers() {
   markers.value = [];
 }
 
+// filter by search values
+function filterBySearch(){
+  // needs to check if it is filtered by cat already
+  // if filtered by cat, then the search query needs to filter from remaining markers
+  // if not filtered, then search query needs to filter from all the markers
+
+  // if search is applied first then returns all events by the search vlaue
+  // if filter by cat after applying search query, then no markers show up
+
+  const search = searchVal.value.trim().toLowerCase();
+  let filtered = getEventMarkerByCat(eventCat.value, allEvents.value);
+
+  if (search) {
+    filtered = filtered.filter(event =>
+      event.title?.toLowerCase().includes(search) ||
+      event.description?.toLowerCase().includes(search)
+    );
+  }
+  
+  clearMarkers();
+  filtered.forEach(event => {
+    makeMarker(event, map);
+  });
+}
+
+function handleGlobalClick(event) {
+  const infoWindowEl = document.querySelector('.gm-style-iw');
+  const mapEl = document.getElementById('map');
+
+  // If the click is inside the map or the info window, do nothing
+  if (
+    mapEl?.contains(event.target) ||
+    infoWindowEl?.contains(event.target)
+  ) {
+    return;
+  }
+
+  infowindow?.close();
+}
 
 onMounted(async () => {
   document.body.style.overflow = 'hidden';
   await initMap();
 });
 
-watch(eventCat, (newCat) => {
-  clearMarkers();
+watch(eventCat, () => {
+  // clearMarkers();
 
-   const filteredEvents = getEventMarkerByCat(newCat, allEvents.value);
-    filteredEvents.forEach(event => {
-      makeMarker(event, map)
-    });
+  //  const filteredEvents = getEventMarkerByCat(newCat, allEvents.value);
+  //   filteredEvents.forEach(event => {
+  //     makeMarker(event, map)
+  //   });
+  filterBySearch()
 })
+
+watch(searchVal, () => {
+  filterBySearch();
+});
 
 onUnmounted(() => {
   document.body.style.overflow = '';
+  document.removeEventListener("click", handleGlobalClick);
 });
+
 </script>
 
 <template>
@@ -194,6 +244,7 @@ onUnmounted(() => {
             id="searchVal"
             type="text"
             name="search"
+            v-model="searchVal"
             placeholder="🔍   Search"
             class="min-w-0 flex-auto rounded-md bg-white px-3.5 py-2 text-gray-900 outline-1 outline-offset-[-1px] outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-indigo-600"
           />
