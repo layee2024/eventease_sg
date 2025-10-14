@@ -9,6 +9,8 @@ import FriendsView from '../views/FriendsView.vue';
 import ProfileView from '../views/ProfileView.vue';
 import EventsView from '../views/events/EventsView.vue';
 import TrendingView from '../views/events/TrendingView.vue';
+import ShuffleView from '../views/ShuffleView.vue';
+
 
 
 const routes = [
@@ -21,6 +23,11 @@ const routes = [
     path: '/login',
     name: 'LoginView',
     component: LoginView,
+  },
+  {
+    path: '/shuffle',
+    name: 'ShuffleView',
+    component: ShuffleView,
   },
   {
     path: '/register',
