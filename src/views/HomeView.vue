@@ -163,8 +163,8 @@
           class="mt-4 text-base sm:text-lg text-gray-300/90 font-medium transition-all duration-700 ease-out delay-150"
           :class="heroElementsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
         >
-          Join <span class="text-yellow-400 font-bold">5,000+ students</span> discovering
-          <span class="text-yellow-400 font-bold">200+ events</span> across Singapore's universities
+          Join <span class="hero-gradient-text font-bold">5,000+ students</span> discovering
+          <span class="hero-gradient-text font-bold">200+ events</span> across Singapore's universities
         </p>
 
         <!-- Description -->
@@ -196,7 +196,7 @@
             />
             <button
               @click="handleSearch"
-              class="absolute right-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg"
+              class="absolute right-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:scale-105"
             >
               Search
             </button>
@@ -304,11 +304,11 @@
     <!-- Solutions Section -->
     <section
       ref="problem"
-      class="h-[93vh] min-h-min flex items-center justify-center relative w-full bg-gradient-to-tl from-indigo-200 via-red-200 to-yellow-100 py-20 px-6 md:px-16 lg:px-24"
+      class="h-[93vh] min-h-min flex items-center justify-center relative w-full bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20 px-6 md:px-16 lg:px-24"
     >
       <div
-        class="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-2 gap-10 xl:items-start 
-        transition-all duration-1000 ease-out transform"
+        class="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-2 gap-10 xl:items-start
+        transition-all duration-700 ease-out transform"
         :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
       >
         <!-- Left Side -->
@@ -342,7 +342,7 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div
-            class="flex flex-col group relative overflow-hidden p-6 rounded-xl shadow-md transition-all duration-500 ease-out transform border border-gray-100 bg-white/70 backdrop-blur-sm hover:-translate-y-2 hover:shadow-2xl hover:border-violet-300 hover:bg-white/90"
+            class="flex flex-col group relative overflow-hidden p-6 rounded-2xl shadow-md transition-all duration-700 ease-out transform border border-white/20 bg-white/80 backdrop-blur-lg hover:-translate-y-2 hover:shadow-2xl hover:border-violet-300 hover:bg-white/90"
             v-for="(card, i) in [
               {
                 title: 'Discover Effortlessly',
@@ -369,12 +369,12 @@
             :key="i"
             :style="{ transitionDelay: `${i * 150}ms` }"
             :class="[
-              'p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-1000 ease-out transform border border-gray-100 bg-white/70 backdrop-blur-sm',
+              'p-6 rounded-2xl shadow-md hover:shadow-lg transition-all duration-700 ease-out transform border border-white/20 bg-white/80 backdrop-blur-lg',
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
             ]"
           >
             <div class="flex items-center space-x-3">
-              <div class="flex items-center justify-center w-10 h-10 rounded-full bg-violet-100 text-violet-600">
+              <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-violet-100 to-violet-200 text-violet-600 group-hover:from-violet-200 group-hover:to-violet-300 transition-all duration-300">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -382,7 +382,7 @@
                   stroke-width="2.2"
                   stroke="currentColor"
                   v-html="card.icon"
-                  class="w-6 h-6"
+                  class="w-8 h-8"
                 ></svg>
               </div>
               <h3 class="font-semibold text-lg text-gray-900 group-hover:text-violet-600">{{ card.title }}</h3>
@@ -676,6 +676,19 @@
     transition: background-color 5000s ease-in-out 0s;
   }
 
+  /* Hero gradient text */
+  .hero-gradient-text {
+    background: linear-gradient(
+      135deg,
+      rgb(234, 179, 8),
+      rgb(251, 146, 60),
+      rgb(244, 114, 182)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
   /* Responsive search bar */
   @media (max-width: 640px) {
     input[type="text"] {
@@ -782,7 +795,7 @@
 
   /* Stats Card Styling */
   .stat-card {
-    background: white;
+    background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
     border: 1px solid #e5e7eb;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   }
