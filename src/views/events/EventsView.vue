@@ -13,7 +13,7 @@ const filteredEvents = ref([]);
 const savedIds = ref([]);
 const router = useRouter();
 
-// Get trending events
+// Get trending events from supabase 
 async function getTrendingEvents() {
   const { data, error } = await supabase.from("events").select("*")
   if (error) {
@@ -73,8 +73,9 @@ function handleFilterChange(filter) {
   const matchCategory = !filter.category || event.category === filter.category
   const matchPrice = filter.maxPrice == null || isNaN(filter.maxPrice) || event.ticket_price <= filter.maxPrice
   const matchCrowd = !filter.crowdLevel || event.crowd_level === filter.crowdLevel
-
-  return matchCategory && matchPrice && matchCrowd
+  const matchSearch = !filter.searchQuery || event.title.toLowerCase().includes(filter.searchQuery.toLowerCase()) || event.venue.toLowerCase().includes(filter.searchQuery.toLowerCase())
+  
+  return matchCategory && matchPrice && matchCrowd && matchSearch
 })
 
 }

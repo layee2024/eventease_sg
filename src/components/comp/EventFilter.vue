@@ -7,13 +7,15 @@ const emits = defineEmits(["update-filter"])
 const category = ref("")
 const maxPrice = ref("")
 const crowdLevel = ref("")
+const searchQuery = ref("")
 
 // Emit filter changes
 function applyFilter() {
   emits("update-filter", {
     category: category.value,
     maxPrice: maxPrice.value ? parseFloat(maxPrice.value) : null,
-    crowdLevel: crowdLevel.value
+    crowdLevel: crowdLevel.value,
+    searchQuery: searchQuery.value,
   })
 }
 
@@ -28,6 +30,12 @@ function resetFilter() {
 
 <template>
   <div class="p-4 mb-6 bg-white rounded-lg shadow-sm flex flex-wrap gap-4">
+    
+     
+    <input
+    type="text" v-model="searchQuery" placeholder="Search events..." class="border rounded px-3 py-1"
+  />
+    
     <select v-model="category" class="border rounded px-3 py-1">
       <option value="">All Categories</option>
       <option value="Music">Music</option>
@@ -47,7 +55,7 @@ function resetFilter() {
       type="number"
       v-model="maxPrice"
       placeholder="Max Price"
-      class="border rounded px-3 py-1 w-24"
+      class="border rounded px-3 py-1 w-36"
     />
 
     <select v-model="crowdLevel" class="border rounded px-3 py-1">
