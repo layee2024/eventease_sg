@@ -9,6 +9,7 @@ import FriendsView from '../views/FriendsView.vue';
 import ProfileView from '../views/ProfileView.vue';
 import EventsView from '../views/events/EventsView.vue';
 import TrendingView from '../views/events/TrendingView.vue';
+import ShuffleView from '../views/ShuffleView.vue';
 
 
 const routes = [
@@ -56,6 +57,11 @@ const routes = [
     path: '/profile',
     name: 'ProfileView',
     component: ProfileView,
+  },
+  {
+    path: '/shuffle',
+    name: 'ShuffleView',
+    component: ShuffleView,
   },
 ];
 

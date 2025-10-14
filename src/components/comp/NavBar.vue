@@ -90,6 +90,17 @@ function isActive(path) {
         Map
       </router-link>
 
+      <router-link
+        to="/shuffle"
+        class="flex justify-center items-center gap-1 cursor-pointer font-medium hover:text-blue-600 transition-colors"
+        :class="{ 'text-blue-600 border-b-2 border-blue-600': route.path === '/shuffle' }"
+      >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+        <path d="M17.25 3a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V4.81l-5.78 5.78a.75.75 0 0 1-1.06-1.06l5.78-5.78h-.69a.75.75 0 0 1 0-1.5h1.5ZM3 8.25a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H4.81l5.78 5.78a.75.75 0 0 1-1.06 1.06L3.75 10.06v.69a.75.75 0 0 1-1.5 0v-1.5ZM17.25 16.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-.69l-5.78-5.78a.75.75 0 0 1 1.06-1.06l5.78 5.78h.69a.75.75 0 0 1 0 1.5h-1.5Z" />
+      </svg>
+        Shuffle
+      </router-link>
+
     </div>
 
     <!-- Right Side -->
