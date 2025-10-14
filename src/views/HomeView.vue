@@ -7,6 +7,19 @@
   const isVisible = ref(false)
 
   onMounted(async () => {
+    await nextTick()
+    initStarAnimation()
+
+    const el = problem.value
+    if (!el) return
+
+    let threshold = 0.7
+    if (window.innerWidth <= 425) {
+      threshold = 0.3
+    } else if (window.innerWidth <= 768) {
+      threshold = 0.5
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -16,13 +29,10 @@
           }
         })
       },
-      { threshold: 0.7 }
+      { threshold }
     )
 
-    if (problem.value) observer.observe(problem.value)
-
-    await nextTick()
-    initStarAnimation()
+    observer.observe(el)
   })
 
   const scrollToNext = () => {
@@ -75,7 +85,7 @@
       <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
 
       <div class="relative z-10 flex flex-col justify-center w-full h-full px-6 md:px-16">
-        <h1 class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight">
+        <h1 class="text-3xl sm:text-6xl font-extrabold text-white leading-tight">
           Discover Amazing <br />
           <Typewriter
             text="Events in Singapore"
@@ -104,7 +114,7 @@
     <!-- Solutions Section -->
     <section
       ref="problem"
-      class="h-[93vh] min-h-min flex items-center justify-center relative w-full bg-gradient-to-tl from-indigo-200 via-red-200 to-yellow-100 py-20 px-6 md:px-16 lg:px-24"
+      class="min-h-screen h-min flex items-center justify-center relative w-full bg-gradient-to-tl from-indigo-200 via-red-200 to-yellow-100 py-20 px-6 md:px-16 lg:px-24"
     >
       <div
         class="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-2 gap-10 xl:items-start 
@@ -113,7 +123,7 @@
       >
         <!-- Left Side -->
         <div class="flex flex-col justify-center items-center xl:items-start h-full">
-          <h2 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
+          <h2 class="text-3xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
             We Built EventEase SG to
             <span class="stars-animation">
               <span class="stars">
