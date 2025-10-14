@@ -3,7 +3,7 @@ EventEase SG is an online event discovery and planning website created for Singa
 
 
 ## Deployed URL
-[Deployed URL](deployed_link_here)
+[Deployed URL](eventease-sg.vercel.app)
 
 ## Setup
 1. Create a `.env` file under the root directory, with the following code inside:
