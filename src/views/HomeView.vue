@@ -15,19 +15,6 @@
   const howItWorksVisible = ref(false)
 
   onMounted(async () => {
-    await nextTick()
-    initStarAnimation()
-
-    const el = problem.value
-    if (!el) return
-
-    let threshold = 0.7
-    if (window.innerWidth <= 425) {
-      threshold = 0.3
-    } else if (window.innerWidth <= 768) {
-      threshold = 0.5
-    }
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -37,10 +24,50 @@
           }
         })
       },
-      { threshold }
+      { threshold: 0.5 }
     )
 
-    observer.observe(el)
+    const statsObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            statsVisible.value = true
+            statsObserver.disconnect()
+          }
+        })
+      },
+      { threshold: 0.5 }
+    )
+
+    const howItWorksObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            howItWorksVisible.value = true
+            howItWorksObserver.disconnect()
+          }
+        })
+      },
+      { threshold: 0.3 }
+    )
+
+    if (problem.value) observer.observe(problem.value)
+    if (statsSection.value) statsObserver.observe(statsSection.value)
+    if (howItWorksSection.value) howItWorksObserver.observe(howItWorksSection.value)
+
+    await nextTick()
+    initStarAnimation()
+
+    // Trigger hero animations
+    setTimeout(() => {
+      heroElementsVisible.value = true
+    }, 100)
+
+    // Ensure video plays on mount
+    const video = document.querySelector('video')
+    if (video) {
+      video.play().catch(err => console.log('Video autoplay prevented:', err))
+    }
   })
 
   const scrollToNext = () => {
@@ -188,6 +215,98 @@
       </div>
     </section>
 
+    <!-- Solutions Section -->
+    <section
+      ref="problem"
+      class="h-[93vh] min-h-min flex items-center justify-center relative w-full bg-gradient-to-tl from-indigo-200 via-red-200 to-yellow-100 py-20 px-6 md:px-16 lg:px-24"
+    >
+      <div
+        class="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-2 gap-10 xl:items-start 
+        transition-all duration-1000 ease-out transform"
+        :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
+      >
+        <!-- Left Side -->
+        <div class="flex flex-col justify-center items-center xl:items-start h-full">
+          <h2 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
+            We Built EventEase SG to
+            <span class="stars-animation">
+              <span class="stars">
+                <svg viewBox="0 0 512 512">
+                  <path d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
+                </svg>
+              </span>
+              <span class="stars">
+                <svg viewBox="0 0 512 512">
+                  <path d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
+                </svg>
+              </span>
+              <span class="stars">
+                <svg viewBox="0 0 512 512">
+                <path d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
+                </svg>
+              </span>
+              <span class="stars-animation-text">Solve Real Problems</span>
+            </span>
+          </h2>
+          <p class="text-slate-800 text-lg leading-relaxed xl:max-w-lg">
+            EventEase SG is your all-in-one platform for discovering and experiencing Singapore's most exciting events. 
+            From live concerts to art markets, workshops, and nightlife happenings, EventEase helps you find events that 
+            match your mood, interests, and budget — and makes planning effortless.
+          </p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div
+            class="flex flex-col group relative overflow-hidden p-6 rounded-xl shadow-md transition-all duration-500 ease-out transform border border-gray-100 bg-white/70 backdrop-blur-sm hover:-translate-y-2 hover:shadow-2xl hover:border-violet-300 hover:bg-white/90"
+            v-for="(card, i) in [
+              {
+                title: 'Discover Effortlessly',
+                text: 'Browse curated events across categories — music, art, food, sports, and more. Filter by budget, distance, or date to find what fits your vibe instantly.',
+                icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M21 21l-5.2-5.2m0 0A7.5 7.5 0 105.2 5.2a7.5 7.5 0 0010.6 10.6z' />`
+              },
+              {
+                title: 'Smart Recommendations',
+                text: 'Get personalized event suggestions powered by your interests, past searches, and trending activities nearby — so you spend less time scrolling and more time exploring.',
+                icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M9 12h6m2 9H7a2 2 0 01-2-2V5a2 2 0 012-2h6l6 6v10a2 2 0 01-2 2z' />`
+              },
+              {
+                title: 'Social Planning Made Easy',
+                text: 'Coordinate with friends seamlessly. Save events, share plans, and sync calendars to make group outings simple and spontaneous.',
+                icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z' />`
+
+              },
+              {
+                title: 'Real-time Updates',
+                text: 'Stay in the loop with live event alerts, last-minute ticket drops, and venue updates. EventEase ensures you\'re always one step ahead.',
+                icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' />`
+              }
+            ]"
+            :key="i"
+            :style="{ transitionDelay: `${i * 150}ms` }"
+            :class="[
+              'p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-1000 ease-out transform border border-gray-100 bg-white/70 backdrop-blur-sm',
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            ]"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="flex items-center justify-center w-10 h-10 rounded-full bg-violet-100 text-violet-600">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2.2"
+                  stroke="currentColor"
+                  v-html="card.icon"
+                  class="w-6 h-6"
+                ></svg>
+              </div>
+              <h3 class="font-semibold text-lg text-gray-900 group-hover:text-violet-600">{{ card.title }}</h3>
+            </div>
+            <p class="text-gray-600 text-sm mt-3 group-hover:text-gray-800">{{ card.text }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Stats/Social Proof Section -->
     <section
       ref="statsSection"
@@ -274,98 +393,6 @@
       </div>
     </section>
 
-    <!-- Solutions Section -->
-    <section
-      ref="problem"
-      class="min-h-screen h-min flex items-center justify-center relative w-full bg-gradient-to-tl from-indigo-200 via-red-200 to-yellow-100 py-20 px-6 md:px-16 lg:px-24"
-    >
-      <div
-        class="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-2 gap-10 xl:items-start 
-        transition-all duration-1000 ease-out transform"
-        :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
-      >
-        <!-- Left Side -->
-        <div class="flex flex-col justify-center items-center xl:items-start h-full">
-          <h2 class="text-3xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
-            We Built EventEase SG to
-            <span class="stars-animation">
-              <span class="stars">
-                <svg viewBox="0 0 512 512">
-                  <path d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
-                </svg>
-              </span>
-              <span class="stars">
-                <svg viewBox="0 0 512 512">
-                  <path d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
-                </svg>
-              </span>
-              <span class="stars">
-                <svg viewBox="0 0 512 512">
-                <path d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
-                </svg>
-              </span>
-              <span class="stars-animation-text">Solve Real Problems</span>
-            </span>
-          </h2>
-          <p class="text-slate-800 text-lg leading-relaxed xl:max-w-lg">
-            EventEase SG is your all-in-one platform for discovering and experiencing Singapore's most exciting events. 
-            From live concerts to art markets, workshops, and nightlife happenings, EventEase helps you find events that 
-            match your mood, interests, and budget — and makes planning effortless.
-          </p>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div
-            class="flex flex-col group relative overflow-hidden p-6 rounded-xl shadow-md transition-all duration-500 ease-out transform border border-gray-100 bg-white/70 backdrop-blur-sm hover:-translate-y-2 hover:shadow-2xl hover:border-violet-300 hover:bg-white/90"
-            v-for="(card, i) in [
-              {
-                title: 'Discover Effortlessly',
-                text: 'Browse curated events across categories — music, art, food, sports, and more. Filter by budget, distance, or date to find what fits your vibe instantly.',
-                icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M21 21l-5.2-5.2m0 0A7.5 7.5 0 105.2 5.2a7.5 7.5 0 0010.6 10.6z' />`
-              },
-              {
-                title: 'Smart Recommendations',
-                text: 'Get personalized event suggestions powered by your interests, past searches, and trending activities nearby — so you spend less time scrolling and more time exploring.',
-                icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M9 12h6m2 9H7a2 2 0 01-2-2V5a2 2 0 012-2h6l6 6v10a2 2 0 01-2 2z' />`
-              },
-              {
-                title: 'Social Planning Made Easy',
-                text: 'Coordinate with friends seamlessly. Save events, share plans, and sync calendars to make group outings simple and spontaneous.',
-                icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z' />`
-
-              },
-              {
-                title: 'Real-time Updates',
-                text: 'Stay in the loop with live event alerts, last-minute ticket drops, and venue updates. EventEase ensures you\'re always one step ahead.',
-                icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' />`
-              }
-            ]"
-            :key="i"
-            :style="{ transitionDelay: `${i * 150}ms` }"
-            :class="[
-              'p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-1000 ease-out transform border border-gray-100 bg-white/70 backdrop-blur-sm',
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-            ]"
-          >
-            <div class="flex items-center space-x-3">
-              <div class="flex items-center justify-center w-10 h-10 rounded-full bg-violet-100 text-violet-600">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2.2"
-                  stroke="currentColor"
-                  v-html="card.icon"
-                  class="w-6 h-6"
-                ></svg>
-              </div>
-              <h3 class="font-semibold text-lg text-gray-900 group-hover:text-violet-600">{{ card.title }}</h3>
-            </div>
-            <p class="text-gray-600 text-sm mt-3 group-hover:text-gray-800">{{ card.text }}</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- How It Works Section -->
     <section
       ref="howItWorksSection"
@@ -388,7 +415,7 @@
         <!-- Steps Container -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-12 relative">
           <!-- Connecting Lines (Desktop Only) -->
-          <div class="hidden md:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 opacity-30" style="width: calc(100% - 180px); margin: 0 90px;"></div>
+          <div class="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 opacity-30" style="width: calc(100% - 180px); margin: 0 90px;"></div>
 
           <!-- Step 1: Browse -->
           <div
