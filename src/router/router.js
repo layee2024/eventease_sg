@@ -12,7 +12,6 @@ import TrendingView from '../views/events/TrendingView.vue';
 import ShuffleView from '../views/ShuffleView.vue';
 
 
-
 const routes = [
   {
     path: '/',
@@ -63,6 +62,11 @@ const routes = [
     path: '/profile',
     name: 'ProfileView',
     component: ProfileView,
+  },
+  {
+    path: '/shuffle',
+    name: 'ShuffleView',
+    component: ShuffleView,
   },
 ];
 
