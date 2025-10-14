@@ -11,6 +11,8 @@
   const heroElementsVisible = ref(false)
   const statsSection = ref(null)
   const statsVisible = ref(false)
+  const howItWorksSection = ref(null)
+  const howItWorksVisible = ref(false)
 
   onMounted(async () => {
     const observer = new IntersectionObserver(
@@ -37,8 +39,21 @@
       { threshold: 0.3 }
     )
 
+    const howItWorksObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            howItWorksVisible.value = true
+            howItWorksObserver.disconnect()
+          }
+        })
+      },
+      { threshold: 0.3 }
+    )
+
     if (problem.value) observer.observe(problem.value)
     if (statsSection.value) statsObserver.observe(statsSection.value)
+    if (howItWorksSection.value) howItWorksObserver.observe(howItWorksSection.value)
 
     await nextTick()
     initStarAnimation()
@@ -377,6 +392,149 @@
         </div>
       </div>
     </section>
+
+    <!-- How It Works Section -->
+    <section
+      ref="howItWorksSection"
+      class="relative w-full bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20 px-6 md:px-16 lg:px-24"
+    >
+      <div class="max-w-7xl mx-auto">
+        <!-- Section Header -->
+        <div
+          class="text-center mb-16 transition-all duration-700 ease-out"
+          :class="howItWorksVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
+        >
+          <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            How It Works
+          </h2>
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            Getting started is simple
+          </p>
+        </div>
+
+        <!-- Steps Container -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-12 relative">
+          <!-- Connecting Lines (Desktop Only) -->
+          <div class="hidden md:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 opacity-30" style="width: calc(100% - 180px); margin: 0 90px;"></div>
+
+          <!-- Step 1: Browse -->
+          <div
+            class="how-it-works-card group relative p-8 rounded-2xl transition-all duration-700 ease-out transform"
+            :class="howItWorksVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
+            :style="{ transitionDelay: '0ms' }"
+          >
+            <!-- Step Badge - Top Right -->
+            <div class="step-badge absolute -top-3 -right-3 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-white font-bold text-lg shadow-lg">
+              01
+            </div>
+
+            <div class="relative z-10 text-center">
+              <!-- Icon -->
+              <div class="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 text-purple-600 group-hover:scale-110 group-hover:from-purple-200 group-hover:to-purple-300 transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.2-5.2m0 0A7.5 7.5 0 105.2 5.2a7.5 7.5 0 0010.6 10.6z" />
+                </svg>
+              </div>
+
+              <!-- Content -->
+              <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors duration-300">
+                Browse Events
+              </h3>
+              <p class="text-gray-600 leading-relaxed">
+                Explore curated events across categories. Filter by your interests, budget, and schedule to find the perfect match.
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 2: Save -->
+          <div
+            class="how-it-works-card group relative p-8 rounded-2xl transition-all duration-700 ease-out transform"
+            :class="howItWorksVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
+            :style="{ transitionDelay: '150ms' }"
+          >
+            <!-- Step Badge - Top Right -->
+            <div class="step-badge absolute -top-3 -right-3 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 text-white font-bold text-lg shadow-lg">
+              02
+            </div>
+
+            <div class="relative z-10 text-center">
+              <!-- Icon -->
+              <div class="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 text-pink-600 group-hover:scale-110 group-hover:from-pink-200 group-hover:to-pink-300 transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                </svg>
+              </div>
+
+              <!-- Content -->
+              <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-pink-600 transition-colors duration-300">
+                Save Your Favorites
+              </h3>
+              <p class="text-gray-600 leading-relaxed">
+                Bookmark events you love and get personalized recommendations based on your preferences.
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 3: Plan with Friends -->
+          <div
+            class="how-it-works-card group relative p-8 rounded-2xl transition-all duration-700 ease-out transform"
+            :class="howItWorksVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
+            :style="{ transitionDelay: '300ms' }"
+          >
+            <!-- Step Badge - Top Right -->
+            <div class="step-badge absolute -top-3 -right-3 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold text-lg shadow-lg">
+              03
+            </div>
+
+            <div class="relative z-10 text-center">
+              <!-- Icon -->
+              <div class="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 group-hover:scale-110 group-hover:from-blue-200 group-hover:to-blue-300 transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+              </div>
+
+              <!-- Content -->
+              <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-300">
+                Plan with Friends
+              </h3>
+              <p class="text-gray-600 leading-relaxed">
+                Coordinate with your friends, share plans, and sync calendars to never miss out together.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div
+          class="mt-16 text-center transition-all duration-700 ease-out"
+          :class="howItWorksVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
+          :style="{ transitionDelay: '450ms' }"
+        >
+          <p class="text-xl md:text-2xl text-gray-700 font-semibold mb-6">
+            Ready to discover amazing events?
+          </p>
+          <button
+            @click="router.push('/events')"
+            class="cta-button group relative inline-flex items-center gap-3 px-10 py-5 text-lg font-bold text-white rounded-full overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+          >
+            <!-- Gradient Background -->
+            <span class="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-size-200 bg-pos-0 group-hover:bg-pos-100 transition-all duration-500"></span>
+
+            <!-- Button Content -->
+            <span class="relative z-10 flex items-center gap-3">
+              Get Started Now
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </span>
+
+            <!-- Shine Effect -->
+            <span class="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out bg-gradient-to-r from-transparent via-white/30 to-transparent"></span>
+          </button>
+        </div>
+      </div>
+    </section>
   </main>
 </template>
 
@@ -518,5 +676,61 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* How It Works Card Styling */
+  .how-it-works-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: visible;
+  }
+
+  .how-it-works-card:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(139, 92, 246, 0.3);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.25), 0 10px 20px rgba(244, 143, 177, 0.2);
+  }
+
+  .step-badge {
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 20;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+  }
+
+  .how-it-works-card:hover .step-badge {
+    transform: scale(1.15) rotate(5deg);
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.5), 0 5px 15px rgba(244, 143, 177, 0.3);
+    border-color: rgba(255, 255, 255, 1);
+  }
+
+  /* CTA Button Styling */
+  .cta-button {
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3), 0 5px 15px rgba(244, 143, 177, 0.2);
+    cursor: pointer;
+  }
+
+  .cta-button:hover {
+    box-shadow: 0 20px 50px rgba(139, 92, 246, 0.5), 0 10px 25px rgba(244, 143, 177, 0.4);
+  }
+
+  .cta-button:active {
+    transform: scale(0.98);
+  }
+
+  /* Custom background size and position utilities */
+  .bg-size-200 {
+    background-size: 200%;
+  }
+
+  .bg-pos-0 {
+    background-position: 0%;
+  }
+
+  .group:hover .bg-pos-100 {
+    background-position: 100%;
   }
 </style>
