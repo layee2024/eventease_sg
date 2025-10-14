@@ -41,8 +41,22 @@ async function register() {
 
     if (error) throw error
 
+    const user = data.user;
+    if (user) {
+      // Add default preferences row to public.preferences
+      const { error: insertError } = await supabase.from("preferences").insert({
+        id: user.id,  
+        interests: [],        
+        budget: "all",     
+        transport_mode: [],   
+        saved: []                  
+      });
+
+      if (insertError) console.error("Error inserting preferences:", insertError)
+
     toast.success("Account created! Check your email for verification link.")
     setTimeout(() => router.push("/verify"), 1500)
+    }
 
   } catch (err) {
     console.error(err)
