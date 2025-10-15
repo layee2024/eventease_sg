@@ -7,7 +7,7 @@
 </script>
 
 <template>
-  <div id="app" class="min-h-screen h-full">
+  <div id="app" class="min-h-screen h-full overflow-y-scroll">
     <NavBar />
     <Toaster position="bottom-right" />
     <div class="h-[90vh] w-screen">
