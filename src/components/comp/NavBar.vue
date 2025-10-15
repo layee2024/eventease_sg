@@ -45,7 +45,7 @@ function isActive(path) {
 </script>
 
 <template>
-  <nav class="sticky top-0 z-50 bg-white shadow-sm w-full">
+  <nav class="fixed top-0 z-50 bg-white shadow-sm w-full">
     <!-- Top Bar -->
     <div class="flex items-center justify-between py-3 px-6">
       <!-- Logo -->
