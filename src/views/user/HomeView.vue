@@ -1,8 +1,8 @@
 <script setup>
   import { ref, onMounted, onUnmounted, nextTick } from "vue"
   import { useRouter } from "vue-router"
-  import Typewriter from "../components/comp/Typewriter.vue"
-  import GithubGlobe from "../components/comp/GithubGlobe.vue"
+  import Typewriter from "../../components/comp/Typewriter.vue"
+  import GithubGlobe from "../../components/comp/GithubGlobe.vue"
   import { Button } from "@/components/ui/button"
 
   const router = useRouter()
@@ -10,8 +10,6 @@
   const isVisible = ref(false)
   const searchQuery = ref("")
   const heroElementsVisible = ref(false)
-  const statsSection = ref(null)
-  const statsVisible = ref(false)
   const globeSection = ref(null)
   const globeVisible = ref(false)
   const howItWorksSection = ref(null)
@@ -131,18 +129,6 @@
       { threshold: 0.5 }
     )
 
-    const statsObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            statsVisible.value = true
-            statsObserver.disconnect()
-          }
-        })
-      },
-      { threshold: 0.5 }
-    )
-
     const globeObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -168,7 +154,6 @@
     )
 
     if (problem.value) observer.observe(problem.value)
-    if (statsSection.value) statsObserver.observe(statsSection.value)
     if (globeSection.value) globeObserver.observe(globeSection.value)
     if (howItWorksSection.value) howItWorksObserver.observe(howItWorksSection.value)
 
@@ -187,9 +172,21 @@
     }
   })
 
-  const scrollToNext = () => {
+  const scrollToNext1 = () => {
     if (problem.value) {
       problem.value.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
+  const scrollToNext2 = () => {
+    if (globeSection.value) {
+      globeSection.value.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
+  const scrollToNext3 = () => {
+    if (howItWorksSection.value) {
+      howItWorksSection.value.scrollIntoView({ behavior: "smooth" })
     }
   }
 
@@ -323,8 +320,8 @@
         <!-- Scroll Arrow -->
         <div
           class="absolute bottom-10 left-1/2 transform -translate-x-1/2 cursor-pointer animate-bounce text-white hover:text-yellow-400 transition-colors duration-300"
-          @click="scrollToNext"
-        >
+          @click="scrollToNext1"
+          >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-8 h-8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
@@ -332,208 +329,10 @@
       </div>
     </section>
 
-    <!-- Stats/Social Proof Section -->
-    <section
-      ref="statsSection"
-      class="relative w-full bg-white py-20 px-6 md:px-16 lg:px-24"
-    >
-      <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-          <!-- Stat Card 1: Total Events -->
-          <div
-            class="stat-card group relative overflow-hidden p-8 rounded-2xl transition-all duration-700 ease-out transform"
-            :class="statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
-            :style="{ transitionDelay: '0ms' }"
-          >
-            <div class="relative z-10">
-              <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 text-purple-600 group-hover:from-purple-200 group-hover:to-blue-200 group-hover:scale-110 transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                </svg>
-              </div>
-              <div class="text-center">
-                <div class="stat-number text-4xl md:text-5xl font-extrabold mb-2 group-hover:scale-105 transition-transform duration-300">200+</div>
-                <div class="text-gray-600 text-sm md:text-base font-medium">Total Events</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Stat Card 2: Active Students -->
-          <div
-            class="stat-card group relative overflow-hidden p-8 rounded-2xl transition-all duration-700 ease-out transform"
-            :class="statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
-            :style="{ transitionDelay: '150ms' }"
-          >
-            <div class="relative z-10">
-              <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-600 group-hover:from-blue-200 group-hover:to-indigo-200 group-hover:scale-110 transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                </svg>
-              </div>
-              <div class="text-center">
-                <div class="stat-number text-4xl md:text-5xl font-extrabold mb-2 group-hover:scale-105 transition-transform duration-300">5,000+</div>
-                <div class="text-gray-600 text-sm md:text-base font-medium">Active Students</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Stat Card 3: Event Categories -->
-          <div
-            class="stat-card group relative overflow-hidden p-8 rounded-2xl transition-all duration-700 ease-out transform"
-            :class="statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
-            :style="{ transitionDelay: '300ms' }"
-          >
-            <div class="relative z-10">
-              <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-pink-100 to-red-100 text-pink-600 group-hover:from-pink-200 group-hover:to-red-200 group-hover:scale-110 transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-                </svg>
-              </div>
-              <div class="text-center">
-                <div class="stat-number text-4xl md:text-5xl font-extrabold mb-2 group-hover:scale-105 transition-transform duration-300">15</div>
-                <div class="text-gray-600 text-sm md:text-base font-medium">Event Categories</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Stat Card 4: Universities -->
-          <div
-            class="stat-card group relative overflow-hidden p-8 rounded-2xl transition-all duration-700 ease-out transform"
-            :class="statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
-            :style="{ transitionDelay: '450ms' }"
-          >
-            <div class="relative z-10">
-              <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-100 to-orange-100 text-yellow-600 group-hover:from-yellow-200 group-hover:to-orange-200 group-hover:scale-110 transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
-                </svg>
-              </div>
-              <div class="text-center">
-                <div class="stat-number text-4xl md:text-5xl font-extrabold mb-2 group-hover:scale-105 transition-transform duration-300">10+</div>
-                <div class="text-gray-600 text-sm md:text-base font-medium">Universities</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Globe Section -->
-    <section
-      ref="globeSection"
-      class="relative w-full min-h-screen flex items-center py-20 px-6 md:px-16 lg:px-24 overflow-hidden"
-      style="background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);"
-    >
-      <div class="max-w-7xl mx-auto w-full">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
-          <!-- Left Side: Globe -->
-          <div
-            class="globe-wrapper relative transition-all duration-1000 ease-out flex items-center justify-center order-2 lg:order-1"
-            :class="globeVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'"
-            style="height: 600px;"
-          >
-            <GithubGlobe
-              :globe-config="globeConfig"
-              :data="globeData"
-              class="w-full h-full"
-            />
-          </div>
-
-          <!-- Right Side: Content -->
-          <div
-            class="flex flex-col justify-center space-y-6 order-1 lg:order-2"
-            :class="globeVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'"
-            style="transition: all 1s ease-out;"
-          >
-            <!-- Badge -->
-            <div
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 w-fit"
-              :style="{ transitionDelay: '200ms' }"
-            >
-              <div class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></div>
-              <span class="text-purple-300 text-sm font-medium">Global Event Network</span>
-            </div>
-
-            <!-- Main Heading -->
-            <h2
-              class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
-              :style="{ transitionDelay: '300ms' }"
-            >
-              Events that connect
-              <span class="block mt-2 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                across borders
-              </span>
-            </h2>
-
-            <!-- Description -->
-            <p
-              class="text-lg md:text-xl text-gray-300 leading-relaxed max-w-xl"
-              :style="{ transitionDelay: '400ms' }"
-            >
-              From Singapore to the world. EventEase SG brings you local events with global impact,
-              connecting students and communities across Asia-Pacific and beyond.
-            </p>
-
-            <!-- Stats Grid -->
-            <div
-              class="grid grid-cols-2 gap-6 pt-4"
-              :style="{ transitionDelay: '500ms' }"
-            >
-              <div class="space-y-2">
-                <div class="text-3xl md:text-4xl font-bold text-white">8+</div>
-                <div class="text-sm text-gray-400">Countries Connected</div>
-              </div>
-              <div class="space-y-2">
-                <div class="text-3xl md:text-4xl font-bold text-white">50+</div>
-                <div class="text-sm text-gray-400">Partner Cities</div>
-              </div>
-              <div class="space-y-2">
-                <div class="text-3xl md:text-4xl font-bold text-white">200+</div>
-                <div class="text-sm text-gray-400">Global Events</div>
-              </div>
-              <div class="space-y-2">
-                <div class="text-3xl md:text-4xl font-bold text-white">24/7</div>
-                <div class="text-sm text-gray-400">Live Updates</div>
-              </div>
-            </div>
-
-            <!-- CTA Button -->
-            <div
-              class="pt-4"
-              :style="{ transitionDelay: '600ms' }"
-            >
-              <button
-                @click="router.push('/events')"
-                class="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105"
-              >
-                Explore Global Events
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-              </button>
-            </div>
-
-            <!-- Interactive Hint -->
-            <p
-              class="text-sm text-gray-500 flex items-center gap-2"
-              :style="{ transitionDelay: '700ms' }"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
-              </svg>
-              Drag to rotate the globe and explore connections
-            </p>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
     <!-- Solutions Section -->
     <section
       ref="problem"
-      class="h-[93vh] min-h-min flex items-center justify-center relative w-full bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20 px-6 md:px-16 lg:px-24"
+      class="h-[93vh] min-h-min lg:min-h-screen flex items-center justify-center relative w-full bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20 px-6 md:px-16 lg:px-24"
     >
       <div
         class="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-2 gap-10 xl:items-start
@@ -620,91 +419,136 @@
           </div>
         </div>
       </div>
+      <!-- Scroll Arrow -->
+      <div
+        class="absolute bottom-10 left-1/2 transform -translate-x-1/2 cursor-pointer animate-bounce text-gray-700 hover:text-yellow-400 transition-colors duration-300"
+        @click="scrollToNext2"
+        >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-8 h-8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
     </section>
 
-    <!-- Stats/Social Proof Section -->
+
+    <!-- Globe Section -->
     <section
-      ref="statsSection"
-      class="relative w-full bg-white py-20 px-6 md:px-16 lg:px-24"
+      ref="globeSection"
+      class="relative w-full min-h-screen flex items-center py-20 px-6 md:px-16 lg:px-24 overflow-hidden"
+      style="background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);"
     >
-      <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-          <!-- Stat Card 1: Total Events -->
+      <div class="max-w-7xl mx-auto w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+          <!-- Left Side: Globe -->
           <div
-            class="stat-card group relative overflow-hidden p-8 rounded-2xl transition-all duration-700 ease-out transform"
-            :class="statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
-            :style="{ transitionDelay: '0ms' }"
+            class="globe-wrapper relative transition-all duration-1000 ease-out flex items-center justify-center order-2 lg:order-1"
+            :class="globeVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'"
+            style="height: 600px;"
           >
-            <div class="relative z-10">
-              <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 text-purple-600 group-hover:from-purple-200 group-hover:to-blue-200 group-hover:scale-110 transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                </svg>
-              </div>
-              <div class="text-center">
-                <div class="stat-number text-4xl md:text-5xl font-extrabold mb-2 group-hover:scale-105 transition-transform duration-300">200+</div>
-                <div class="text-gray-600 text-sm md:text-base font-medium">Total Events</div>
-              </div>
-            </div>
+            <GithubGlobe
+              :globe-config="globeConfig"
+              :data="globeData"
+              class="w-full h-full"
+            />
           </div>
 
-          <!-- Stat Card 2: Active Students -->
+          <!-- Right Side: Content -->
           <div
-            class="stat-card group relative overflow-hidden p-8 rounded-2xl transition-all duration-700 ease-out transform"
-            :class="statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
-            :style="{ transitionDelay: '150ms' }"
+            class="flex flex-col justify-center items-center lg:items-start text-center lg:text-start space-y-6 order-1 lg:order-2"
+            :class="globeVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'"
+            style="transition: all 1s ease-out;"
           >
-            <div class="relative z-10">
-              <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-600 group-hover:from-blue-200 group-hover:to-indigo-200 group-hover:scale-110 transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                </svg>
+            <!-- Badge -->
+            <div
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 w-fit"
+              :style="{ transitionDelay: '200ms' }"
+            >
+              <div class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></div>
+              <span class="text-purple-300 text-sm font-medium">Global Event Network</span>
+            </div>
+
+            <!-- Main Heading -->
+            <h2
+              class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
+              :style="{ transitionDelay: '300ms' }"
+            >
+              Events that connect
+              <span class="block mt-2 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                across borders
+              </span>
+            </h2>
+
+            <!-- Description -->
+            <p
+              class="text-lg md:text-xl text-gray-300 leading-relaxed max-w-xl"
+              :style="{ transitionDelay: '400ms' }"
+            >
+              From Singapore to the world. EventEase SG brings you local events with global impact,
+              connecting students and communities across Asia-Pacific and beyond.
+            </p>
+
+            <!-- Stats Grid -->
+            <div
+              class="grid grid-cols-2 gap-6 pt-4"
+              :style="{ transitionDelay: '500ms' }"
+            >
+              <div class="space-y-2">
+                <div class="text-3xl md:text-4xl font-bold text-white">8+</div>
+                <div class="text-sm text-gray-400">Countries Connected</div>
               </div>
-              <div class="text-center">
-                <div class="stat-number text-4xl md:text-5xl font-extrabold mb-2 group-hover:scale-105 transition-transform duration-300">5,000+</div>
-                <div class="text-gray-600 text-sm md:text-base font-medium">Active Students</div>
+              <div class="space-y-2">
+                <div class="text-3xl md:text-4xl font-bold text-white">50+</div>
+                <div class="text-sm text-gray-400">Partner Cities</div>
+              </div>
+              <div class="space-y-2">
+                <div class="text-3xl md:text-4xl font-bold text-white">200+</div>
+                <div class="text-sm text-gray-400">Global Events</div>
+              </div>
+              <div class="space-y-2">
+                <div class="text-3xl md:text-4xl font-bold text-white">24/7</div>
+                <div class="text-sm text-gray-400">Live Updates</div>
               </div>
             </div>
+
+            <!-- CTA Button -->
+            <div
+              class="pt-4"
+              :style="{ transitionDelay: '600ms' }"
+            >
+              <button
+                @click="router.push('/events')"
+                class="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105"
+              >
+                Explore Global Events
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Interactive Hint -->
+            <p
+              class="text-sm text-gray-500 flex items-center gap-2"
+              :style="{ transitionDelay: '700ms' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
+              </svg>
+              Drag to rotate the globe and explore connections
+            </p>
           </div>
 
-          <!-- Stat Card 3: Event Categories -->
-          <div
-            class="stat-card group relative overflow-hidden p-8 rounded-2xl transition-all duration-700 ease-out transform"
-            :class="statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
-            :style="{ transitionDelay: '300ms' }"
-          >
-            <div class="relative z-10">
-              <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-pink-100 to-red-100 text-pink-600 group-hover:from-pink-200 group-hover:to-red-200 group-hover:scale-110 transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-                </svg>
-              </div>
-              <div class="text-center">
-                <div class="stat-number text-4xl md:text-5xl font-extrabold mb-2 group-hover:scale-105 transition-transform duration-300">15</div>
-                <div class="text-gray-600 text-sm md:text-base font-medium">Event Categories</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Stat Card 4: Universities -->
-          <div
-            class="stat-card group relative overflow-hidden p-8 rounded-2xl transition-all duration-700 ease-out transform"
-            :class="statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
-            :style="{ transitionDelay: '450ms' }"
-          >
-            <div class="relative z-10">
-              <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-100 to-orange-100 text-yellow-600 group-hover:from-yellow-200 group-hover:to-orange-200 group-hover:scale-110 transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
-                </svg>
-              </div>
-              <div class="text-center">
-                <div class="stat-number text-4xl md:text-5xl font-extrabold mb-2 group-hover:scale-105 transition-transform duration-300">10+</div>
-                <div class="text-gray-600 text-sm md:text-base font-medium">Universities</div>
-              </div>
-            </div>
-          </div>
         </div>
+      </div>
+      <!-- Scroll Arrow -->
+      <div
+        class="absolute bottom-10 left-1/2 transform -translate-x-1/2 cursor-pointer animate-bounce text-white hover:text-yellow-400 transition-colors duration-300"
+        @click="scrollToNext3"
+        >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-8 h-8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
       </div>
     </section>
 
