@@ -7,18 +7,30 @@ import { toast } from "vue-sonner"
 
 const router = useRouter()
 const currentStep = ref(1)
-const totalSteps = 3
+const totalSteps = 4 // incremented by 1
 const interests = ref([])
 const budget = ref("all")
 const transportModes = ref([])
+const profilePicture = ref("https://www.vecteezy.com/vector-art/4511281-default-avatar-photo-placeholder-profile-picture")
 const userId = ref(null)
 
 const categories = [
   "Music", "Food", "Arts", "Technology", "Sports",
   "Education", "Business", "Culture", "Health", "Social", "Environment"
 ]
-
 const transportOptions = ["MRT", "Bus", "Car", "Bicycle", "Walk"]
+const avatarOptions = [
+  "https://avatar.iran.liara.run/public/1",
+  "https://avatar.iran.liara.run/public/2",
+  "https://avatar.iran.liara.run/public/3",
+  "https://avatar.iran.liara.run/public/4",
+  "https://avatar.iran.liara.run/public/5",
+  "https://avatar.iran.liara.run/public/61",
+  "https://avatar.iran.liara.run/public/62",
+  "https://avatar.iran.liara.run/public/63",
+  "https://avatar.iran.liara.run/public/64",
+  "https://avatar.iran.liara.run/public/65",
+]
 
 // Fetch current user ID
 onMounted(async () => {
@@ -27,16 +39,13 @@ onMounted(async () => {
 })
 
 // Navigation
-function nextStep() {
-  if (currentStep.value < totalSteps) currentStep.value++
-}
-function prevStep() {
-  if (currentStep.value > 1) currentStep.value--
-}
+function nextStep() { if (currentStep.value < totalSteps) currentStep.value++ }
+function prevStep() { if (currentStep.value > 1) currentStep.value-- }
 
 // Skip button
 async function skipOnboarding() {
   await savePreferences({
+    profile_picture: profilePicture.value,
     interests: [],
     budget: "all",
     transport_mode: [],
@@ -44,12 +53,13 @@ async function skipOnboarding() {
     onboarding: true,
   })
   toast("Default preferences saved")
-  router.push("/") // redirect to home
+  router.push("/")
 }
 
 // Save user preferences
 async function finishOnboarding() {
   const data = {
+    profile_picture: profilePicture.value,
     interests: interests.value,
     budget: budget.value || "all",
     transport_mode: transportModes.value,
@@ -71,11 +81,8 @@ async function savePreferences(data) {
 
   const payload = { id: userId.value, ...data }
 
-  if (existing) {
-    await supabase.from("user_preferences").update(payload).eq("id", userId.value)
-  } else {
-    await supabase.from("user_preferences").insert(payload)
-  }
+  if (existing) await supabase.from("user_preferences").update(payload).eq("id", userId.value)
+  else await supabase.from("user_preferences").insert(payload)
 }
 </script>
 
@@ -89,8 +96,25 @@ async function savePreferences(data) {
               :class="n === currentStep ? 'bg-blue-600 w-5' : 'bg-gray-300'"></span>
       </div>
 
-      <!-- Interests -->
+      <!-- 🧑 Profile Picture Selection -->
       <div v-if="currentStep === 1" class="text-center">
+        <h2 class="text-2xl font-semibold mb-4">Choose Your Avatar</h2>
+        <p class="text-gray-500 mb-6">Select an image that best represents you.</p>
+
+        <div class="grid grid-cols-5 gap-3 mb-6">
+          <img
+            v-for="url in avatarOptions"
+            :key="url"
+            :src="url"
+            class="w-16 h-16 rounded-full object-cover border-2 cursor-pointer transition"
+            :class="profilePicture === url ? 'border-blue-600 scale-110' : 'border-gray-200 hover:scale-105'"
+            @click="profilePicture = url"
+          />
+        </div>
+      </div>
+
+      <!-- Interests -->
+      <div v-if="currentStep === 2" class="text-center">
         <h2 class="text-2xl font-semibold mb-4">Select Your Interests</h2>
         <p class="text-gray-500 mb-6">Choose the types of events you're most interested in.</p>
 
@@ -112,28 +136,20 @@ async function savePreferences(data) {
       </div>
 
       <!-- Budget -->
-      <div v-if="currentStep === 2" class="text-center">
+      <div v-if="currentStep === 3" class="text-center">
         <h2 class="text-2xl font-semibold mb-4">Set Your Budget</h2>
         <p class="text-gray-500 mb-6">What's your preferred spending range for events?</p>
 
         <div class="flex flex-col gap-3 mb-6">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" value="all" v-model="budget" /> All budgets
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" value="low" v-model="budget" /> Below $20
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" value="mid" v-model="budget" /> $20-$50
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" value="high" v-model="budget" /> Above $50
+          <label v-for="opt in ['all','low','mid','high']" :key="opt" class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" :value="opt" v-model="budget" />
+            {{ opt === 'all' ? 'All budgets' : opt === 'low' ? 'Below $20' : opt === 'mid' ? '$20-$50' : 'Above $50' }}
           </label>
         </div>
       </div>
 
       <!-- Transport Mode -->
-      <div v-if="currentStep === 3" class="text-center">
+      <div v-if="currentStep === 4" class="text-center">
         <h2 class="text-2xl font-semibold mb-4">Preferred Transport</h2>
         <p class="text-gray-500 mb-6">How do you usually get around to attend events?</p>
 
@@ -157,7 +173,6 @@ async function savePreferences(data) {
       <!-- Navigation -->
       <div class="flex justify-between mt-4">
         <Button variant="outline" @click="skipOnboarding">Skip for now</Button>
-
         <div class="flex gap-2">
           <Button v-if="currentStep > 1" variant="outline" @click="prevStep">Back</Button>
           <Button v-if="currentStep < totalSteps" @click="nextStep">Next</Button>
@@ -167,10 +182,3 @@ async function savePreferences(data) {
     </div>
   </div>
 </template>
-
-<style scoped>
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-</style>

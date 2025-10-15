@@ -98,7 +98,7 @@ const crowdColor = computed(() => {
 
       <button
         @click.stop="toggleLike"
-        class="absolute top-3 right-3 bg-white/90 hover:bg-red-100 text-red-500 rounded-full p-2 shadow-md transition"
+        class="absolute top-3 right-3 bg-white/90 hover:bg-red-100 text-red-500 rounded-full p-2 shadow-md transition cursor-pointer"
       >
         <Heart
           class="w-5 h-5 transition-transform duration-200"

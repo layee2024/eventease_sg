@@ -1,9 +1,9 @@
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { supabase } from "@/utils/supabase"
 import { toast } from "vue-sonner"
-import { CalendarDays, MapPin, DollarSign, Users, ArrowLeft } from "lucide-vue-next"
+import { CalendarDays, MapPin, DollarSign, Users, ArrowLeft, Heart } from "lucide-vue-next"
 import { Button } from "@/components/ui/button"
 
 const route = useRoute()
@@ -11,6 +11,29 @@ const router = useRouter()
 const event = ref(null)
 const loading = ref(true)
 const eventId = route.params.id
+const isSaved = ref(false)
+const user = ref(null)
+
+// category color mapping
+const categoryColor = computed(() => {
+  if (!event.value) return "bg-gray-500"
+  return (
+    {
+      Music: "bg-purple-600",
+      Food: "bg-orange-500",
+      Arts: "bg-pink-500",
+      Tech: "bg-blue-600",
+      Sports: "bg-green-500",
+      Technology: "bg-blue-600",
+      Education: "bg-indigo-600",
+      Business: "bg-gray-600",
+      Culture: "bg-red-500",
+      Health: "bg-teal-500",
+      Social: "bg-yellow-500",
+      Environment: "bg-green-600",
+    }[event.value.category] || "bg-gray-500"
+  )
+})
 
 function formatDate(start, end) {
   if (!start || !end) return "TBA"
@@ -34,7 +57,6 @@ function formatDate(start, end) {
   return `${startStr} - ${endTime}`
 }
 
-// Fetch event by ID
 async function fetchEvent() {
   const { data, error } = await supabase
     .from("events")
@@ -50,7 +72,56 @@ async function fetchEvent() {
   }
 
   event.value = data
+  await checkSavedStatus()
   loading.value = false
+}
+
+// check if event is saved in user preferences
+async function checkSavedStatus() {
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth?.user) return
+
+  user.value = auth.user
+
+  const { data: pref, error } = await supabase
+    .from("user_preferences")
+    .select("saved")
+    .eq("id", auth.user.id)
+    .single()
+
+  if (error) return console.error(error)
+  isSaved.value = pref?.saved?.includes(eventId) || false
+}
+
+// toggle saved status
+async function toggleSave() {
+  if (!user.value) {
+    toast.error("Please login to save events")
+    return
+  }
+
+  isSaved.value = !isSaved.value
+
+  const { data: pref } = await supabase
+    .from("user_preferences")
+    .select("saved")
+    .eq("id", user.value.id)
+    .single()
+
+  let updated = pref?.saved || []
+
+  if (isSaved.value) {
+    if (!updated.includes(eventId)) updated.push(eventId)
+    toast.success(`${event.value.title} added to saved events`)
+  } else {
+    updated = updated.filter((id) => id !== eventId)
+    toast.info(`${event.value.title} removed from saved events`)
+  }
+
+  await supabase
+    .from("user_preferences")
+    .update({ saved: updated })
+    .eq("id", user.value.id)
 }
 
 onMounted(fetchEvent)
@@ -72,7 +143,7 @@ onMounted(fetchEvent)
         @click="router.push('/events')"
         class="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white/90 backdrop-blur-md shadow-sm hover:bg-gray-200 cursor-pointer"
       >
-        <ArrowLeft class="w-4 h-4" /> Back to Events
+        <ArrowLeft class="w-4 h-4" /> Back
       </Button>
 
       <!-- Header Image -->
@@ -83,7 +154,8 @@ onMounted(fetchEvent)
           class="w-full h-72 object-cover"
         />
         <div
-          class="absolute top-4 right-4 bg-white text-gray-700 px-3 py-1 rounded-lg text-sm font-medium shadow-sm"
+          class="absolute top-4 right-4 text-white text-sm font-medium px-3 py-1 rounded-lg shadow-sm"
+          :class="categoryColor"
         >
           {{ event.category }}
         </div>
@@ -91,11 +163,26 @@ onMounted(fetchEvent)
 
       <!-- Content -->
       <div class="p-8">
-        <!-- Header -->
-        <div class="flex flex-wrap items-center justify-between mb-6 gap-3">
+        <!-- Title & Save Button Row -->
+        <div class="flex items-start justify-between mb-4">
           <h1 class="text-3xl font-extrabold text-gray-900">
             {{ event.title }}
           </h1>
+
+          <button
+            @click="toggleSave"
+            class="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition cursor-pointer"
+          >
+            <Heart
+              :class="[
+                'w-5 h-5 transition',
+                isSaved ? 'fill-red-500 text-red-500' : 'fill-none text-gray-600'
+              ]"
+            />
+            <span class="text-sm font-medium text-gray-700">
+              {{ isSaved ? "Saved" : "Save" }}
+            </span>
+          </button>
         </div>
 
         <!-- Description -->
@@ -103,9 +190,8 @@ onMounted(fetchEvent)
           {{ event.description }}
         </p>
 
-        <!-- Grouped Info Blocks -->
+        <!-- Info Blocks -->
         <div class="grid md:grid-cols-2 gap-6">
-          <!-- Time & Location -->
           <div class="bg-gray-50 rounded-xl p-5 space-y-5 border border-gray-100">
             <div class="flex items-start gap-3 text-gray-800">
               <CalendarDays class="w-5 h-5 text-blue-600 mt-0.5" />
@@ -126,7 +212,6 @@ onMounted(fetchEvent)
             </div>
           </div>
 
-          <!-- Price & Crowd -->
           <div class="bg-gray-50 rounded-xl p-5 space-y-5 border border-gray-100">
             <div class="flex items-start gap-3 text-gray-800">
               <DollarSign class="w-5 h-5 text-green-600 mt-0.5" />
