@@ -2,22 +2,27 @@
   import { RouterView } from 'vue-router'
   import { Toaster } from '@/components/ui/sonner'
   import NavBar from './components/comp/NavBar.vue'
+  import Footer from './components/comp/Footer.vue'
   import 'vue-sonner/style.css'
 
 </script>
 
 <template>
-  <div id="app" class="min-h-screen h-full overflow-y-scroll">
-    <NavBar />
-    <Toaster position="bottom-right" />
-    <div class="h-[90vh] w-screen">
-      <RouterView class="router-view" v-slot="{ Component }">
-        <Transition name="page-slide" mode="out-in" >
-          <component :is="Component" />
-        </Transition>
-      </RouterView>
-    </div>
-  </div>
+  <div id="app" class="min-h-screen flex flex-col">
+  <NavBar />
+  <Toaster position="bottom-right" />
+
+  <main class="flex-1 overflow-y-auto">
+    <RouterView v-slot="{ Component }">
+      <Transition name="page-slide" mode="out-in">
+        <component :is="Component" />
+      </Transition>
+    </RouterView>
+  </main>
+
+  <Footer class="fixed bottom-0 left-0 w-full z-50" />
+</div>
+
 </template>
 
 <style>
