@@ -2,6 +2,7 @@
   import { ref, onMounted, onUnmounted, nextTick } from "vue"
   import { useRouter } from "vue-router"
   import Typewriter from "../components/comp/Typewriter.vue"
+  import GithubGlobe from "../components/comp/GithubGlobe.vue"
   import { Button } from "@/components/ui/button"
 
   const router = useRouter()
@@ -11,8 +12,111 @@
   const heroElementsVisible = ref(false)
   const statsSection = ref(null)
   const statsVisible = ref(false)
+  const globeSection = ref(null)
+  const globeVisible = ref(false)
   const howItWorksSection = ref(null)
   const howItWorksVisible = ref(false)
+
+  // Singapore-focused globe data with arcs showing event connections
+  const colors = ["#9333ea", "#ec4899", "#3b82f6", "#f59e0b"]
+  const globeData = [
+    // Singapore to major cities (showing international events/partnerships)
+    {
+      order: 1,
+      startLat: 1.3521,
+      startLng: 103.8198,
+      endLat: 35.6762,
+      endLng: 139.6503, // Tokyo
+      arcAlt: 0.3,
+      color: colors[0],
+    },
+    {
+      order: 1,
+      startLat: 1.3521,
+      startLng: 103.8198,
+      endLat: 51.5072,
+      endLng: -0.1276, // London
+      arcAlt: 0.5,
+      color: colors[1],
+    },
+    {
+      order: 2,
+      startLat: 1.3521,
+      startLng: 103.8198,
+      endLat: 40.7128,
+      endLng: -74.006, // New York
+      arcAlt: 0.6,
+      color: colors[2],
+    },
+    {
+      order: 2,
+      startLat: 1.3521,
+      startLng: 103.8198,
+      endLat: -33.8688,
+      endLng: 151.2093, // Sydney
+      arcAlt: 0.4,
+      color: colors[3],
+    },
+    {
+      order: 3,
+      startLat: 1.3521,
+      startLng: 103.8198,
+      endLat: 22.3193,
+      endLng: 114.1694, // Hong Kong
+      arcAlt: 0.2,
+      color: colors[0],
+    },
+    {
+      order: 3,
+      startLat: 1.3521,
+      startLng: 103.8198,
+      endLat: 3.139,
+      endLng: 101.6869, // Kuala Lumpur
+      arcAlt: 0.1,
+      color: colors[1],
+    },
+    {
+      order: 4,
+      startLat: 1.3521,
+      startLng: 103.8198,
+      endLat: -6.2088,
+      endLng: 106.8456, // Jakarta
+      arcAlt: 0.2,
+      color: colors[2],
+    },
+    {
+      order: 4,
+      startLat: 1.3521,
+      startLng: 103.8198,
+      endLat: 13.7563,
+      endLng: 100.5018, // Bangkok
+      arcAlt: 0.2,
+      color: colors[3],
+    },
+  ]
+
+  const globeConfig = {
+    pointSize: 2,
+    globeColor: "#3730a3", // Brighter purple-blue
+    showAtmosphere: true,
+    atmosphereColor: "#FFFFFF",
+    atmosphereAltitude: 0.15,
+    emissive: "#4c1d95", // Brighter purple emissive glow
+    emissiveIntensity: 0.3, // Increased from 0.1
+    shininess: 0.9,
+    polygonColor: "rgba(255,255,255,0.8)", // Brighter white polygons
+    ambientLight: "#ffffff", // White ambient light for better visibility
+    directionalLeftLight: "#ffffff",
+    directionalTopLight: "#ffffff",
+    pointLight: "#ffffff",
+    arcTime: 3000,
+    arcLength: 0.9,
+    rings: 2,
+    maxRings: 3,
+    initialPosition: { lat: 1.3521, lng: 103.8198 },
+    autoRotate: true,
+    autoRotateSpeed: 0.5,
+  }
 
   onMounted(async () => {
     const observer = new IntersectionObserver(
@@ -39,6 +143,18 @@
       { threshold: 0.3 }
     )
 
+    const globeObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            globeVisible.value = true
+            globeObserver.disconnect()
+          }
+        })
+      },
+      { threshold: 0.3 }
+    )
+
     const howItWorksObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -53,6 +169,7 @@
 
     if (problem.value) observer.observe(problem.value)
     if (statsSection.value) statsObserver.observe(statsSection.value)
+    if (globeSection.value) globeObserver.observe(globeSection.value)
     if (howItWorksSection.value) howItWorksObserver.observe(howItWorksSection.value)
 
     await nextTick()
@@ -297,6 +414,118 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Globe Section -->
+    <section
+      ref="globeSection"
+      class="relative w-full min-h-screen flex items-center py-20 px-6 md:px-16 lg:px-24 overflow-hidden"
+      style="background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);"
+    >
+      <div class="max-w-7xl mx-auto w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+          <!-- Left Side: Globe -->
+          <div
+            class="globe-wrapper relative transition-all duration-1000 ease-out flex items-center justify-center order-2 lg:order-1"
+            :class="globeVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'"
+            style="height: 600px;"
+          >
+            <GithubGlobe
+              :globe-config="globeConfig"
+              :data="globeData"
+              class="w-full h-full"
+            />
+          </div>
+
+          <!-- Right Side: Content -->
+          <div
+            class="flex flex-col justify-center space-y-6 order-1 lg:order-2"
+            :class="globeVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'"
+            style="transition: all 1s ease-out;"
+          >
+            <!-- Badge -->
+            <div
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 w-fit"
+              :style="{ transitionDelay: '200ms' }"
+            >
+              <div class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></div>
+              <span class="text-purple-300 text-sm font-medium">Global Event Network</span>
+            </div>
+
+            <!-- Main Heading -->
+            <h2
+              class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
+              :style="{ transitionDelay: '300ms' }"
+            >
+              Events that connect
+              <span class="block mt-2 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                across borders
+              </span>
+            </h2>
+
+            <!-- Description -->
+            <p
+              class="text-lg md:text-xl text-gray-300 leading-relaxed max-w-xl"
+              :style="{ transitionDelay: '400ms' }"
+            >
+              From Singapore to the world. EventEase SG brings you local events with global impact,
+              connecting students and communities across Asia-Pacific and beyond.
+            </p>
+
+            <!-- Stats Grid -->
+            <div
+              class="grid grid-cols-2 gap-6 pt-4"
+              :style="{ transitionDelay: '500ms' }"
+            >
+              <div class="space-y-2">
+                <div class="text-3xl md:text-4xl font-bold text-white">8+</div>
+                <div class="text-sm text-gray-400">Countries Connected</div>
+              </div>
+              <div class="space-y-2">
+                <div class="text-3xl md:text-4xl font-bold text-white">50+</div>
+                <div class="text-sm text-gray-400">Partner Cities</div>
+              </div>
+              <div class="space-y-2">
+                <div class="text-3xl md:text-4xl font-bold text-white">200+</div>
+                <div class="text-sm text-gray-400">Global Events</div>
+              </div>
+              <div class="space-y-2">
+                <div class="text-3xl md:text-4xl font-bold text-white">24/7</div>
+                <div class="text-sm text-gray-400">Live Updates</div>
+              </div>
+            </div>
+
+            <!-- CTA Button -->
+            <div
+              class="pt-4"
+              :style="{ transitionDelay: '600ms' }"
+            >
+              <button
+                @click="router.push('/events')"
+                class="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105"
+              >
+                Explore Global Events
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Interactive Hint -->
+            <p
+              class="text-sm text-gray-500 flex items-center gap-2"
+              :style="{ transitionDelay: '700ms' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
+              </svg>
+              Drag to rotate the globe and explore connections
+            </p>
+          </div>
+
         </div>
       </div>
     </section>
