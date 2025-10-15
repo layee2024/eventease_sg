@@ -50,7 +50,7 @@ async function loadUserPreferences() {
   }
 
   const { data: pref, error } = await supabase
-    .from("preferences")
+    .from("user_preferences")
     .select("*")
     .eq("id", user.id)
     .single()
@@ -147,7 +147,7 @@ async function saveEvent() {
     savedIds.value.push(selectedEvent.value.id)
 
     await supabase
-      .from("preferences")
+      .from("user_preferences")
       .update({ saved: savedIds.value })
       .eq("id", user.id)
 

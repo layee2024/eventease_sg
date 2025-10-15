@@ -1,7 +1,7 @@
 <script setup>
   import { ref, onMounted, onUnmounted, nextTick } from "vue"
   import { useRouter } from "vue-router"
-  import Typewriter from "../components/comp/Typewriter.vue"
+  import Typewriter from "../../components/comp/Typewriter.vue"
   import { Button } from "@/components/ui/button"
 
   const router = useRouter()
@@ -137,7 +137,7 @@
         playsinline
         class="absolute inset-0 w-full h-full object-cover"
       >
-        <source src="../assets/pikaso-project-2025-10-14.mp4" type="video/mp4" />
+        <source src="../../assets/pikaso-project-2025-10-14.mp4" type="video/mp4" />
       </video>
       <!-- Subtle Black Overlay -->
       <div class="absolute inset-0 bg-black/50"></div>

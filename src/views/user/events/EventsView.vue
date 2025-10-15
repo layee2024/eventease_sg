@@ -46,7 +46,7 @@ async function loadUserSaved() {
   if (!user) return
 
   const { data, error } = await supabase
-    .from("preferences")
+    .from("user_preferences")
     .select("saved")
     .eq("id", user.id)
     .single()
@@ -88,8 +88,6 @@ onMounted(async () => {
   await getTrendingEvents()
   await loadUserSaved()
 })
-
-
 
 </script>
 

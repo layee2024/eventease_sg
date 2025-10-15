@@ -36,7 +36,7 @@ async function toggleLike() {
   if (!user) return;
 
   const { data: pref } = await supabase
-    .from("preferences")
+    .from("user_preferences")
     .select("saved")
     .eq("id", user.id)
     .single();
@@ -51,7 +51,7 @@ async function toggleLike() {
   }
 
   await supabase
-    .from("preferences")
+    .from("user_preferences")
     .update({ saved: updated })
     .eq("id", user.id);
 }

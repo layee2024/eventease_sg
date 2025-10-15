@@ -1,15 +1,19 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import LoginView from '@/views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
-import VerifyView from '../views/VerifyView.vue';
-import HomeView from '../views/HomeView.vue';
-import MapView from '../views/MapView.vue';
-import SavedView from '../views/SavedView.vue';
-import FriendsView from '../views/FriendsView.vue';
-import ProfileView from '../views/ProfileView.vue';
-import EventsView from '../views/events/EventsView.vue';
-import TrendingView from '../views/events/TrendingView.vue';
-import ShuffleView from '../views/ShuffleView.vue';
+
+// User
+import VerifyView from '../views/user/VerifyView.vue';
+import HomeView from '../views/user/HomeView.vue';
+import MapView from '../views/user/MapView.vue';
+import SavedView from '../views/user/SavedView.vue';
+import FriendsView from '../views/user/FriendsView.vue';
+import ProfileView from '../views/user/ProfileView.vue';
+import EventsView from '../views/user/events/EventsView.vue';
+import ShuffleView from '../views/user/ShuffleView.vue';
+
+// Organiser
+import DashboardView from '../views/organiser/DashboardView.vue'
 
 
 const routes = [
@@ -67,6 +71,11 @@ const routes = [
     path: '/shuffle',
     name: 'ShuffleView',
     component: ShuffleView,
+  },
+  {
+    path: '/dashboard',
+    name: 'DashboardView',
+    component: DashboardView,
   },
 ];
 
