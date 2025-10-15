@@ -1,15 +1,14 @@
 <script setup>
 import { ref, defineEmits } from "vue"
+import { Search } from "lucide-vue-next"
 
 const emits = defineEmits(["update-filter"])
 
-// Filter states
 const category = ref("")
 const maxPrice = ref("")
 const crowdLevel = ref("")
 const searchQuery = ref("")
 
-// Emit filter changes
 function applyFilter() {
   emits("update-filter", {
     category: category.value,
@@ -19,57 +18,74 @@ function applyFilter() {
   })
 }
 
-// Reset filters
 function resetFilter() {
   category.value = ""
   maxPrice.value = ""
   crowdLevel.value = ""
+  searchQuery.value = ""
   applyFilter()
 }
 </script>
 
 <template>
-  <div class="p-4 mb-6 bg-white rounded-lg shadow-sm flex flex-wrap gap-4">
-    
-     
-    <input
-    type="text" v-model="searchQuery" placeholder="Search events..." class="border rounded px-3 py-1"
-  />
-    
-    <select v-model="category" class="border rounded px-3 py-1">
-      <option value="">All Categories</option>
-      <option value="Music">Music</option>
-      <option value="Food">Food</option>
-      <option value="Arts">Arts</option>
-      <option value="Technology">Technology</option>
-      <option value="Sports">Sports</option>
-      <option value="Education">Education</option>
-      <option value="Business">Business</option>
-      <option value="Culture">Culture</option>
-      <option value="Health">Health</option>
-      <option value="Social">Social</option>
-      <option value="Environment">Environment</option>
-    </select>
+  <div class="bg-white shadow-sm rounded-xl p-5 space-y-4 w-full max-w-5xl mx-auto">
+    <!-- Search -->
+    <div class="flex items-center gap-3 w-full">
+      <div class="flex items-center w-full border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500 transition">
+        <Search class="w-5 h-5 text-gray-400 mr-2" />
+        <input
+          type="text"
+          v-model="searchQuery"
+          placeholder="Search events by title or venue..."
+          class="w-full outline-none text-gray-700"
+        />
+      </div>
+    </div>
 
-    <input
-      type="number"
-      v-model="maxPrice"
-      placeholder="Max Price"
-      class="border rounded px-3 py-1 w-36"
-    />
+    <!-- Filter -->
+    <div class="flex flex-wrap gap-3 items-center">
+      <select v-model="category" class="border rounded-lg px-3 py-2 flex-1 min-w-[150px]">
+        <option value="">All Categories</option>
+        <option value="Music">Music</option>
+        <option value="Food">Food</option>
+        <option value="Arts">Arts</option>
+        <option value="Technology">Technology</option>
+        <option value="Sports">Sports</option>
+        <option value="Education">Education</option>
+        <option value="Business">Business</option>
+        <option value="Culture">Culture</option>
+        <option value="Health">Health</option>
+        <option value="Social">Social</option>
+        <option value="Environment">Environment</option>
+      </select>
 
-    <select v-model="crowdLevel" class="border rounded px-3 py-1">
-      <option value="">Any Crowd</option>
-      <option value="High">High</option>
-      <option value="Moderate">Moderate</option>
-      <option value="Low">Low</option>
-    </select>
+      <input
+        type="number"
+        v-model="maxPrice"
+        placeholder="Max Price"
+        class="border rounded-lg px-3 py-2 w-36"
+      />
 
-    <button @click="applyFilter" class="px-4 py-1 bg-blue-600 text-white rounded">
-      Apply
-    </button>
-    <button @click="resetFilter" class="px-4 py-1 bg-gray-300 rounded">
-      Reset
-    </button>
+      <select v-model="crowdLevel" class="border rounded-lg px-3 py-2 flex-1 min-w-[120px]">
+        <option value="">Any Crowd</option>
+        <option value="High">High</option>
+        <option value="Moderate">Moderate</option>
+        <option value="Low">Low</option>
+      </select>
+
+      <button
+        @click="applyFilter"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition"
+      >
+        Search
+      </button>
+
+      <button
+        @click="resetFilter"
+        class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg font-medium transition"
+      >
+        Reset
+      </button>
+    </div>
   </div>
 </template>

@@ -139,7 +139,6 @@ async function saveEvent() {
 
   if (!user) {
     toast.error("Please login to save events")
-    router.push("/login")
     return
   }
 
@@ -203,9 +202,7 @@ function handleSavedUpdate({ id, liked }) {
     <!-- Header -->
     <div class="max-w-7xl mx-auto mb-12 text-center">
       <div class="flex items-center justify-center gap-3 mb-4">
-        <Shuffle class="w-12 h-12 text-blue-600 animate-pulse" />
-        <h1 class="text-5xl font-extrabold text-gray-900">Shuffle & Discover</h1>
-        <Shuffle class="w-12 h-12 text-blue-600 animate-pulse" />
+        <h1 class="text-3xl font-extrabold text-gray-900">Shuffle & Discover</h1>
       </div>
       <p class="text-xl text-gray-600 max-w-2xl mx-auto">
         Can't decide what to do? Let fate choose your next adventure!

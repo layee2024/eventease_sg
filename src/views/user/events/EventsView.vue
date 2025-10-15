@@ -1,122 +1,116 @@
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed, watch } from "vue"
 import { supabase } from "@/utils/supabase"
 import { useRouter } from "vue-router"
 import { Button } from "@/components/ui/button"
 import EventCard from "@/components/comp/EventCard.vue"
-//for eventfilter.vue file import 
 import EventFilter from "@/components/comp/EventFilter.vue"
 
+const router = useRouter()
+const trendingEvents = ref([])
+const filteredEvents = ref([])
+const savedIds = ref([])
 
-const trendingEvents = ref([]);
-const filteredEvents = ref([]);
-const savedIds = ref([]);
-const router = useRouter();
+// Pagination state
+const currentPage = ref(1)
+const itemsPerPage = 20
 
-// Get trending events from supabase 
+// Total pages
+const totalPages = computed(() =>
+  Math.ceil(filteredEvents.value.length / itemsPerPage)
+)
+
+const paginatedEvents = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredEvents.value.slice(start, end)
+})
+
+// Fetch all events
 async function getTrendingEvents() {
   const { data, error } = await supabase.from("events").select("*")
   if (error) {
-    console.error("Error fetching trending events:", error)
+    console.error("Error fetching events:", error)
     return
   }
-  trendingEvents.value = data || [];
-  filteredEvents.value = [...trendingEvents.value];
-  //to check the supabase data type 
-    console.log("Supabase events data:", data) 
-//eg of one object of the supabase data 
-  // { "id": "e1ec6caf-ef92-42ff-a6bc-a56b6eb37d9f", 
-  // "title": "Mindfulness Retreat", 
-  // "category": "Health", 
-  // "description": "Weekend retreat for meditation and relaxation.", 
-  // "start_date": "2025-11-22T09:00:00",
-  //  "end_date": "2025-11-24T17:00:00",
-  //  "venue": "Changi Beach Resort", 
-  // "latitude": 1.39, "longitude": 103.987, "image_url": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
-  //  "ticket_price": 180, 
-  // "crowd_level": "Low" }
-
-  // trendingEvents.value = data.filter((x) => x.crowd_level === "High")
-  // trendingEvents.value=data //keep all the events
+  trendingEvents.value = data || []
+  filteredEvents.value = [...trendingEvents.value]
 }
 
 // Load user's saved list
 async function loadUserSaved() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
-
   const { data, error } = await supabase
     .from("user_preferences")
     .select("saved")
     .eq("id", user.id)
     .single()
-
-  if (error) {
-    console.error("Error loading preferences:", error)
-    return
-  }
-
-  savedIds.value = data?.saved || []
+  if (!error && data) savedIds.value = data.saved || []
 }
 
-// Update saved list
+// Update saved list in state
 function handleSavedUpdate({ id, liked }) {
-  if (liked) {
-    if (!savedIds.value.includes(id)) savedIds.value.push(id)
-  } else {
-    savedIds.value = savedIds.value.filter((x) => x !== id)
-  }
+  savedIds.value = liked
+    ? [...new Set([...savedIds.value, id])]
+    : savedIds.value.filter((x) => x !== id)
 }
-//function for the event filter 
+
+// Handle filters
 function handleFilterChange(filter) {
- filteredEvents.value = trendingEvents.value.filter((event) => {
-  const matchCategory = !filter.category || event.category === filter.category
-  const matchPrice = filter.maxPrice == null || isNaN(filter.maxPrice) || event.ticket_price <= filter.maxPrice
-  const matchCrowd = !filter.crowdLevel || event.crowd_level === filter.crowdLevel
-  const matchSearch = !filter.searchQuery || event.title.toLowerCase().includes(filter.searchQuery.toLowerCase()) || event.venue.toLowerCase().includes(filter.searchQuery.toLowerCase())
-  
-  return matchCategory && matchPrice && matchCrowd && matchSearch
-})
-
+  filteredEvents.value = trendingEvents.value.filter((event) => {
+    const matchCategory = !filter.category || event.category === filter.category
+    const matchPrice =
+      filter.maxPrice == null ||
+      isNaN(filter.maxPrice) ||
+      event.ticket_price <= filter.maxPrice
+    const matchCrowd =
+      !filter.crowdLevel || event.crowd_level === filter.crowdLevel
+    const matchSearch =
+      !filter.searchQuery ||
+      event.title.toLowerCase().includes(filter.searchQuery.toLowerCase()) ||
+      event.venue.toLowerCase().includes(filter.searchQuery.toLowerCase())
+    return matchCategory && matchPrice && matchCrowd && matchSearch
+  })
+  currentPage.value = 1 // Reset to page 1 on filter change
 }
 
-
-
-const viewAll = () => router.push("/events/trending")
+// Pagination controls
+function nextPage() {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+function prevPage() {
+  if (currentPage.value > 1) currentPage.value--
+}
 
 onMounted(async () => {
   await getTrendingEvents()
   await loadUserSaved()
 })
-
 </script>
 
 <template>
   <section class="py-12 px-6 md:px-12 xl:px-20 bg-white">
-    <!-- header -->
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h2 class="text-3xl font-bold text-gray-900">Trending Events</h2>
-        <p class="text-gray-500 mt-1">What's hot in Singapore right now</p>
-      </div>
-      <Button
-        variant="link"
-        class="text-blue-600 font-medium hover:text-blue-700"
-        @click="viewAll"
-      >
-        View All →
-      </Button>
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-3xl font-extrabold text-gray-900">Events</h1>
+      <p class="text-lg text-gray-600 mt-2">
+        Discover events happening across Singapore this week
+      </p>
     </div>
 
-     <!-- Filter Bar -->
-    <EventFilter @update-filter="handleFilterChange" />
+    <!-- Filter Bar -->
+    <div class="flex justify-center mb-8">
+      <EventFilter @update-filter="handleFilterChange" />
+    </div>
 
+    <!-- Events -->
     <div
-      v-if="filteredEvents.length"
+      v-if="paginatedEvents.length"
       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
     >
       <EventCard
-        v-for="event in filteredEvents"
+        v-for="event in paginatedEvents"
         :key="event.id"
         :id="event.id"
         :title="event.title"
@@ -129,8 +123,15 @@ onMounted(async () => {
           Sports: 'bg-green-500',
         }[event.category] || 'bg-gray-500'"
         :location="event.venue || 'Unknown venue'"
-        :price="event.ticket_price === 0 ? 'Free' : `$${event.ticket_price}`"
-        :date="new Date(event.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })"
+        :price="
+          event.ticket_price === 0 ? 'Free' : `$${event.ticket_price}`
+        "
+        :date="
+          new Date(event.start_date).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+          })
+        "
         :crowd="event.crowd_level"
         :image="event.image_url"
         :liked="savedIds.includes(event.id)"
@@ -142,7 +143,52 @@ onMounted(async () => {
     <div v-else class="text-gray-500 text-center py-10 mt-6">
       No events match the selected filters.
     </div>
+
+    <div
+      v-if="totalPages > 1"
+      class="flex flex-col items-center justify-center mt-10"
+    >
+      <!-- Pagination -->
+      <div
+        class="flex flex-col md:gap-3 text-sm text-gray-600 w-full text-center"
+      >
+        <!-- Buttons -->
+        <div class="flex items-center justify-center gap-3 mb-2 md:mb-0">
+          <Button
+            variant="outline"
+            :disabled="currentPage === 1"
+            @click="prevPage"
+            class="cursor-pointer"
+          >
+            Previous
+          </Button>
+
+          <span class="text-gray-700 font-medium">
+            Page {{ currentPage }} of {{ totalPages }}
+          </span>
+
+          <Button
+            variant="outline"
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+            class="cursor-pointer"
+          >
+            Next
+          </Button>
+        </div>
+
+        <div
+          class="text-gray-500 text-xs md:text-sm mt-1 md:mt-0 md:ml-2"
+        >
+          Showing
+          {{ (currentPage - 1) * itemsPerPage + 1 }}
+          -
+          {{ Math.min(currentPage * itemsPerPage, filteredEvents.length) }}
+          of
+          {{ filteredEvents.length }}
+          events
+        </div>
+      </div>
+    </div>
   </section>
-
-
 </template>

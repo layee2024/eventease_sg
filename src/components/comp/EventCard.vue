@@ -27,13 +27,20 @@ watch(
 );
 
 async function toggleLike() {
-  isLiked.value = !isLiked.value;
-  emit("update-saved", { id: props.id, liked: isLiked.value });
-
+  
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return;
+  
+  // Not logged in
+  if (!user) {
+    toast.error("Please login to save events");
+    return;
+  }
+  
+  // Logged in
+  isLiked.value = !isLiked.value;
+  emit("update-saved", { id: props.id, liked: isLiked.value });
 
   const { data: pref } = await supabase
     .from("user_preferences")
