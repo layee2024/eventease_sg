@@ -1,9 +1,10 @@
 <script setup>
-import { ref, computed, watch } from "vue";
-import { supabase } from "@/utils/supabase";
-import { Card, CardContent } from "@/components/ui/card";
-import { Heart } from "lucide-vue-next";
-import { toast } from "vue-sonner";
+import { ref, computed, watch } from "vue"
+import { useRouter } from "vue-router"
+import { supabase } from "@/utils/supabase"
+import { Card, CardContent } from "@/components/ui/card"
+import { Heart } from "lucide-vue-next"
+import { toast } from "vue-sonner"
 
 const props = defineProps({
   id: String,
@@ -16,66 +17,75 @@ const props = defineProps({
   crowd: String,
   image: String,
   liked: { type: Boolean, default: false },
-});
+})
 
-const emit = defineEmits(["update-saved"]);
-const isLiked = ref(props.liked);
+const emit = defineEmits(["update-saved"])
+const router = useRouter()
+const isLiked = ref(props.liked)
 
 watch(
   () => props.liked,
   (val) => (isLiked.value = val)
-);
+)
 
+function goToDetails() {
+  if (!props.id) {
+    console.warn("No event ID found")
+    return
+  }
+  router.push(`/event/${props.id}`)
+}
+
+// Toggle like
 async function toggleLike() {
-  
   const {
     data: { user },
-  } = await supabase.auth.getUser();
-  
-  // Not logged in
+  } = await supabase.auth.getUser()
+
   if (!user) {
-    toast.error("Please login to save events");
-    return;
+    toast.error("Please login to save events")
+    return
   }
-  
-  // Logged in
-  isLiked.value = !isLiked.value;
-  emit("update-saved", { id: props.id, liked: isLiked.value });
+
+  isLiked.value = !isLiked.value
+  emit("update-saved", { id: props.id, liked: isLiked.value })
 
   const { data: pref } = await supabase
     .from("user_preferences")
     .select("saved")
     .eq("id", user.id)
-    .single();
+    .single()
 
-  let updated = pref?.saved || [];
+  let updated = pref?.saved || []
   if (isLiked.value) {
-    if (!updated.includes(props.id)) updated.push(props.id);
-    toast.success(`${props.title} added to saved events`);
+    if (!updated.includes(props.id)) updated.push(props.id)
+    toast.success(`${props.title} added to saved events`)
   } else {
-    updated = updated.filter((x) => x !== props.id);
-    toast.error(`${props.title} removed from saved events`);
+    updated = updated.filter((x) => x !== props.id)
+    toast.error(`${props.title} removed from saved events`)
   }
 
   await supabase
     .from("user_preferences")
     .update({ saved: updated })
-    .eq("id", user.id);
+    .eq("id", user.id)
 }
 
 const crowdColor = computed(() => {
-  const level = (props.crowd || "").toLowerCase();
-  if (level.includes("low") || level.includes("quiet")) return "bg-green-500";
+  const level = (props.crowd || "").toLowerCase()
+  if (level.includes("low") || level.includes("quiet")) return "bg-green-500"
   if (level.includes("moderate") || level.includes("medium"))
-    return "bg-orange-400";
-  if (level.includes("high") || level.includes("busy")) return "bg-red-500";
-  return "bg-gray-400";
-});
+    return "bg-orange-400"
+  if (level.includes("high") || level.includes("busy")) return "bg-red-500"
+  return "bg-gray-400"
+})
 </script>
+
 
 <template>
   <Card
-    class="relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 duration-300"
+    class="relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 duration-300 cursor-pointer"
+    @click="goToDetails"
   >
     <div class="relative">
       <img
@@ -84,9 +94,7 @@ const crowdColor = computed(() => {
         class="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
       />
 
-      <div
-        class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"
-      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
       <button
         @click.stop="toggleLike"
@@ -117,9 +125,7 @@ const crowdColor = computed(() => {
 
     <!-- Card content -->
     <CardContent class="p-4">
-      <h3 class="font-semibold text-gray-900 text-base truncate mb-1">
-        {{ title }}
-      </h3>
+      <h3 class="font-semibold text-gray-900 text-base truncate mb-1">{{ title }}</h3>
       <p class="text-sm text-gray-500 truncate">{{ location }}</p>
 
       <div class="flex justify-between items-center mt-3">

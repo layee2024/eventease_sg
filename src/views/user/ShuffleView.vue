@@ -158,8 +158,23 @@ async function saveEvent() {
 
 // View event details
 function viewEventDetails() {
-  // You can implement a detailed event view page later
-  toast.info("Event details page coming soon!")
+  if (!selectedEvent.value || !selectedEvent.value.title) {
+    toast.error("No event selected");
+    return;
+  }
+
+  const eventSlug = selectedEvent.value.title
+    .toLowerCase()
+    .replace(/[^\w\s]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+
+  if (!eventSlug) {
+    toast.error("Invalid event title")
+    return;
+  }
+
+  router.push(`/event/${eventSlug}`);
 }
 
 // Go to preferences to customize filters

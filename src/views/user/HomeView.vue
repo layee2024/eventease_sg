@@ -307,13 +307,14 @@
               type="text"
               placeholder="Search for events, categories, or venues..."
               class="w-full pl-12 pr-32 py-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-300 focus:bg-white/20 focus:shadow-xl"
-            />
-            <button
-              @click="handleSearch"
-              class="absolute right-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:scale-105"
-            >
-              Search
-            </button>
+              />
+              <Button
+                variant="primary"
+                size="lg"
+                class="absolute right-2 px-6 py-2.5 text-white cursor-pointer hover:bg-[#dbe1e3] hover:text-gray-700"
+                >
+                Search
+              </Button>
           </div>
         </div>
 
@@ -341,7 +342,7 @@
       >
         <!-- Left Side -->
         <div class="flex flex-col justify-center items-center xl:items-start h-full">
-          <h2 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
+          <h2 class="text-center md:text-start text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
             We Built EventEase SG to
             <span class="stars-animation">
               <span class="stars">
@@ -410,7 +411,7 @@
                   stroke-width="2.2"
                   stroke="currentColor"
                   v-html="card.icon"
-                  class="w-8 h-8"
+                  class="w-6 h-6"
                 ></svg>
               </div>
               <h3 class="font-semibold text-lg text-gray-900 group-hover:text-violet-600">{{ card.title }}</h3>
@@ -470,7 +471,7 @@
 
             <!-- Main Heading -->
             <h2
-              class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
+              class="text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight"
               :style="{ transitionDelay: '300ms' }"
             >
               Events that connect
@@ -490,7 +491,7 @@
 
             <!-- Stats Grid -->
             <div
-              class="grid grid-cols-2 gap-6 pt-4"
+              class="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4"
               :style="{ transitionDelay: '500ms' }"
             >
               <div class="space-y-2">

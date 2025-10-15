@@ -1,60 +1,60 @@
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { Button } from "@/components/ui/button";
+import { ref, onMounted } from "vue"
+import { useRouter } from "vue-router"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { supabase } from "../utils/supabase";
-import { toast } from "vue-sonner";
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { supabase } from "../utils/supabase"
+import { toast } from "vue-sonner"
 
-const router = useRouter();
-const email = ref("");
-const password = ref("");
-const loading = ref(false);
-const isOrganiser = ref(false);
+const router = useRouter()
+const email = ref("")
+const password = ref("")
+const loading = ref(false)
+const isOrganiser = ref(false)
 
 onMounted(async () => {
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await supabase.auth.getSession()
   if (session) {
-    router.push("/"); // TODO: adjust later for admin/organiser
-    return;
+    router.push("/") // TODO: adjust later for admin/organiser
+    return
   }
-});
+})
 
 async function handleLogin() {
   try {
-    loading.value = true;
+    loading.value = true
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email.value,
       password: password.value,
-    });
+    })
 
     if (error) {
       if (error.message.includes("Email not confirmed")) {
-        toast.error("Please verify your email before logging in.");
+        toast.error("Please verify your email before logging in.")
       } else {
-        toast.error("Invalid credentials.");
+        toast.error("Invalid credentials.")
       }
-      return;
+      return
     }
 
-    toast.success("Welcome back!");
+    toast.success("Welcome back!")
 
     // Get user ID
-    const user = data.user;
+    const user = data.user
     if (!user) {
-      toast.error("No user session found.");
-      return;
+      toast.error("No user session found.")
+      return
     }
 
     // Fetch onboarding status
@@ -62,26 +62,26 @@ async function handleLogin() {
       .from("user_preferences")
       .select("onboarding")
       .eq("id", user.id)
-      .maybeSingle();
+      .maybeSingle()
 
     if (prefsError) {
-      console.error(prefsError);
-      toast.error("Error checking onboarding status.");
-      return;
+      console.error(prefsError)
+      toast.error("Error checking onboarding status.")
+      return
     }
 
     if (isOrganiser.value) {
-      router.push("/dashboard");
+      router.push("/dashboard")
     } else if (!prefs || prefs.onboarding === false) {
-      router.push("/onboarding"); // send new user to onboarding
+      router.push("/onboarding") // send new user to onboarding
     } else {
-      router.push("/");
+      router.push("/")
     }
   } catch (err) {
-    console.error(err);
-    toast.error("Login failed. Try again.");
+    console.error(err)
+    toast.error("Login failed. Try again.")
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 </script>

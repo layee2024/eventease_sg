@@ -1,24 +1,26 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router'
 import { supabase } from '@/utils/supabase'
-import LoginView from '@/views/LoginView.vue';
-import RegisterView from '../views/RegisterView.vue';
+import LoginView from '@/views/LoginView.vue'
+import RegisterView from '../views/RegisterView.vue'
 
 // User
-import VerifyView from '../views/user/VerifyView.vue';
-import HomeView from '../views/user/HomeView.vue';
-import MapView from '../views/user/MapView.vue';
-import SavedView from '../views/user/SavedView.vue';
-import FriendsView from '../views/user/FriendsView.vue';
-import ProfileView from '../views/user/ProfileView.vue';
-import EventsView from '../views/user/events/EventsView.vue';
-import ShuffleView from '../views/user/ShuffleView.vue';
-import OnboardingView from '../views/user/Onboarding.vue';
+import VerifyView from '../views/user/VerifyView.vue'
+import HomeView from '../views/user/HomeView.vue'
+import MapView from '../views/user/MapView.vue'
+import SavedView from '../views/user/SavedView.vue'
+import FriendsView from '../views/user/FriendsView.vue'
+import ProfileView from '../views/user/ProfileView.vue'
+import EventsView from '../views/user/events/EventsView.vue'
+import EventDetails from '../views/user/events/EventDetails.vue'
+import ShuffleView from '../views/user/ShuffleView.vue'
+import OnboardingView from '../views/user/Onboarding.vue'
 
 // Organiser
 import DashboardView from '../views/organiser/DashboardView.vue'
 
 
 const routes = [
+  // User
   {
     path: '/',
     name: 'HomeView',
@@ -55,6 +57,11 @@ const routes = [
     component: EventsView,
   },
   {
+    path: "/event/:id",
+    name: "EventDetails",
+    component: EventDetails,
+  },
+  {
     path: '/map',
     name: 'MapView',
     component: MapView,
@@ -79,12 +86,14 @@ const routes = [
     name: 'ShuffleView',
     component: ShuffleView,
   },
+
+  // Organiser
   {
     path: '/dashboard',
     name: 'DashboardView',
     component: DashboardView,
   },
-];
+]
 
 const router = createRouter({
   history: createWebHistory(),
@@ -92,7 +101,7 @@ const router = createRouter({
   scrollBehavior() {
     return { top: 0 }
   },
-});
+})
 
 router.beforeEach(async (to, from, next) => {
   if (to.path === '/onboarding') {
@@ -125,4 +134,4 @@ router.beforeEach(async (to, from, next) => {
   next()
 })
 
-export default router;
+export default router

@@ -18,7 +18,7 @@ async function loadSavedEvents() {
 
   // Get user's saved events
   const { data: pref, error: prefErr } = await supabase
-    .from("preferences")
+    .from("user_preferences")
     .select("saved")
     .eq("id", user.id)
     .single()
