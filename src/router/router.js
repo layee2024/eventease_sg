@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { supabase } from '@/utils/supabase'
 import LoginView from '@/views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
 
@@ -11,6 +12,7 @@ import FriendsView from '../views/user/FriendsView.vue';
 import ProfileView from '../views/user/ProfileView.vue';
 import EventsView from '../views/user/events/EventsView.vue';
 import ShuffleView from '../views/user/ShuffleView.vue';
+import OnboardingView from '../views/user/Onboarding.vue';
 
 // Organiser
 import DashboardView from '../views/organiser/DashboardView.vue'
@@ -31,6 +33,11 @@ const routes = [
     path: '/shuffle',
     name: 'ShuffleView',
     component: ShuffleView,
+  },
+  {
+    path: '/onboarding',
+    name: 'OnboardingView',
+    component: OnboardingView,
   },
   {
     path: '/register',
@@ -86,5 +93,36 @@ const router = createRouter({
     return { top: 0 }
   },
 });
+
+router.beforeEach(async (to, from, next) => {
+  if (to.path === '/onboarding') {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return next('/login')
+    }
+
+    const { data: prefs, error } = await supabase
+      .from('user_preferences')
+      .select('onboarding')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Error fetching onboarding status:', error)
+      return next('/')
+    }
+
+    // If onboarding already done, redirect home
+    if (prefs?.onboarding === true) {
+      return next('/')
+    }
+  }
+
+  // Allow navigation normally
+  next()
+})
 
 export default router;

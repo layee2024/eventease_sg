@@ -25,7 +25,7 @@ onMounted(async () => {
     data: { session },
   } = await supabase.auth.getSession();
   if (session) {
-    router.push("/");    // TODO: Change for Admin next time
+    router.push("/"); // TODO: adjust later for admin/organiser
     return;
   }
 });
@@ -50,10 +50,35 @@ async function handleLogin() {
 
     toast.success("Welcome back!");
 
-    if (isOrganiser.value) router.push("./dashboard")
-    else router.push("/");
+    // Get user ID
+    const user = data.user;
+    if (!user) {
+      toast.error("No user session found.");
+      return;
+    }
 
+    // Fetch onboarding status
+    const { data: prefs, error: prefsError } = await supabase
+      .from("user_preferences")
+      .select("onboarding")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (prefsError) {
+      console.error(prefsError);
+      toast.error("Error checking onboarding status.");
+      return;
+    }
+
+    if (isOrganiser.value) {
+      router.push("/dashboard");
+    } else if (!prefs || prefs.onboarding === false) {
+      router.push("/onboarding"); // send new user to onboarding
+    } else {
+      router.push("/");
+    }
   } catch (err) {
+    console.error(err);
     toast.error("Login failed. Try again.");
   } finally {
     loading.value = false;
@@ -68,8 +93,7 @@ async function handleLogin() {
         <CardTitle class="text-xl">Login</CardTitle>
         <CardDescription>
           Toggle below to login as a
-          <b>{{ isOrganiser ? "Organiser" : "User" }}</b
-          >.
+          <b>{{ isOrganiser ? "Organiser" : "User" }}</b>.
         </CardDescription>
       </CardHeader>
 
