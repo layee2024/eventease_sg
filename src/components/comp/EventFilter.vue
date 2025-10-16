@@ -28,10 +28,10 @@ function resetFilter() {
 </script>
 
 <template>
-  <div class="bg-white shadow-sm rounded-xl p-5 space-y-4 w-full max-w-5xl mx-auto">
-    <!-- Search -->
-    <div class="flex items-center gap-3 w-full">
-      <div class="flex items-center w-full border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500 transition">
+  <div class="bg-white shadow-sm rounded-xl p-5 space-y-4 w-full max-w-4xl mx-auto">
+    <!-- Search Bar -->
+    <div class="flex flex-col md:flex-row gap-3">
+      <div class="flex items-center border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500 transition w-full">
         <Search class="w-5 h-5 text-gray-400 mr-2" />
         <input
           type="text"
@@ -42,9 +42,19 @@ function resetFilter() {
       </div>
     </div>
 
-    <!-- Filter -->
-    <div class="flex flex-wrap gap-3 items-center">
-      <select v-model="category" class="border rounded-lg px-3 py-2 flex-1 min-w-[150px]">
+    <div
+      class="grid grid-cols-1 md:grid-cols-[20%_25%_20%_auto] lg:grid-cols-[25%_25%_25%_auto] gap-3 items-center"
+    >
+      <!-- Budget -->
+      <input
+        type="number"
+        v-model="maxPrice"
+        placeholder="Budget"
+        class="border rounded-lg px-3 py-2 w-full"
+      />
+
+      <!-- Category -->
+      <select v-model="category" class="border rounded-lg px-3 py-2 w-full">
         <option value="">All Categories</option>
         <option value="Music">Music</option>
         <option value="Food">Food</option>
@@ -59,33 +69,31 @@ function resetFilter() {
         <option value="Environment">Environment</option>
       </select>
 
-      <input
-        type="number"
-        v-model="maxPrice"
-        placeholder="Max Price"
-        class="border rounded-lg px-3 py-2 w-36"
-      />
-
-      <select v-model="crowdLevel" class="border rounded-lg px-3 py-2 flex-1 min-w-[120px]">
+      <!-- Crowd Level -->
+      <select v-model="crowdLevel" class="border rounded-lg px-3 py-2 w-full">
         <option value="">Any Crowd</option>
         <option value="High">High</option>
         <option value="Moderate">Moderate</option>
         <option value="Low">Low</option>
       </select>
 
-      <button
-        @click="applyFilter"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition"
-      >
-        Search
-      </button>
 
-      <button
-        @click="resetFilter"
-        class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg font-medium transition"
-      >
-        Reset
-      </button>
+      <!-- Buttons -->
+      <div class="flex gap-3 justify-between md:justify-end w-full">
+        <button
+          @click="applyFilter"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition w-full md:w-auto"
+        >
+          Search
+        </button>
+
+        <button
+          @click="resetFilter"
+          class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg font-medium transition w-full md:w-auto"
+        >
+          Reset
+        </button>
+      </div>
     </div>
   </div>
 </template>

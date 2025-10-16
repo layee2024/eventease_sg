@@ -25,7 +25,7 @@ onMounted(async () => {
     data: { session },
   } = await supabase.auth.getSession()
   if (session) {
-    router.push("/") // TODO: adjust later for admin/organiser
+    router.push("/")
     return
   }
 })
@@ -50,32 +50,10 @@ async function handleLogin() {
 
     toast.success("Welcome back!")
 
-    // Get user ID
-    const user = data.user
-    if (!user) {
-      toast.error("No user session found.")
-      return
-    }
-
-    // Fetch onboarding status
-    const { data: prefs, error: prefsError } = await supabase
-      .from("user_preferences")
-      .select("onboarding")
-      .eq("id", user.id)
-      .maybeSingle()
-
-    if (prefsError) {
-      console.error(prefsError)
-      toast.error("Error checking onboarding status.")
-      return
-    }
-
     if (isOrganiser.value) {
       router.push("/dashboard")
-    } else if (!prefs || prefs.onboarding === false) {
-      router.push("/onboarding") // send new user to onboarding
     } else {
-      router.push("/")
+      router.push("/") // Onboarding handled in Home page now
     }
   } catch (err) {
     console.error(err)
@@ -87,7 +65,7 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="flex items-center justify-center px-4 py-10 h-full">
+  <div class="min-h-[93vh] flex items-center justify-center px-4 py-10 h-full">
     <Card class="mx-auto max-w-md w-full">
       <CardHeader>
         <CardTitle class="text-xl">Login</CardTitle>

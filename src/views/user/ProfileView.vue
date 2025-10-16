@@ -170,7 +170,7 @@ const initials = computed(() =>
 </script>
 
 <template>
-  <section class="py-10 md:py-16">
+  <section class="min-h-[93vh] py-10 md:py-16">
     <div class="container mx-auto max-w-6xl px-4">
       <div class="grid gap-7 md:grid-cols-3">
         <!-- profile -->

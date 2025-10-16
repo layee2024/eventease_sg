@@ -17,6 +17,7 @@ import OnboardingView from '../views/user/Onboarding.vue'
 
 // Organiser
 import DashboardView from '../views/organiser/DashboardView.vue'
+import PlannerView from '../views/user/PlannerView.vue'
 
 
 const routes = [
@@ -65,6 +66,11 @@ const routes = [
     path: '/map',
     name: 'MapView',
     component: MapView,
+  },
+  {
+    path: '/planner',
+    name: 'PlannerView',
+    component: PlannerView,
   },
   {
     path: '/saved',

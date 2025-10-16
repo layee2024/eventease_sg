@@ -158,23 +158,12 @@ async function saveEvent() {
 
 // View event details
 function viewEventDetails() {
-  if (!selectedEvent.value || !selectedEvent.value.title) {
+  if (!selectedEvent.value || !selectedEvent.value.id) {
     toast.error("No event selected");
     return;
   }
 
-  const eventSlug = selectedEvent.value.title
-    .toLowerCase()
-    .replace(/[^\w\s]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-
-  if (!eventSlug) {
-    toast.error("Invalid event title")
-    return;
-  }
-
-  router.push(`/event/${eventSlug}`);
+  router.push(`/event/${selectedEvent.value.id}`);
 }
 
 // Go to preferences to customize filters
@@ -217,10 +206,10 @@ function handleSavedUpdate({ id, liked }) {
     <!-- Header -->
     <div class="max-w-7xl mx-auto mb-12 text-center">
       <div class="flex items-center justify-center gap-3 mb-4">
-        <h1 class="text-3xl font-extrabold text-gray-900">Shuffle & Discover</h1>
+        <h1 class="text-3xl font-extrabold text-gray-900">Shuffle</h1>
       </div>
       <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-        Can't decide what to do? Let fate choose your next adventure!
+        Can't decide what to do? Let fate choose your next adventure!<br/>
         Shuffle the cards and discover exciting events tailored to your preferences.
       </p>
     </div>
@@ -232,7 +221,7 @@ function handleSavedUpdate({ id, liked }) {
     </div>
 
     <!-- Main Content -->
-    <div v-else class="max-w-7xl mx-auto">
+    <div v-else class="max-w-5xl mx-auto">
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
         <Card>
@@ -402,13 +391,13 @@ function handleSavedUpdate({ id, liked }) {
 
                 <!-- Action Buttons -->
                 <div class="flex flex-col gap-3 mt-6">
-                  <Button @click="saveEvent" size="lg" class="w-full">
+                  <Button @click="saveEvent" size="lg" class="w-full cursor-pointer">
                     Save This Event
                   </Button>
-                  <Button @click="viewEventDetails" size="lg" variant="outline" class="w-full">
+                  <Button @click="viewEventDetails" size="lg" variant="outline" class="w-full cursor-pointer">
                     View Full Details
                   </Button>
-                  <Button @click="resetShuffle" size="lg" variant="ghost" class="w-full">
+                  <Button @click="resetShuffle" size="lg" variant="ghost" class="w-full cursor-pointer">
                     Shuffle Again
                   </Button>
                 </div>
@@ -427,5 +416,5 @@ function handleSavedUpdate({ id, liked }) {
 </template>
 
 <style scoped>
-/* Additional custom animations */
+
 </style>

@@ -1,242 +1,169 @@
 <script setup>
-  import { ref, onMounted, onUnmounted, nextTick } from "vue"
-  import { useRouter } from "vue-router"
-  import Typewriter from "../../components/comp/Typewriter.vue"
-  import GithubGlobe from "../../components/comp/GithubGlobe.vue"
-  import { Button } from "@/components/ui/button"
+import { ref, onMounted, onUnmounted, nextTick } from "vue"
+import { useRouter } from "vue-router"
+import Typewriter from "../../components/comp/Typewriter.vue"
+import GithubGlobe from "../../components/comp/GithubGlobe.vue"
+import { Button } from "@/components/ui/button"
+import { supabase } from "@/utils/supabase"
+import { toast } from "vue-sonner"
 
-  const router = useRouter()
-  const problem = ref(null)
-  const isVisible = ref(false)
-  const searchQuery = ref("")
-  const heroElementsVisible = ref(false)
-  const globeSection = ref(null)
-  const globeVisible = ref(false)
-  const howItWorksSection = ref(null)
-  const howItWorksVisible = ref(false)
+const router = useRouter()
+const problem = ref(null)
+const isVisible = ref(false)
+const searchQuery = ref("")
+const heroElementsVisible = ref(false)
+const globeSection = ref(null)
+const globeVisible = ref(false)
+const howItWorksSection = ref(null)
+const howItWorksVisible = ref(false)
 
-  // Singapore-focused globe data with arcs showing event connections
-  const colors = ["#9333ea", "#ec4899", "#3b82f6", "#f59e0b"]
-  const globeData = [
-    // Singapore to major cities (showing international events/partnerships)
-    {
-      order: 1,
-      startLat: 1.3521,
-      startLng: 103.8198,
-      endLat: 35.6762,
-      endLng: 139.6503, // Tokyo
-      arcAlt: 0.3,
-      color: colors[0],
-    },
-    {
-      order: 1,
-      startLat: 1.3521,
-      startLng: 103.8198,
-      endLat: 51.5072,
-      endLng: -0.1276, // London
-      arcAlt: 0.5,
-      color: colors[1],
-    },
-    {
-      order: 2,
-      startLat: 1.3521,
-      startLng: 103.8198,
-      endLat: 40.7128,
-      endLng: -74.006, // New York
-      arcAlt: 0.6,
-      color: colors[2],
-    },
-    {
-      order: 2,
-      startLat: 1.3521,
-      startLng: 103.8198,
-      endLat: -33.8688,
-      endLng: 151.2093, // Sydney
-      arcAlt: 0.4,
-      color: colors[3],
-    },
-    {
-      order: 3,
-      startLat: 1.3521,
-      startLng: 103.8198,
-      endLat: 22.3193,
-      endLng: 114.1694, // Hong Kong
-      arcAlt: 0.2,
-      color: colors[0],
-    },
-    {
-      order: 3,
-      startLat: 1.3521,
-      startLng: 103.8198,
-      endLat: 3.139,
-      endLng: 101.6869, // Kuala Lumpur
-      arcAlt: 0.1,
-      color: colors[1],
-    },
-    {
-      order: 4,
-      startLat: 1.3521,
-      startLng: 103.8198,
-      endLat: -6.2088,
-      endLng: 106.8456, // Jakarta
-      arcAlt: 0.2,
-      color: colors[2],
-    },
-    {
-      order: 4,
-      startLat: 1.3521,
-      startLng: 103.8198,
-      endLat: 13.7563,
-      endLng: 100.5018, // Bangkok
-      arcAlt: 0.2,
-      color: colors[3],
-    },
-  ]
+const colors = ["#9333ea", "#ec4899", "#3b82f6", "#f59e0b"]
+const globeData = [
+  { order: 1, startLat: 1.3521, startLng: 103.8198, endLat: 35.6762, endLng: 139.6503, arcAlt: 0.3, color: colors[0] },
+  { order: 1, startLat: 1.3521, startLng: 103.8198, endLat: 51.5072, endLng: -0.1276, arcAlt: 0.5, color: colors[1] },
+  { order: 2, startLat: 1.3521, startLng: 103.8198, endLat: 40.7128, endLng: -74.006, arcAlt: 0.6, color: colors[2] },
+  { order: 2, startLat: 1.3521, startLng: 103.8198, endLat: -33.8688, endLng: 151.2093, arcAlt: 0.4, color: colors[3] },
+  { order: 3, startLat: 1.3521, startLng: 103.8198, endLat: 22.3193, endLng: 114.1694, arcAlt: 0.2, color: colors[0] },
+  { order: 3, startLat: 1.3521, startLng: 103.8198, endLat: 3.139, endLng: 101.6869, arcAlt: 0.1, color: colors[1] },
+  { order: 4, startLat: 1.3521, startLng: 103.8198, endLat: -6.2088, endLng: 106.8456, arcAlt: 0.2, color: colors[2] },
+  { order: 4, startLat: 1.3521, startLng: 103.8198, endLat: 13.7563, endLng: 100.5018, arcAlt: 0.2, color: colors[3] },
+]
 
-  const globeConfig = {
-    pointSize: 2,
-    globeColor: "#3730a3", // Brighter purple-blue
-    showAtmosphere: true,
-    atmosphereColor: "#FFFFFF",
-    atmosphereAltitude: 0.15,
-    emissive: "#4c1d95", // Brighter purple emissive glow
-    emissiveIntensity: 0.3, // Increased from 0.1
-    shininess: 0.9,
-    polygonColor: "rgba(255,255,255,0.8)", // Brighter white polygons
-    ambientLight: "#ffffff", // White ambient light for better visibility
-    directionalLeftLight: "#ffffff",
-    directionalTopLight: "#ffffff",
-    pointLight: "#ffffff",
-    arcTime: 3000,
-    arcLength: 0.9,
-    rings: 2,
-    maxRings: 3,
-    initialPosition: { lat: 1.3521, lng: 103.8198 },
-    autoRotate: true,
-    autoRotateSpeed: 0.5,
+const globeConfig = {
+  pointSize: 2,
+  globeColor: "#3730a3",
+  showAtmosphere: true,
+  atmosphereColor: "#FFFFFF",
+  atmosphereAltitude: 0.15,
+  emissive: "#4c1d95",
+  emissiveIntensity: 0.3,
+  shininess: 0.9,
+  polygonColor: "rgba(255,255,255,0.8)",
+  ambientLight: "#ffffff",
+  directionalLeftLight: "#ffffff",
+  directionalTopLight: "#ffffff",
+  pointLight: "#ffffff",
+  arcTime: 3000,
+  arcLength: 0.9,
+  rings: 2,
+  maxRings: 3,
+  initialPosition: { lat: 1.3521, lng: 103.8198 },
+  autoRotate: true,
+  autoRotateSpeed: 0.5,
+}
+
+// Onboarding check
+async function checkOnboarding() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const { data: prefs, error } = await supabase
+    .from("user_preferences")
+    .select("onboarding")
+    .eq("id", user.id)
+    .maybeSingle()
+
+  if (error) {
+    console.error("Error checking onboarding:", error)
+    return
   }
 
-  onMounted(async () => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            isVisible.value = true
-            observer.disconnect()
-          }
-        })
-      },
-      { threshold: 0.5 }
-    )
+  if (!prefs || prefs.onboarding === false) {
+    toast.info("Let's set up your preferences first!")
+    router.push("/onboarding")
+  }
+}
 
-    const globeObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            globeVisible.value = true
-            globeObserver.disconnect()
-          }
-        })
-      },
-      { threshold: 0.3 }
-    )
+onMounted(async () => {
+  await nextTick()
+  initStarAnimation()
 
-    const howItWorksObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            howItWorksVisible.value = true
-            howItWorksObserver.disconnect()
-          }
-        })
-      },
-      { threshold: 0.3 }
-    )
+  setTimeout(() => {
+    heroElementsVisible.value = true
+  }, 100)
 
-    if (problem.value) observer.observe(problem.value)
-    if (globeSection.value) globeObserver.observe(globeSection.value)
-    if (howItWorksSection.value) howItWorksObserver.observe(howItWorksSection.value)
+  const video = document.querySelector("video")
+  if (video) video.play().catch(() => {})
 
-    await nextTick()
-    initStarAnimation()
+  // Intersection Observers
+  const observer = new IntersectionObserver(
+    (entries) => entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        isVisible.value = true
+        observer.disconnect()
+      }
+    }),
+    { threshold: 0.5 }
+  )
 
-    // Trigger hero animations
+  const globeObserver = new IntersectionObserver(
+    (entries) => entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        globeVisible.value = true
+        globeObserver.disconnect()
+      }
+    }),
+    { threshold: 0.3 }
+  )
+
+  const howItWorksObserver = new IntersectionObserver(
+    (entries) => entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        howItWorksVisible.value = true
+        howItWorksObserver.disconnect()
+      }
+    }),
+    { threshold: 0.3 }
+  )
+
+  if (problem.value) observer.observe(problem.value)
+  if (globeSection.value) globeObserver.observe(globeSection.value)
+  if (howItWorksSection.value) howItWorksObserver.observe(howItWorksSection.value)
+
+  setTimeout(checkOnboarding, 800)
+})
+
+onUnmounted(() => {
+  if (problem.value) observer?.unobserve(problem.value)
+})
+
+// Scroll
+const scrollToNext1 = () => problem.value?.scrollIntoView({ behavior: "smooth" })
+const scrollToNext2 = () => globeSection.value?.scrollIntoView({ behavior: "smooth" })
+const scrollToNext3 = () => howItWorksSection.value?.scrollIntoView({ behavior: "smooth" })
+
+// Search
+const handleSearch = () => {
+  const query = searchQuery.value.trim()
+  router.push(query ? { path: "/events", query: { search: query } } : "/events")
+}
+
+const handleSearchKeypress = (e) => {
+  if (e.key === "Enter") handleSearch()
+}
+
+// Star animation
+function initStarAnimation() {
+  let index = 0
+  const interval = 1000
+  const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
+
+  const animate = (star) => {
+    star.style.setProperty("--star-left", `${rand(-10, 100)}%`)
+    star.style.setProperty("--star-top", `${rand(-40, 80)}%`)
+    star.style.animation = "none"
+    star.offsetHeight
+    star.style.animation = ""
+  }
+
+  const stars = document.getElementsByClassName("stars")
+  for (const star of stars) {
     setTimeout(() => {
-      heroElementsVisible.value = true
-    }, 100)
-
-    // Ensure video plays on mount
-    const video = document.querySelector('video')
-    if (video) {
-      video.play().catch(err => console.log('Video autoplay prevented:', err))
-    }
-  })
-
-  const scrollToNext1 = () => {
-    if (problem.value) {
-      problem.value.scrollIntoView({ behavior: "smooth" })
-    }
+      animate(star)
+      setInterval(() => animate(star), interval)
+    }, index++ * (interval / 3))
   }
-
-  const scrollToNext2 = () => {
-    if (globeSection.value) {
-      globeSection.value.scrollIntoView({ behavior: "smooth" })
-    }
-  }
-
-  const scrollToNext3 = () => {
-    if (howItWorksSection.value) {
-      howItWorksSection.value.scrollIntoView({ behavior: "smooth" })
-    }
-  }
-
-  const handleSearch = () => {
-    if (searchQuery.value.trim()) {
-      router.push({
-        path: '/events',
-        query: { search: searchQuery.value.trim() }
-      })
-    } else {
-      router.push('/events')
-    }
-  }
-
-  const handleSearchKeypress = (event) => {
-    if (event.key === 'Enter') {
-      handleSearch()
-    }
-  }
-
-  onUnmounted(() => {
-    if (problem.value) observer.unobserve(problem.value)
-  })
-
-  // Star animation
-  function initStarAnimation() {
-    let index = 0
-    const interval = 1000
-
-    const rand = (min, max) =>
-      Math.floor(Math.random() * (max - min + 1)) + min
-
-    const animate = (star) => {
-      star.style.setProperty("--star-left", `${rand(-10, 100)}%`)
-      star.style.setProperty("--star-top", `${rand(-40, 80)}%`)
-
-      // reset animation
-      star.style.animation = "none"
-      star.offsetHeight
-      star.style.animation = ""
-    }
-
-    const stars = document.getElementsByClassName("stars")
-    for (const star of stars) {
-      setTimeout(() => {
-        animate(star)
-        setInterval(() => animate(star), interval)
-      }, index++ * (interval / 3))
-    }
-  }
+}
 </script>
 
 <template>
@@ -311,7 +238,7 @@
               <Button
                 variant="primary"
                 size="lg"
-                class="absolute right-2 px-6 py-2.5 text-white cursor-pointer hover:bg-[#dbe1e3] hover:text-gray-700"
+                class="absolute right-2 px-6 py-2.5 text-white cursor-pointer rounded-full hover:bg-[#dbe1e3] hover:text-gray-700"
                 >
                 Search
               </Button>
@@ -584,7 +511,7 @@
             :style="{ transitionDelay: '0ms' }"
           >
             <!-- Step Badge - Top Right -->
-            <div class="step-badge absolute -top-3 -right-3 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-white font-bold text-lg shadow-lg">
+            <div class="step-badge absolute -top-3 -left-3 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-white font-bold text-lg shadow-lg">
               01
             </div>
 
@@ -613,7 +540,7 @@
             :style="{ transitionDelay: '150ms' }"
           >
             <!-- Step Badge - Top Right -->
-            <div class="step-badge absolute -top-3 -right-3 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 text-white font-bold text-lg shadow-lg">
+            <div class="step-badge absolute -top-3 -left-3 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 text-white font-bold text-lg shadow-lg">
               02
             </div>
 
@@ -642,7 +569,7 @@
             :style="{ transitionDelay: '300ms' }"
           >
             <!-- Step Badge - Top Right -->
-            <div class="step-badge absolute -top-3 -right-3 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold text-lg shadow-lg">
+            <div class="step-badge absolute -top-3 -left-3 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold text-lg shadow-lg">
               03
             </div>
 

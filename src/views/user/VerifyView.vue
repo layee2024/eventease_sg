@@ -11,7 +11,7 @@ function handleContinue() {
 </script>
 
 <template>
-  <div class="flex items-center justify-center px-4 h-full">
+  <div class="min-h-[90vh] flex items-center justify-center px-4 h-full">
     <Card class="max-w-sm w-full text-center">
       <CardHeader>
         <CardTitle>Email Verification</CardTitle>

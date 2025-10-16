@@ -90,7 +90,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="py-12 px-6 md:px-12 xl:px-20 bg-white">
+  <section class="min-h-screen py-12 px-6 md:px-12 xl:px-20 bg-white">
     <!-- Header -->
     <div class="text-center mb-10">
       <h1 class="text-3xl font-extrabold text-gray-900">Events</h1>
