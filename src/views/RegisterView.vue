@@ -54,10 +54,15 @@ async function register() {
       // User registration
       const { error: insertError } = await supabase.from("user_preferences").insert({
         id: user.id,
+        name: firstName.value + " " + lastName.value,
+        email: email.value,
         interests: [],
         budget: "all",
         transport_mode: [],
-        saved: []
+        saved: [],
+        onboarding: false,
+        going: [],
+        friends: []
       })
       if (insertError) console.error("User pref insert error:", insertError)
     } else {

@@ -12,6 +12,8 @@ const event = ref(null)
 const loading = ref(true)
 const eventId = route.params.id
 const isSaved = ref(false)
+const isGoing = ref(false)
+const goingCount = ref(0)
 const user = ref(null)
 
 // category color mapping
@@ -35,9 +37,9 @@ const categoryColor = computed(() => {
   )
 })
 
+// Date formatter
 function formatDate(start, end) {
   if (!start || !end) return "TBA"
-
   const options = {
     day: "numeric",
     month: "long",
@@ -46,17 +48,16 @@ function formatDate(start, end) {
     minute: "2-digit",
     hour12: true,
   }
-
   const startStr = new Intl.DateTimeFormat("en-SG", options).format(new Date(start))
   const endTime = new Intl.DateTimeFormat("en-SG", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
   }).format(new Date(end))
-
   return `${startStr} - ${endTime}`
 }
 
+// Fetch event details
 async function fetchEvent() {
   const { data, error } = await supabase
     .from("events")
@@ -73,27 +74,54 @@ async function fetchEvent() {
 
   event.value = data
   await checkSavedStatus()
+  await checkGoingStatus()
+  await countGoingUsers()
   loading.value = false
 }
 
-// check if event is saved in user preferences
+// Check if user has saved the event
 async function checkSavedStatus() {
   const { data: auth } = await supabase.auth.getUser()
   if (!auth?.user) return
-
   user.value = auth.user
 
   const { data: pref, error } = await supabase
     .from("user_preferences")
     .select("saved")
-    .eq("id", auth.user.id)
+    .eq("id", user.value.id)
     .single()
 
   if (error) return console.error(error)
   isSaved.value = pref?.saved?.includes(eventId) || false
 }
 
-// toggle saved status
+// Check if user is going to this event
+async function checkGoingStatus() {
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth?.user) return
+  user.value = auth.user
+
+  const { data: pref, error } = await supabase
+    .from("user_preferences")
+    .select("going")
+    .eq("id", user.value.id)
+    .single()
+
+  if (error) return console.error(error)
+  isGoing.value = pref?.going?.includes(eventId) || false
+}
+
+// Count how many users are going
+async function countGoingUsers() {
+  const { count, error } = await supabase
+    .from("user_preferences")
+    .select("id", { count: "exact", head: true })
+    .contains("going", [eventId])
+
+  if (!error) goingCount.value = count || 0
+}
+
+// Toggle save
 async function toggleSave() {
   if (!user.value) {
     toast.error("Please login to save events")
@@ -101,7 +129,6 @@ async function toggleSave() {
   }
 
   isSaved.value = !isSaved.value
-
   const { data: pref } = await supabase
     .from("user_preferences")
     .select("saved")
@@ -109,7 +136,6 @@ async function toggleSave() {
     .single()
 
   let updated = pref?.saved || []
-
   if (isSaved.value) {
     if (!updated.includes(eventId)) updated.push(eventId)
     toast.success(`${event.value.title} added to saved events`)
@@ -124,6 +150,37 @@ async function toggleSave() {
     .eq("id", user.value.id)
 }
 
+// Join or leave event
+async function toggleJoinEvent() {
+  if (!user.value) {
+    toast.error("Please login to join events")
+    return
+  }
+
+  const { data: pref } = await supabase
+    .from("user_preferences")
+    .select("going")
+    .eq("id", user.value.id)
+    .single()
+
+  let updated = pref?.going || []
+  if (isGoing.value) {
+    updated = updated.filter((id) => id !== eventId)
+    toast.info(`You left ${event.value.title}`)
+  } else {
+    if (!updated.includes(eventId)) updated.push(eventId)
+    toast.success(`You joined ${event.value.title}!`)
+  }
+
+  await supabase
+    .from("user_preferences")
+    .update({ going: updated })
+    .eq("id", user.value.id)
+
+  isGoing.value = !isGoing.value
+  await countGoingUsers()
+}
+
 onMounted(fetchEvent)
 </script>
 
@@ -133,10 +190,7 @@ onMounted(fetchEvent)
       <div class="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full"></div>
     </div>
 
-    <div
-      v-else-if="event"
-      class="relative max-w-5xl mx-auto bg-white shadow-md rounded-lg overflow-hidden my-10"
-    >
+    <div v-else-if="event" class="relative max-w-5xl mx-auto bg-white shadow-md rounded-lg overflow-hidden my-10">
       <!-- Back Button -->
       <Button
         variant="outline"
@@ -148,11 +202,7 @@ onMounted(fetchEvent)
 
       <!-- Header Image -->
       <div class="relative">
-        <img
-          :src="event.image_url"
-          alt="Event banner"
-          class="w-full h-72 object-cover"
-        />
+        <img :src="event.image_url" alt="Event banner" class="w-full h-72 object-cover" />
         <div
           class="absolute top-4 right-4 text-white text-sm font-medium px-3 py-1 rounded-lg shadow-sm"
           :class="categoryColor"
@@ -163,7 +213,7 @@ onMounted(fetchEvent)
 
       <!-- Content -->
       <div class="p-8">
-        <!-- Title & Save Button Row -->
+        <!-- Title & Save Button -->
         <div class="flex items-start justify-between mb-4">
           <h1 class="text-3xl font-extrabold text-gray-900">
             {{ event.title }}
@@ -197,9 +247,7 @@ onMounted(fetchEvent)
               <CalendarDays class="w-5 h-5 text-blue-600 mt-0.5" />
               <div>
                 <p class="font-semibold">Date & Time</p>
-                <p class="text-gray-600 text-sm">
-                  {{ formatDate(event.start_date, event.end_date) }}
-                </p>
+                <p class="text-gray-600 text-sm">{{ formatDate(event.start_date, event.end_date) }}</p>
               </div>
             </div>
 
@@ -227,12 +275,24 @@ onMounted(fetchEvent)
               <Users class="w-5 h-5 text-purple-600 mt-0.5" />
               <div>
                 <p class="font-semibold">Crowd Level</p>
-                <p class="text-gray-600 text-sm">
-                  {{ event.crowd_level || "N/A" }}
-                </p>
+                <p class="text-gray-600 text-sm">{{ event.crowd_level || "N/A" }}</p>
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Going Button -->
+        <div class="mt-8 flex items-center justify-between">
+          <p class="text-blue-600 font-medium">
+            {{ goingCount }} {{ goingCount === 1 ? "person is" : "people are" }} going
+          </p>
+          <Button
+            class="cursor-pointer"
+            :variant="isGoing ? 'secondary' : 'default'"
+            @click="toggleJoinEvent"
+          >
+            {{ isGoing ? "Leave Event" : "Join Event" }}
+          </Button>
         </div>
 
         <!-- Map -->
@@ -258,11 +318,7 @@ onMounted(fetchEvent)
 
     <div v-else class="text-center py-20 text-gray-600">
       <p>Event not found.</p>
-      <Button
-        @click="router.push('/events')"
-        variant="outline"
-        class="mt-4"
-      >
+      <Button @click="router.push('/events')" variant="outline" class="mt-4">
         Back to Events
       </Button>
     </div>
