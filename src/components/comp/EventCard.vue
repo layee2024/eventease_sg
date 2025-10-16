@@ -10,7 +10,7 @@ const props = defineProps({
   id: { type: String, required: true },
   title: String,
   category: String,
-  categoryColor: String, // Tailwind bg-* class string
+  categoryColor: String,
   location: String,
   price: String,
   date: String,
@@ -24,35 +24,69 @@ const router = useRouter()
 
 const isLiked = ref(props.liked)
 const goingCount = ref(0)
+const friendsGoingCount = ref(0)
 const loadingGoing = ref(true)
 
-// --- Fetch going count for THIS event only ---
-async function fetchGoingCountForEvent(eventId) {
+async function fetchGoingStats(eventId) {
   if (!eventId) return
   loadingGoing.value = true
 
-  // Uses a COUNT-only query (fast, no row data downloaded)
-  const { count, error } = await supabase
-    .from("user_preferences")
-    .select("id", { count: "exact", head: true })
-    .contains("going", [eventId])
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      goingCount.value = 0
+      friendsGoingCount.value = 0
+      loadingGoing.value = false
+      return
+    }
 
-  if (error) {
-    console.error("Failed to load going count:", error)
-    goingCount.value = 0
-  } else {
+    const { count, error: countErr } = await supabase
+      .from("user_preferences")
+      .select("id", { count: "exact", head: true })
+      .contains("going", [eventId])
+
+    if (countErr) throw countErr
     goingCount.value = count ?? 0
-  }
 
-  loadingGoing.value = false
+    const { data: me, error: meErr } = await supabase
+      .from("user_preferences")
+      .select("friends")
+      .eq("id", user.id)
+      .single()
+    if (meErr) throw meErr
+
+    const friends = me?.friends || []
+    if (friends.length === 0) {
+      friendsGoingCount.value = 0
+      loadingGoing.value = false
+      return
+    }
+
+    // friends
+    const { count: fCount, error: fErr } = await supabase
+      .from("user_preferences")
+      .select("id", { count: "exact", head: true })
+      .in("id", friends)
+      .contains("going", [eventId])
+
+    if (fErr) throw fErr
+    friendsGoingCount.value = fCount ?? 0
+  } catch (err) {
+    console.error("Error fetching going stats:", err)
+    toast.error("Failed to load going stats")
+    goingCount.value = 0
+    friendsGoingCount.value = 0
+  } finally {
+    loadingGoing.value = false
+  }
 }
 
 onMounted(() => {
-  fetchGoingCountForEvent(props.id)
+  fetchGoingStats(props.id)
 })
 
 watch(() => props.id, (newId) => {
-  if (newId) fetchGoingCountForEvent(newId)
+  if (newId) fetchGoingStats(newId)
 })
 
 watch(
@@ -61,17 +95,13 @@ watch(
 )
 
 function goToDetails() {
-  if (!props.id) {
-    console.warn("No event ID found")
-    return
-  }
+  if (!props.id) return
   router.push(`/event/${props.id}`)
 }
 
 // Toggle like
 async function toggleLike() {
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) {
     toast.error("Please login to save events")
     return
@@ -121,6 +151,7 @@ const crowdColor = computed(() => {
 })
 </script>
 
+
 <template>
   <Card
     class="relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 duration-300 cursor-pointer"
@@ -169,13 +200,16 @@ const crowdColor = computed(() => {
       <p class="text-sm text-gray-500 truncate">{{ location }}</p>
 
       <!-- People going -->
-      <p class="text-blue-600 font-medium text-sm mt-2 h-5 flex items-center">
+      <p class="text-blue-600 font-medium text-sm mt-2 h-5 flex items-center gap-1">
         <span v-if="loadingGoing" class="inline-flex items-center gap-2 text-gray-400">
           <span class="h-3 w-3 border-2 border-gray-300 border-t-transparent rounded-full animate-spin"></span>
           Loading…
         </span>
         <span v-else>
           {{ goingCount }} {{ goingCount === 1 ? 'person' : 'people' }} going
+          <span v-if="friendsGoingCount > 0" class="text-gray-500 text-xs ml-1">
+            • {{ friendsGoingCount }} {{ friendsGoingCount === 1 ? 'friend' : 'friends' }} going
+          </span>
         </span>
       </p>
 

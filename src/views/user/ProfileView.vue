@@ -5,6 +5,7 @@ import { supabase } from "@/utils/supabase"
 import { toast } from "vue-sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Loader2 } from "lucide-vue-next"
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,10 @@ const profilePicture = ref("")
 const interests = ref([])
 const budget = ref("all")
 const transportModes = ref([])
+
+const joinedEvents = ref([])
+const loadingEvents = ref(false)
+const joinedOpen = ref(false)
 
 const avatarOpen = ref(false)
 const interestsOpen = ref(false)
@@ -58,7 +63,6 @@ const categoryColor = (cat) =>
     Music: "bg-purple-600",
     Food: "bg-orange-500",
     Arts: "bg-pink-500",
-    Tech: "bg-blue-600",
     Technology: "bg-blue-600",
     Sports: "bg-green-500",
     Education: "bg-indigo-600",
@@ -69,45 +73,89 @@ const categoryColor = (cat) =>
     Environment: "bg-green-600",
   }[cat] || "bg-gray-500")
 
+// ---------- lifecycle ----------
 onMounted(async () => {
   const { data: auth } = await supabase.auth.getUser()
-  if (!auth.user) {
+  if (!auth?.user) {
     toast.error("Please login first")
     router.push("/login")
     return
   }
+
   user.value = auth.user
   userId.value = auth.user.id
   name.value = auth.user.user_metadata?.full_name || "Anonymous User"
   email.value = auth.user.email
 
+  // Load preferences (now includes going)
   const { data, error } = await supabase
     .from("user_preferences")
-    .select("interests, budget, transport_mode, profile_picture")
+    .select("interests, budget, transport_mode, profile_picture, going")
     .eq("id", userId.value)
     .maybeSingle()
 
   if (error) {
     console.error(error)
     toast.error("Failed to load preferences")
-  } else if (data) {
-    interests.value = data.interests || []
-    budget.value = data.budget || "all"
-    transportModes.value = data.transport_mode || []
-    profilePicture.value = data.profile_picture || PLACEHOLDER
-  } else {
-    await supabase.from("user_preferences").insert({
+    return
+  }
+
+  if (!data) {
+    // first-time user row
+    const { error: insertErr } = await supabase.from("user_preferences").insert({
       id: userId.value,
       interests: [],
       budget: "all",
       transport_mode: [],
+      going: [],
       saved: [],
       onboarding: true,
       profile_picture: PLACEHOLDER,
     })
+    if (insertErr) console.error(insertErr)
     profilePicture.value = PLACEHOLDER
+    joinedEvents.value = []
+    return
   }
+
+  interests.value = data.interests || []
+  budget.value = data.budget || "all"
+  transportModes.value = data.transport_mode || []
+  profilePicture.value = data.profile_picture || PLACEHOLDER
+
+  // fetch joined events using correct columns
+  const eventIds = Array.isArray(data.going) ? data.going : []
+  await fetchJoinedEvents(eventIds)
 })
+
+// ---------- fetch joined events ----------
+async function fetchJoinedEvents(ids) {
+  try {
+    if (!Array.isArray(ids) || ids.length === 0) {
+      joinedEvents.value = []
+      return
+    }
+    loadingEvents.value = true
+
+    // IMPORTANT: use the actual columns in your events table
+    // Earlier components used: title, start_date, venue, image_url, description
+    const { data, error } = await supabase
+      .from("events")
+      .select("id, title, start_date, venue, image_url, description")
+      .in("id", ids)
+
+    if (error) throw error
+
+    joinedEvents.value = (data || []).sort(
+      (a, b) => new Date(b.start_date) - new Date(a.start_date)
+    )
+  } catch (err) {
+    console.error("Error fetching joined events:", err?.message || err)
+    toast.error("Failed to load joined events.")
+  } finally {
+    loadingEvents.value = false
+  }
+}
 
 // ---------- helpers ----------
 async function updatePrefs(patch) {
@@ -123,7 +171,7 @@ async function saveInterests() {
     await updatePrefs({ interests: interests.value })
     toast.success("Interests updated")
     interestsOpen.value = false
-  } catch (e) {
+  } catch {
     toast.error("Failed to update interests")
   }
 }
@@ -133,7 +181,7 @@ async function saveBudget() {
     await updatePrefs({ budget: budget.value })
     toast.success("Budget updated")
     budgetOpen.value = false
-  } catch (e) {
+  } catch {
     toast.error("Failed to update budget")
   }
 }
@@ -143,7 +191,7 @@ async function saveTransport() {
     await updatePrefs({ transport_mode: transportModes.value })
     toast.success("Transport updated")
     transportOpen.value = false
-  } catch (e) {
+  } catch {
     toast.error("Failed to update transport")
   }
 }
@@ -154,11 +202,12 @@ async function chooseAvatar(src) {
     await updatePrefs({ profile_picture: src })
     toast.success("Profile picture updated")
     avatarOpen.value = false
-  } catch (e) {
+  } catch {
     toast.error("Failed to update profile picture")
   }
 }
 
+// ---------- computed ----------
 const initials = computed(() =>
   name.value
     .split(" ")
@@ -173,7 +222,7 @@ const initials = computed(() =>
   <section class="min-h-[93vh] py-10 md:py-16">
     <div class="container mx-auto max-w-6xl px-4">
       <div class="grid gap-7 md:grid-cols-3">
-        <!-- profile -->
+        <!-- Profile -->
         <div class="flex justify-center items-center bg-blue-600 text-white rounded-xl p-8 relative">
           <div class="flex flex-col items-center text-center gap-5">
             <div class="size-36 rounded-full overflow-hidden bg-white/10 ring-4 ring-white/20 grid place-items-center">
@@ -189,7 +238,7 @@ const initials = computed(() =>
           </div>
         </div>
 
-        <!-- preferences cards -->
+        <!-- Preferences cards -->
         <div class="md:col-span-2 grid gap-6 sm:grid-cols-2">
           <!-- Interests -->
           <Card class="hover:shadow-md transition">
@@ -201,7 +250,6 @@ const initials = computed(() =>
                   v-for="cat in (interests.length ? interests : ['None selected'])"
                   :key="cat"
                   class="px-2.5 py-1 rounded-full text-xs bg-gray-900 text-white"
-                  :class="interests.length ? categoryColor(cat) : 'bg-gray-400'"
                 >
                   {{ cat }}
                 </span>
@@ -242,43 +290,33 @@ const initials = computed(() =>
             </CardContent>
           </Card>
 
-          <!-- Saved Events -->
+          <!-- Current Events Joined -->
           <Card class="hover:shadow-md transition">
             <CardContent class="p-6">
-              <p class="text-sm text-gray-500 mb-2">Quick Access</p>
-              <h3 class="text-xl font-semibold mb-2">Saved Events</h3>
-              <p class="text-gray-700 mb-2">View and manage your saved events.</p>
-              <Button variant="link" class="mt-2 px-0 cursor-pointer" @click="router.push('/saved')">Open →</Button>
+              <p class="text-sm text-gray-500 mb-2">Activity</p>
+              <h3 class="text-xl font-semibold mb-2">Current Events Joined</h3>
+
+              <p v-if="!joinedEvents.length" class="text-gray-700 mb-3">
+                You haven't joined any events yet.
+              </p>
+
+              <div v-else class="mb-3">
+                <p class="text-gray-700">
+                  {{ joinedEvents.length }} event<span v-if="joinedEvents.length > 1">s</span> joined
+                </p>
+                <p class="text-xs text-gray-500 mt-1">
+                  Most recent: {{ new Date(joinedEvents[0].start_date).toLocaleDateString() }}
+                </p>
+              </div>
+
+              <Button variant="link" class="mt-2 px-0 cursor-pointer" @click="joinedOpen = true">
+                View all →
+              </Button>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-
-    <!-- Avatar picker -->
-    <Dialog v-model:open="avatarOpen">
-      <DialogContent class="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Select a profile picture</DialogTitle>
-        </DialogHeader>
-        <div class="grid grid-cols-5 gap-x-8 gap-y-2 place-items-center">
-          <button
-            v-for="src in AVATARS"
-            :key="src"
-            class="p-1 w-24 h-24 rounded-full overflow-hidden transition"
-            :class="[
-              profilePicture === src
-                ? 'border-4 border-blue-500 cursor-default'
-                : 'hover:border-2 hover:border-blue-400 cursor-pointer'
-            ]"
-            :disabled="profilePicture === src"
-            @click="profilePicture !== src && chooseAvatar(src)"
-          >
-            <img :src="src" alt="avatar option" class="object-cover w-full h-full" />
-          </button>
-        </div>
-      </DialogContent>
-    </Dialog>
 
     <!-- Interests modal -->
     <Dialog v-model:open="interestsOpen">
@@ -356,11 +394,54 @@ const initials = computed(() =>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <!-- Joined Events Modal -->
+    <Dialog v-model:open="joinedOpen">
+      <DialogContent class="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Your Joined Events</DialogTitle>
+        </DialogHeader>
+
+        <div v-if="loadingEvents" class="flex items-center justify-center py-10 text-gray-500">
+          <Loader2 class="h-6 w-6 animate-spin mr-2 text-blue-600" /> Loading events...
+        </div>
+
+        <div v-else>
+          <ul v-if="joinedEvents.length" class="divide-y divide-gray-200">
+            <li
+              v-for="e in joinedEvents"
+              :key="e.id"
+              class="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <p class="font-semibold text-gray-900">{{ e.title }}</p>
+                <p class="text-sm text-gray-600">
+                  {{ new Date(e.start_date).toLocaleDateString() }} • {{ e.venue }}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                class="mt-2 sm:mt-0 cursor-pointer"
+                @click="router.push(`/event/${e.id}`)"
+              >
+                View →
+              </Button>
+            </li>
+          </ul>
+
+          <p v-else class="text-center text-gray-500 py-6">
+            You haven't joined any events yet.
+          </p>
+        </div>
+
+      </DialogContent>
+    </Dialog>
   </section>
 </template>
 
 <style scoped>
-.container {
-  max-width: 1100px;
-}
+.container { max-width: 1100px; }
 </style>
+
+
