@@ -37,18 +37,11 @@ const budgetOpen = ref(false)
 const transportOpen = ref(false)
 
 // ---------- constants ----------
-const AVATARS = [
-  "https://avatar.iran.liara.run/public/1",
-  "https://avatar.iran.liara.run/public/2",
-  "https://avatar.iran.liara.run/public/3",
-  "https://avatar.iran.liara.run/public/4",
-  "https://avatar.iran.liara.run/public/5",
-  "https://avatar.iran.liara.run/public/61",
-  "https://avatar.iran.liara.run/public/62",
-  "https://avatar.iran.liara.run/public/63",
-  "https://avatar.iran.liara.run/public/64",
-  "https://avatar.iran.liara.run/public/65",
-]
+const AVATARS = Array.from({ length: 10 }, (_, i) => {
+  const ids = [1, 2, 3, 4, 5, 61, 62, 63, 64, 65]
+  return `/avatars/${ids[i]}.png`
+})
+
 const PLACEHOLDER =
   "https://cdn.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-symbol-vector.jpg"
 
@@ -434,7 +427,33 @@ const initials = computed(() =>
             You haven't joined any events yet.
           </p>
         </div>
+      </DialogContent>
+    </Dialog>
 
+    <!-- Change Photo Modal -->
+    <Dialog v-model:open="avatarOpen">
+      <DialogContent class="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Choose a Profile Photo</DialogTitle>
+        </DialogHeader>
+
+        <div class="grid grid-cols-5 gap-3 py-4">
+          <img
+            v-for="src in AVATARS"
+            :key="src"
+            :src="src"
+            alt="Avatar option"
+            class="w-16 h-16 rounded-full cursor-pointer border-2 transition hover:border-blue-500"
+            :class="{ 'border-blue-600': profilePicture === src }"
+            @click="chooseAvatar(src)"
+          />
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" @click="avatarOpen = false" class="cursor-pointer">
+            Cancel
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   </section>
