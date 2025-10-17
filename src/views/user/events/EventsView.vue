@@ -95,7 +95,7 @@ onMounted(async () => {
     <div class="text-center mb-10">
       <h1 class="text-3xl font-extrabold text-gray-900">Events</h1>
       <p class="text-lg text-gray-600 mt-2">
-        Discover events happening across Singapore this week
+        Discover upcoming events happening across Singapore
       </p>
     </div>
 

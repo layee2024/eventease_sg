@@ -178,14 +178,6 @@ function resetShuffle() {
   applyFilters() // Re-shuffle events
 }
 
-// Stats for display
-const stats = computed(() => ({
-  totalEvents: allEvents.value.length,
-  matchingEvents: filteredEvents.value.length,
-  categoriesSelected: preferredCategories.value.length || "All",
-  budgetLimit: maxBudget.value ? `$${maxBudget.value}` : "Any"
-}))
-
 onMounted(async () => {
   await fetchEvents()
   await loadUserPreferences()
@@ -222,59 +214,17 @@ function handleSavedUpdate({ id, liked }) {
 
     <!-- Main Content -->
     <div v-else class="max-w-5xl mx-auto">
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-        <Card>
-          <CardContent class="p-4 flex items-center gap-3">
-            <div class="p-3 bg-blue-100 rounded-lg">
-              <TrendingUp class="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p class="text-sm text-gray-500">Total Events</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.totalEvents }}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent class="p-4 flex items-center gap-3">
-            <div class="p-3 bg-green-100 rounded-lg">
-              <Sparkles class="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <p class="text-sm text-gray-500">Matching Events</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.matchingEvents }}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent class="p-4 flex items-center gap-3">
-            <div class="p-3 bg-purple-100 rounded-lg">
-              <Users class="w-6 h-6 text-purple-600" />
-            </div>
-            <div>
-              <p class="text-sm text-gray-500">Categories</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.categoriesSelected }}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent class="p-4 flex items-center gap-3">
-            <div class="p-3 bg-orange-100 rounded-lg">
-              <DollarSign class="w-6 h-6 text-orange-600" />
-            </div>
-            <div>
-              <p class="text-sm text-gray-500">Max Budget</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.budgetLimit }}</p>
-            </div>
-          </CardContent>
-        </Card>
+      
+      <!-- Card Shuffle Component -->
+      <div v-if="!showResult" class="mb-12">
+        <CardShuffle
+        :events="filteredEvents"
+        @result="handleShuffleResult"
+        />
       </div>
 
       <!-- Active Filters Display -->
-      <div v-if="preferredCategories.length > 0 || maxBudget || preferredCrowdLevel" class="mb-8">
+      <div v-if="!showResult && (preferredCategories.length > 0 || maxBudget || preferredCrowdLevel)" class="mb-8">
         <Card>
           <CardHeader>
             <CardTitle class="text-lg flex items-center gap-2">
@@ -299,18 +249,10 @@ function handleSavedUpdate({ id, liked }) {
         </Card>
       </div>
 
-      <!-- Card Shuffle Component -->
-      <div v-if="!showResult" class="mb-12">
-        <CardShuffle
-          :events="filteredEvents"
-          @result="handleShuffleResult"
-        />
-      </div>
-
       <!-- Result Card -->
       <div v-if="showResult && selectedEvent" class="max-w-4xl mx-auto">
-        <Card class="border-4 border-yellow-400 shadow-2xl">
-          <CardHeader class="bg-gradient-to-r from-yellow-400 to-orange-400 text-white">
+        <Card class="p-0 border-4 border-yellow-400 shadow-2xl">
+          <CardHeader class="bg-yellow-400 text-white p-2">
             <CardTitle class="text-3xl text-center flex items-center justify-center gap-3">
               <Sparkles class="w-8 h-8" />
               Your Perfect Event!
@@ -320,7 +262,7 @@ function handleSavedUpdate({ id, liked }) {
               The cards have chosen! Here's your next adventure:
             </CardDescription>
           </CardHeader>
-          <CardContent class="p-8">
+          <CardContent class="pt-2 pb-6">
             <div class="grid lg:grid-cols-2 gap-8">
               <!-- Event Card -->
               <div>
@@ -382,7 +324,14 @@ function handleSavedUpdate({ id, liked }) {
                     </div>
                     <div class="flex items-center gap-2">
                       <span class="font-semibold text-gray-700">Crowd Level:</span>
-                      <Badge :variant="selectedEvent.crowd_level === 'Low' ? 'default' : 'secondary'">
+                      <Badge 
+                        :variant="selectedEvent.crowd_level === 'Low' ? 'default' : 'secondary'"
+                        :class="[
+                        'px-2 py-1 rounded text-xs font-medium',
+                        selectedEvent.crowd_level === 'Low' ? 'bg-green-100 text-green-700' :
+                        selectedEvent.crowd_level === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-700'
+                      ]">
                         {{ selectedEvent.crowd_level }}
                       </Badge>
                     </div>

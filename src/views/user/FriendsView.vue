@@ -276,18 +276,18 @@ async function removeFriendConfirmed() {
 
     <!-- Friends Table -->
     <div class="max-w-4xl mx-auto mt-16">
-      <div class="relative flex justify-center items-center mb-4">
-        <h2 class="text-center text-xl font-extrabold text-gray-800">Friends List</h2>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3 text-center sm:text-left">
+        <h2 class="text-xl font-extrabold text-gray-800">Friends List</h2>
 
-        <!-- Right-aligned button -->
         <Button
           variant="outline"
-          class="absolute right-0 cursor-pointer"
+          class="sm:w-auto mx-auto sm:mx-4 cursor-pointer max-w-1/2"
           @click="requestsOpen = true"
         >
           Friend Requests ({{ requests.length }})
         </Button>
       </div>
+
 
       <Table>
         <TableCaption v-if="friends.length === 0 && !pageLoading">You have no friends yet 😢</TableCaption>
@@ -362,7 +362,5 @@ async function removeFriendConfirmed() {
 </template>
 
 <style scoped>
-section {
-  font-family: system-ui, sans-serif;
-}
+
 </style>
