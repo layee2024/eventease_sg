@@ -1,6 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue"
-import { supabase } from "@/utils/supabase"
+import { ref, computed } from "vue"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sparkles, RotateCw, Shuffle } from "lucide-vue-next"
@@ -19,17 +18,6 @@ const isShuffling = ref(false)
 const selectedEvent = ref(null)
 const currentIndex = ref(0)
 const shuffleCount = ref(0)
-const totalEvents = ref(0)
-
-onMounted(async () => {
-  const { count, error } = await supabase
-    .from("events")
-    .select("*", { count: "exact", head: true })
-
-  if (!error) totalEvents.value = count || 0
-  else console.error("Failed to fetch total events count:", error)
-})
-
 
 // Get random events for display (showing 5 cards at a time)
 const displayCards = computed(() => {
@@ -238,7 +226,7 @@ function getCategoryColor(category) {
 
       <!-- Card counter -->
       <div class="text-center mt-4 text-gray-500 text-sm">
-        <p v-if="!isShuffling">Shuffling {{ props.events.length }} of {{ totalEvents }} events</p>
+        <p v-if="!isShuffling">Showing {{ displayCards.length }} of {{ props.events.length }} events</p>
         <p v-else class="animate-pulse font-bold text-purple-600">Shuffling... {{ shuffleCount }}</p>
       </div>
     </div>
@@ -249,11 +237,11 @@ function getCategoryColor(category) {
         @click="shuffleCards"
         :disabled="isShuffling || props.events.length === 0"
         size="lg"
-        class="gap-2 px-8 py-6 text-lg font-bold cursor-pointer"
+        class="gap-2 px-8 py-6 text-lg font-bold"
         :class="isShuffling ? 'animate-pulse' : ''"
       >
         <Sparkles v-if="!isShuffling" class="w-6 h-6" />
-        <Shuffle v-else class="w-6 h-6 animate-spin" />
+        <Shuffle v-else class="w-6 h-6 animate-spin cursor-pointer" />
         {{ isShuffling ? "Shuffling..." : "Shuffle Cards!" }}
       </Button>
 
@@ -262,7 +250,7 @@ function getCategoryColor(category) {
         @click="reset"
         size="lg"
         variant="outline"
-        class="gap-2 px-6 cursor-pointer"
+        class="gap-2 px-6"
       >
         <RotateCw class="w-5 h-5" />
         Shuffle Again
