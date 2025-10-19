@@ -5,6 +5,8 @@ import { supabase } from "@/utils/supabase"
 import { Card, CardContent } from "@/components/ui/card"
 import { Heart } from "lucide-vue-next"
 import { toast } from "vue-sonner"
+import ReviewPreview  from "@/components/comp/user/ReviewPreview.vue"
+
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -224,6 +226,13 @@ const crowdColor = computed(() => {
           {{ price }}
         </span>
         <span class="text-sm text-gray-400">{{ date }}</span>
+
+        <!-- ⭐ Mini Review Preview -->
+        <div
+          class="mt-2 flex items-center justify-between text-[11px] text-gray-500 border-t border-gray-100 pt-2"
+        >
+          <ReviewPreview :eventId="id" />
+        </div>
       </div>
     </CardContent>
   </Card>

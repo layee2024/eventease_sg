@@ -5,6 +5,7 @@ import { useRouter } from "vue-router"
 import { Button } from "@/components/ui/button"
 import EventCard from "@/components/comp/user/EventCard.vue"
 import EventFilter from "@/components/comp/user/EventFilter.vue"
+import ReviewPreview from "@/components/comp/user/ReviewPreview.vue"
 
 const router = useRouter()
 const trendingEvents = ref([])
