@@ -44,13 +44,5 @@ onMounted(fetchAverageRating)
         {{ averageRating > 0 ? averageRating.toFixed(1) : 'No rating yet' }}
       </span>
     </div>
-
-    <!-- 🔗 More details link -->
-    <span
-      class="text-blue-500 hover:underline cursor-pointer mt-0.5"
-      @click="router.push(`/event/${props.eventId}`)"
-    >
-      More details →
-    </span>
   </div>
 </template>

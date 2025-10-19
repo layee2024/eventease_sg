@@ -227,12 +227,12 @@ const crowdColor = computed(() => {
         </span>
         <span class="text-sm text-gray-400">{{ date }}</span>
 
-        <!-- ⭐ Mini Review Preview -->
-        <div
-          class="mt-2 flex items-center justify-between text-[11px] text-gray-500 border-t border-gray-100 pt-2"
-        >
-          <ReviewPreview :eventId="id" />
-        </div>
+      </div>
+      <!-- ⭐ Mini Review Preview -->
+      <div
+        class="mt-2 flex items-center justify-between text-[11px] text-gray-500 border-t border-gray-100 pt-2"
+      >
+        <ReviewPreview :eventId="id" />
       </div>
     </CardContent>
   </Card>

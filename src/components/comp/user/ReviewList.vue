@@ -72,7 +72,7 @@ defineExpose({ fetchReviews })
 
 
 <template>
-    <div class="mt-8 border-t border-gray-200 pt-6">
+    <div class=" pt-3">
       <h2 class="text-lg font-semibold text-gray-800 mb-4">Reviews</h2>
   
       <div v-if="loading" class="text-gray-400 text-sm">Loading reviews…</div>
