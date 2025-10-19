@@ -3,8 +3,8 @@ import { ref, onMounted, computed, watch } from "vue"
 import { supabase } from "@/utils/supabase"
 import { useRouter } from "vue-router"
 import { Button } from "@/components/ui/button"
-import EventCard from "@/components/comp/EventCard.vue"
-import EventFilter from "@/components/comp/EventFilter.vue"
+import EventCard from "@/components/comp/user/EventCard.vue"
+import EventFilter from "@/components/comp/user/EventFilter.vue"
 
 const router = useRouter()
 const trendingEvents = ref([])

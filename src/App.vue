@@ -1,7 +1,7 @@
 <script setup>
   import { RouterView } from 'vue-router'
   import { Toaster } from '@/components/ui/sonner'
-  import NavBar from './components/comp/NavBar.vue'
+  import NavBar from './components/comp/user/UserNavBar.vue'
   import Footer from './components/comp/Footer.vue'
   import 'vue-sonner/style.css'
 

@@ -1,8 +1,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from "vue"
 import { useRouter } from "vue-router"
-import Typewriter from "../../components/comp/Typewriter.vue"
-import GithubGlobe from "../../components/comp/GithubGlobe.vue"
+import Typewriter from "../../components/comp/user/Typewriter.vue"
+import GithubGlobe from "../../components/comp/user/GithubGlobe.vue"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/utils/supabase"
 import { toast } from "vue-sonner"

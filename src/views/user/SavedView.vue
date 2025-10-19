@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue"
 import { supabase } from "@/utils/supabase"
-import EventCard from "@/components/comp/EventCard.vue"
+import EventCard from "@/components/comp/user/EventCard.vue"
 
 const savedEvents = ref([])
 const savedIds = ref([])
