@@ -5,6 +5,9 @@ import { supabase } from "@/utils/supabase"
 import { toast } from "vue-sonner"
 import { CalendarDays, MapPin, DollarSign, Users, ArrowLeft, Heart } from "lucide-vue-next"
 import { Button } from "@/components/ui/button"
+import  ReviewList  from "@/components/comp/user/ReviewList.vue"
+import  ReviewForm  from "@/components/comp/user/ReviewForm.vue"
+
 
 const route = useRoute()
 const router = useRouter()
@@ -15,6 +18,15 @@ const isSaved = ref(false)
 const isGoing = ref(false)
 const goingCount = ref(0)
 const user = ref(null)
+const reviewList = ref(null)
+
+// review refresh
+function refreshReviews() {
+  if (reviewList.value?.fetchReviews) {
+    reviewList.value.fetchReviews()
+  }
+}
+
 
 // category color mapping
 const categoryColor = computed(() => {
@@ -77,6 +89,7 @@ async function fetchEvent() {
   await checkGoingStatus()
   await countGoingUsers()
   loading.value = false
+
 }
 
 // Check if user has saved the event
@@ -313,6 +326,13 @@ onMounted(fetchEvent)
             Map unavailable
           </div>
         </div>
+
+         <!-- ⭐ Reviews Section -->
+         <div class="mt-12 border-t border-gray-200 pt-8">
+          <ReviewList ref="reviewList" :eventId="eventId" />
+          <ReviewForm :eventId="eventId" @review-added="refreshReviews" />
+        </div>
+
       </div>
     </div>
 
