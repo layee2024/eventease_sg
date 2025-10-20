@@ -8,7 +8,6 @@
 <script lang="ts" setup>
 // Download globe json file from https://geojson-maps.kyd.au/ and save in the same folder
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { OrbitControls } from "three/addons/controls/OrbitControls.js"
 import ThreeGlobe from "three-globe"
 import {

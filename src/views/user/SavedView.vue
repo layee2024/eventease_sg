@@ -42,6 +42,7 @@ async function loadSavedEvents() {
     .from("events")
     .select("*")
     .in("id", savedIds.value)
+    .gte("end_date", today) 
 
   if (eventErr) {
     console.error("Error fetching saved events:", eventErr)

@@ -327,7 +327,7 @@ onMounted(fetchEvent)
           </div>
         </div>
 
-         <!-- ⭐ Reviews Section -->
+         <!-- Reviews Section -->
          <div class="mt-12 border-t border-gray-200 pt-8">
           <ReviewList ref="reviewList" :eventId="eventId" />
           <ReviewForm :eventId="eventId" @review-added="refreshReviews" />

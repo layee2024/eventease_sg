@@ -27,7 +27,8 @@ const preferredCrowdLevel = ref(null)
 
 // Fetch all events from Supabase
 async function fetchEvents() {
-  const { data, error } = await supabase.from("events").select("*")
+  const today = new Date().toISOString()
+  const { data, error } = await supabase.from("events").select("*").gte("end_date", today) 
 
   if (error) {
     console.error("Error fetching events:", error)
@@ -48,7 +49,7 @@ async function loadUserPreferences() {
     loading.value = false
     return
   }
-
+  const today = new Date().toISOString()
   const { data: pref, error } = await supabase
     .from("user_preferences")
     .select("*")

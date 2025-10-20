@@ -29,7 +29,7 @@ onMounted(fetchAverageRating)
 
 <template>
   <div class="flex flex-col items-start text-[11px] text-gray-600 w-full leading-tight">
-    <!-- ⭐ Star rating -->
+    <!-- Star rating -->
     <div class="flex items-center gap-1">
       <div class="flex">
         <span

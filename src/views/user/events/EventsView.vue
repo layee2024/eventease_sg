@@ -29,7 +29,11 @@ const paginatedEvents = computed(() => {
 
 // Fetch all events
 async function getTrendingEvents() {
-  const { data, error } = await supabase.from("events").select("*")
+  const today = new Date().toISOString()
+  const { data, error } = await supabase.from("events")
+  .select("*")
+  .gte("end_date", today) 
+  
   if (error) {
     console.error("Error fetching events:", error)
     return

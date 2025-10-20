@@ -93,7 +93,11 @@ async function initMap() {
 
 // get all categories
 async function getCat() {
-  const { data, error } = await supabase.from("events").select("*")
+  const today = new Date().toISOString()
+  
+  const { data, error } = await supabase.from("events")
+  .select("*")
+  .gte("end_date", today) 
   if (error) {
     console.error("Error fetching events:", error)
     return []
