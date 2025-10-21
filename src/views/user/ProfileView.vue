@@ -352,6 +352,47 @@ const initials = computed(() =>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    <!-- Joined Events Modal -->
+    <Dialog v-model:open="joinedOpen">
+      <DialogContent class="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Your Joined Events</DialogTitle>
+        </DialogHeader>
+
+        <div v-if="loadingEvents" class="flex items-center justify-center py-10 text-gray-500">
+          <Loader2 class="h-6 w-6 animate-spin mr-2 text-blue-600" /> Loading events...
+        </div>
+
+        <div v-else>
+          <ul v-if="joinedEvents.length" class="divide-y divide-gray-200">
+            <li
+              v-for="e in joinedEvents"
+              :key="e.id"
+              class="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <p class="font-semibold text-gray-900">{{ e.title }}</p>
+                <p class="text-sm text-gray-600">
+                  {{ new Date(e.start_date).toLocaleDateString() }} • {{ e.venue }}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                class="mt-2 sm:mt-0 cursor-pointer"
+                @click="router.push(`/event/${e.id}`)"
+              >
+                View →
+              </Button>
+            </li>
+          </ul>
+
+          <p v-else class="text-center text-gray-500 py-6">
+            You haven't joined any events yet.
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
 
     <!-- Interests modal -->
     <Dialog v-model:open="interestsOpen">
