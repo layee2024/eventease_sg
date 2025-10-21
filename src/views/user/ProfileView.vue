@@ -16,7 +16,6 @@ import {
 
 const router = useRouter()
 
-// ---------- state ----------
 const user = ref(null)
 const name = ref("")
 const email = ref("")
@@ -36,20 +35,15 @@ const interestsOpen = ref(false)
 const budgetOpen = ref(false)
 const transportOpen = ref(false)
 
-// ---------- constants ----------
+// temporary modal state
+const tempInterests = ref([])
+const tempBudget = ref("all")
+const tempTransport = ref([])
+
 const AVATARS = Array.from({ length: 10 }, (_, i) => {
   const ids = [1, 2, 3, 4, 5, 61, 62, 63, 64, 65]
   return `/avatars/${ids[i]}.png`
 })
-
-const PLACEHOLDER =
-  "https://cdn.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-symbol-vector.jpg"
-
-const categories = [
-  "Music","Food","Arts","Technology","Sports",
-  "Education","Business","Culture","Health","Social","Environment",
-]
-const transportOptions = ["MRT", "Bus", "Car", "Bicycle", "Walk"]
 
 const categoryColor = (cat) =>
   ({
@@ -66,7 +60,15 @@ const categoryColor = (cat) =>
     Environment: "bg-green-600",
   }[cat] || "bg-gray-500")
 
-// ---------- lifecycle ----------
+const PLACEHOLDER =
+  "https://cdn.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-symbol-vector.jpg"
+
+const categories = [
+  "Music","Food","Arts","Technology","Sports",
+  "Education","Business","Culture","Health","Social","Environment",
+]
+const transportOptions = ["MRT", "Bus", "Car", "Bicycle", "Walk"]
+
 onMounted(async () => {
   const { data: auth } = await supabase.auth.getUser()
   if (!auth?.user) {
@@ -75,14 +77,11 @@ onMounted(async () => {
     return
   }
 
-  console.log("AUTH USER:", auth.user)
-
   user.value = auth.user
   userId.value = auth.user.id
   name.value = auth.user.user_metadata?.first_name + " " + auth.user.user_metadata?.last_name
   email.value = auth.user.email
 
-  // Load preferences (now includes going)
   const { data, error } = await supabase
     .from("user_preferences")
     .select("interests, budget, transport_mode, profile_picture, going")
@@ -96,7 +95,6 @@ onMounted(async () => {
   }
 
   if (!data) {
-    // first-time user row
     const { error: insertErr } = await supabase.from("user_preferences").insert({
       id: userId.value,
       interests: [],
@@ -118,7 +116,6 @@ onMounted(async () => {
   transportModes.value = data.transport_mode || []
   profilePicture.value = data.profile_picture || PLACEHOLDER
 
-  // fetch joined events using correct columns
   const eventIds = Array.isArray(data.going) ? data.going : []
   await fetchJoinedEvents(eventIds)
 })
@@ -132,8 +129,6 @@ async function fetchJoinedEvents(ids) {
     }
     loadingEvents.value = true
 
-    // IMPORTANT: use the actual columns in your events table
-    // Earlier components used: title, start_date, venue, image_url, description
     const { data, error } = await supabase
       .from("events")
       .select("id, title, start_date, venue, image_url, description")
@@ -161,8 +156,24 @@ async function updatePrefs(patch) {
   if (error) throw error
 }
 
+// open modals with cloned data
+function openInterestsModal() {
+  tempInterests.value = [...interests.value]
+  interestsOpen.value = true
+}
+function openBudgetModal() {
+  tempBudget.value = budget.value
+  budgetOpen.value = true
+}
+function openTransportModal() {
+  tempTransport.value = [...transportModes.value]
+  transportOpen.value = true
+}
+
+// save functions
 async function saveInterests() {
   try {
+    interests.value = [...tempInterests.value]
     await updatePrefs({ interests: interests.value })
     toast.success("Interests updated")
     interestsOpen.value = false
@@ -173,6 +184,7 @@ async function saveInterests() {
 
 async function saveBudget() {
   try {
+    budget.value = tempBudget.value
     await updatePrefs({ budget: budget.value })
     toast.success("Budget updated")
     budgetOpen.value = false
@@ -183,6 +195,7 @@ async function saveBudget() {
 
 async function saveTransport() {
   try {
+    transportModes.value = [...tempTransport.value]
     await updatePrefs({ transport_mode: transportModes.value })
     toast.success("Transport updated")
     transportOpen.value = false
@@ -249,7 +262,7 @@ const initials = computed(() =>
                   {{ cat }}
                 </span>
               </div>
-              <Button variant="outline" size="sm" @click="interestsOpen = true" class="cursor-pointer">Manage</Button>
+              <Button variant="outline" size="sm" @click="openInterestsModal" class="cursor-pointer">Manage</Button>
             </CardContent>
           </Card>
 
@@ -263,7 +276,7 @@ const initials = computed(() =>
                    budget === 'low' ? 'Below $20' :
                    budget === 'mid' ? '$20-$50' : 'Above $50' }}
               </p>
-              <Button variant="outline" size="sm" @click="budgetOpen = true" class="cursor-pointer">Manage</Button>
+              <Button variant="outline" size="sm" @click="openBudgetModal" class="cursor-pointer">Manage</Button>
             </CardContent>
           </Card>
 
@@ -281,7 +294,7 @@ const initials = computed(() =>
                   {{ mode }}
                 </span>
               </div>
-              <Button variant="outline" size="sm" @click="transportOpen = true" class="cursor-pointer">Manage</Button>
+              <Button variant="outline" size="sm" @click="openTransportModal" class="cursor-pointer">Manage</Button>
             </CardContent>
           </Card>
 
@@ -313,125 +326,6 @@ const initials = computed(() =>
       </div>
     </div>
 
-    <!-- Interests modal -->
-    <Dialog v-model:open="interestsOpen">
-      <DialogContent class="max-w-xl">
-        <DialogHeader><DialogTitle>Edit interests</DialogTitle></DialogHeader>
-        <div class="grid grid-cols-2 gap-3">
-          <button
-            v-for="cat in categories"
-            :key="cat"
-            class="py-2 px-4 border rounded-lg text-sm font-medium transition"
-            :class="interests.includes(cat)
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
-            @click="interests.includes(cat)
-              ? interests.splice(interests.indexOf(cat), 1)
-              : interests.push(cat)"
-          >
-            {{ cat }}
-          </button>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" @click="interestsOpen = false" class="cursor-pointer">Cancel</Button>
-          <Button @click="saveInterests" class="cursor-pointer">Save</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-
-    <!-- Budget modal -->
-    <Dialog v-model:open="budgetOpen">
-      <DialogContent class="max-w-md">
-        <DialogHeader><DialogTitle>Edit budget</DialogTitle></DialogHeader>
-        <div class="flex flex-col gap-2">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" value="all" v-model="budget" /> All budgets
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" value="low" v-model="budget" /> Below $20
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" value="mid" v-model="budget" /> $20-$50
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" value="high" v-model="budget" /> Above $50
-          </label>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" @click="budgetOpen = false" class="cursor-pointer">Cancel</Button>
-          <Button @click="saveBudget" class="cursor-pointer">Save</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-
-    <!-- Transport modal -->
-    <Dialog v-model:open="transportOpen">
-      <DialogContent class="max-w-md">
-        <DialogHeader><DialogTitle>Edit transport</DialogTitle></DialogHeader>
-        <div class="grid grid-cols-2 gap-3">
-          <button
-            v-for="mode in transportOptions"
-            :key="mode"
-            class="py-2 px-4 border rounded-lg text-sm font-medium transition"
-            :class="transportModes.includes(mode)
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
-            @click="transportModes.includes(mode)
-              ? transportModes.splice(transportModes.indexOf(mode), 1)
-              : transportModes.push(mode)"
-          >
-            {{ mode }}
-          </button>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" @click="transportOpen = false" class="cursor-pointer">Cancel</Button>
-          <Button @click="saveTransport" class="cursor-pointer">Save</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-
-    <!-- Joined Events Modal -->
-    <Dialog v-model:open="joinedOpen">
-      <DialogContent class="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Your Joined Events</DialogTitle>
-        </DialogHeader>
-
-        <div v-if="loadingEvents" class="flex items-center justify-center py-10 text-gray-500">
-          <Loader2 class="h-6 w-6 animate-spin mr-2 text-blue-600" /> Loading events...
-        </div>
-
-        <div v-else>
-          <ul v-if="joinedEvents.length" class="divide-y divide-gray-200">
-            <li
-              v-for="e in joinedEvents"
-              :key="e.id"
-              class="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div>
-                <p class="font-semibold text-gray-900">{{ e.title }}</p>
-                <p class="text-sm text-gray-600">
-                  {{ new Date(e.start_date).toLocaleDateString() }} • {{ e.venue }}
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                class="mt-2 sm:mt-0 cursor-pointer"
-                @click="router.push(`/event/${e.id}`)"
-              >
-                View →
-              </Button>
-            </li>
-          </ul>
-
-          <p v-else class="text-center text-gray-500 py-6">
-            You haven't joined any events yet.
-          </p>
-        </div>
-      </DialogContent>
-    </Dialog>
-
     <!-- Change Photo Modal -->
     <Dialog v-model:open="avatarOpen">
       <DialogContent class="max-w-md">
@@ -458,11 +352,78 @@ const initials = computed(() =>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <!-- Interests modal -->
+    <Dialog v-model:open="interestsOpen">
+      <DialogContent class="max-w-xl">
+        <DialogHeader><DialogTitle>Edit interests</DialogTitle></DialogHeader>
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            v-for="cat in categories"
+            :key="cat"
+            class="py-2 px-4 border rounded-lg text-sm font-medium transition"
+            :class="tempInterests.includes(cat)
+              ? 'bg-blue-600 text-white border-blue-600'
+              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
+            @click="tempInterests.includes(cat)
+              ? tempInterests.splice(tempInterests.indexOf(cat), 1)
+              : tempInterests.push(cat)"
+          >
+            {{ cat }}
+          </button>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" @click="interestsOpen = false" class="cursor-pointer">Cancel</Button>
+          <Button @click="saveInterests" class="cursor-pointer">Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Budget modal -->
+    <Dialog v-model:open="budgetOpen">
+      <DialogContent class="max-w-md">
+        <DialogHeader><DialogTitle>Edit budget</DialogTitle></DialogHeader>
+        <div class="flex flex-col gap-2">
+          <label class="flex items-center gap-2 cursor-pointer" v-for="opt in ['all','low','mid','high']" :key="opt">
+            <input type="radio" :value="opt" v-model="tempBudget" /> 
+            {{ opt === 'all' ? 'All budgets' : opt === 'low' ? 'Below $20' : opt === 'mid' ? '$20-$50' : 'Above $50' }}
+          </label>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" @click="budgetOpen = false" class="cursor-pointer">Cancel</Button>
+          <Button @click="saveBudget" class="cursor-pointer">Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Transport modal -->
+    <Dialog v-model:open="transportOpen">
+      <DialogContent class="max-w-md">
+        <DialogHeader><DialogTitle>Edit transport</DialogTitle></DialogHeader>
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            v-for="mode in transportOptions"
+            :key="mode"
+            class="py-2 px-4 border rounded-lg text-sm font-medium transition"
+            :class="tempTransport.includes(mode)
+              ? 'bg-blue-600 text-white border-blue-600'
+              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
+            @click="tempTransport.includes(mode)
+              ? tempTransport.splice(tempTransport.indexOf(mode), 1)
+              : tempTransport.push(mode)"
+          >
+            {{ mode }}
+          </button>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" @click="transportOpen = false" class="cursor-pointer">Cancel</Button>
+          <Button @click="saveTransport" class="cursor-pointer">Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </section>
 </template>
 
 <style scoped>
 .container { max-width: 1100px; }
 </style>
-
-
