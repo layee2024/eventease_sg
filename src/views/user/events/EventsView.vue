@@ -63,7 +63,8 @@ function handleSavedUpdate({ id, liked }) {
 
 // Handle filters
 function handleFilterChange(filter) {
-  filteredEvents.value = trendingEvents.value.filter((event) => {
+  //filter first 
+  let result = trendingEvents.value.filter((event) => {
     const matchCategory = !filter.category || event.category === filter.category
     const matchPrice =
       filter.maxPrice == null ||
@@ -77,7 +78,22 @@ function handleFilterChange(filter) {
       event.venue.toLowerCase().includes(filter.searchQuery.toLowerCase())
     return matchCategory && matchPrice && matchCrowd && matchSearch
   })
-  currentPage.value = 1 // Reset to page 1 on filter change
+  //apply sorting here
+   if (filter.sortOption) {
+    if (filter.sortOption === "title") {
+      result.sort((a, b) => a.title.localeCompare(b.title))
+    } else if (filter.sortOption === "priceLow") {
+      result.sort((a, b) => a.ticket_price - b.ticket_price)
+    } else if (filter.sortOption === "priceHigh") {
+      result.sort((a, b) => b.ticket_price - a.ticket_price)
+    } else if (filter.sortOption === "date") {
+      result.sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+    }
+  }
+  //update results 
+  filteredEvents.value = result
+  // Reset to page 1 on filter change
+  currentPage.value = 1 
 }
 
 // Pagination controls
@@ -94,6 +110,8 @@ onMounted(async () => {
 })
 </script>
 
+
+
 <template>
   <section class="min-h-screen py-12 px-6 md:px-12 xl:px-20 bg-white">
     <!-- Header -->
@@ -105,9 +123,11 @@ onMounted(async () => {
     </div>
 
     <!-- Filter Bar -->
+
     <div class="flex justify-center mb-8">
       <EventFilter @update-filter="handleFilterChange" />
     </div>
+
 
     <!-- Events -->
     <div

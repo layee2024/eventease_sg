@@ -8,6 +8,7 @@ const category = ref("")
 const maxPrice = ref("")
 const crowdLevel = ref("")
 const searchQuery = ref("")
+const sortOption =ref("")
 
 function applyFilter() {
   emits("update-filter", {
@@ -15,6 +16,7 @@ function applyFilter() {
     maxPrice: maxPrice.value ? parseFloat(maxPrice.value) : null,
     crowdLevel: crowdLevel.value,
     searchQuery: searchQuery.value,
+    sortOption: sortOption.value,
   })
 }
 
@@ -23,9 +25,13 @@ function resetFilter() {
   maxPrice.value = ""
   crowdLevel.value = ""
   searchQuery.value = ""
+  sortOption.value =""
   applyFilter()
 }
 </script>
+
+
+
 
 <template>
   <div class="bg-white shadow-sm rounded-xl p-5 space-y-4 w-full max-w-4xl mx-auto">
@@ -77,9 +83,16 @@ function resetFilter() {
         <option value="Low">Low</option>
       </select>
 
-
+      <!-- Sort By -->
+       <select v-model="sortOption" class="border rounded-lg px-3 py-2 w-full">
+        <option value="">Sort By</option>
+        <option value="date">Upcoming (Soonest)</option>
+        <option value="title">Title (A–Z)</option>
+        <option value="priceLow">Price (Low → High)</option>
+        <option value="priceHigh">Price (High → Low)</option>
+       </select>
       <!-- Buttons -->
-      <div class="flex gap-3 justify-between md:justify-end w-full">
+      <div class="flex gap-3 justify-center w-full">
         <button
           @click="applyFilter"
           class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition w-full md:w-auto"
