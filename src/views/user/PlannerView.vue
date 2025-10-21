@@ -144,42 +144,32 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="min-h-screen bg-white py-12 px-6 md:px-12 xl:px-20">
-    <!-- Header -->
-    <div class="container">
-
-      <!-- header -->
-      <div class="row justify-self-center">
-        <div class="bg-gray-100 rounded-full p-2">
-          <SparklesIcon class="h-9"></SparklesIcon>
-        </div>
+  <section class="min-h-[93vh] bg-white py-12 px-6 md:px-12 xl:px-20">
+    <!-- header -->
+    <div class="row justify-self-center">
+      <div class="bg-gray-100 rounded-full p-2">
+        <SparklesIcon class="h-9"></SparklesIcon>
       </div>
-
-      <div class="text-center mb-10">
-      <h1 class="text-3xl font-extrabold text-gray-900">Plan your perfect day</h1>
-      <p class="text-lg text-gray-600 mt-2">
-        Let AI help you create a personalised schedule that matches
-          your goals, interest and energy level
-      </p>
     </div>
 
-      
-      <!-- header end -->
-
-
-
-
-
-    </div>
+    <div class="text-center mb-10">
+    <h1 class="text-3xl font-extrabold text-gray-900">Plan your perfect day</h1>
+    <p class="text-lg text-gray-600 mt-2">
+      Let AI help you create a personalised schedule that matches
+        your goals, interest and energy level
+    </p>
+  </div>
     <br><br>
-    <div class="container flex flex-col xl:flex-row gap-6">
+    <div class="flex flex-col xl:flex-row gap-6">
 
       <div class="shadow-lg border rounded-md xl:w-full p-5 h-fit">
-        <div class="flex items-center">
-          <SparklesIcon class="h-8 mr-2"> </SparklesIcon>
-          <h2 class="text-3xl text-black font-semibold">Tell us about your day</h2>
+        <div class="flex flex-col gap-2">
+          <div class="flex">
+            <SparklesIcon class="h-8 mr-2"> </SparklesIcon>
+            <h2 class="text-3xl text-black font-semibold">Tell us about your day</h2>
+          </div>
+          <h4 class="text-gray-400 italic">Share your preference and we'll create the perfect schedule for you</h4>
         </div>
-        <h4 class="text-gray-400 italic">Share your preference and we'll create the perfect schedule for you</h4>
 
         <br>
 
