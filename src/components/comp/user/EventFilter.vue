@@ -86,6 +86,7 @@ function resetFilter() {
       <!-- Sort By -->
        <select v-model="sortOption" class="border rounded-lg px-3 py-2 w-full">
         <option value="">Sort By</option>
+        <option value="distance">Nearest</option>
         <option value="date">Upcoming (Soonest)</option>
         <option value="title">Title (A–Z)</option>
         <option value="priceLow">Price (Low → High)</option>

@@ -93,6 +93,7 @@ const routes = [
     component: ShuffleView,
   },
 
+
   // Organiser
   {
     path: '/dashboard',

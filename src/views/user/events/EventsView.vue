@@ -1,11 +1,23 @@
 <script setup>
 import { ref, onMounted, computed, watch } from "vue"
 import { supabase } from "@/utils/supabase"
-import { useRouter } from "vue-router"
+import { useRouter, useRoute } from "vue-router"
 import { Button } from "@/components/ui/button"
 import EventCard from "@/components/comp/user/EventCard.vue"
 import EventFilter from "@/components/comp/user/EventFilter.vue"
 import ReviewPreview from "@/components/comp/user/ReviewPreview.vue"
+
+//  Fetch the event
+const event = ref(null)
+const route = useRoute()
+
+//  Get lat/lng from query
+const userLocation = computed(() => {
+  const lat = parseFloat(route.query.lat)
+  const lng = parseFloat(route.query.lng)
+  if (isNaN(lat) || isNaN(lng)) return null
+  return { lat, lng }
+})
 
 const router = useRouter()
 const trendingEvents = ref([])
@@ -20,6 +32,33 @@ const itemsPerPage = 20
 const totalPages = computed(() =>
   Math.ceil(filteredEvents.value.length / itemsPerPage)
 )
+
+//haversine distance function (return km)
+function getDistanceKm(lat1, lng1, lat2, lng2) {
+  const R = 6371
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLng = (lng2 - lng1) * Math.PI / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) *
+      Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng / 2) ** 2
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
+
+// Helper: calculate distance safely for one event
+function getEventDistance(event) {
+  if (!userLocation.value || !event.latitude || !event.longitude) return null
+  return Number(
+    getDistanceKm(
+    userLocation.value.lat,
+    userLocation.value.lng,
+    parseFloat(event.latitude),
+    parseFloat(event.longitude)
+  )
+)
+}
 
 const paginatedEvents = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
@@ -40,6 +79,7 @@ async function getTrendingEvents() {
   }
   trendingEvents.value = data || []
   filteredEvents.value = [...trendingEvents.value]
+
 }
 
 // Load user's saved list
@@ -60,6 +100,7 @@ function handleSavedUpdate({ id, liked }) {
     ? [...new Set([...savedIds.value, id])]
     : savedIds.value.filter((x) => x !== id)
 }
+
 
 // Handle filters
 function handleFilterChange(filter) {
@@ -88,13 +129,23 @@ function handleFilterChange(filter) {
       result.sort((a, b) => b.ticket_price - a.ticket_price)
     } else if (filter.sortOption === "date") {
       result.sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+    } else if (filter.sortOption === "distance" ) {
+        if (userLocation.value) {
+          result.sort((a, b) => {
+            const distA = getEventDistance(a) ?? Infinity
+            const distB = getEventDistance(b) ?? Infinity
+            return distA - distB
+      })
     }
   }
+  }
+
   //update results 
   filteredEvents.value = result
   // Reset to page 1 on filter change
   currentPage.value = 1 
 }
+
 
 // Pagination controls
 function nextPage() {
@@ -108,6 +159,7 @@ onMounted(async () => {
   await getTrendingEvents()
   await loadUserSaved()
 })
+
 </script>
 
 
@@ -160,8 +212,11 @@ onMounted(async () => {
         :crowd="event.crowd_level"
         :image="event.image_url"
         :liked="savedIds.includes(event.id)"
+        :distance="getEventDistance(event)"
         @update-saved="handleSavedUpdate"
       />
+    
+
     </div>
 
     <!-- Empty State -->

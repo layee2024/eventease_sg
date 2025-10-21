@@ -19,6 +19,7 @@ const props = defineProps({
   crowd: String,
   image: String,
   liked: { type: Boolean, default: false },
+  distance: Number,
 })
 
 const emit = defineEmits(["update-saved"])
@@ -195,12 +196,20 @@ const crowdColor = computed(() => {
         <span :class="['w-2 h-2 rounded-full', crowdColor]" />
         {{ crowd }}
       </span>
+
+   
+
     </div>
 
     <CardContent class="p-4">
       <h3 class="font-semibold text-gray-900 text-base truncate mb-1">{{ title }}</h3>
       <p class="text-sm text-gray-500 truncate">{{ location }}</p>
 
+    <!-- Show distance if available -->
+    <p v-if="distance !== undefined && distance !== Infinity && !isNaN(distance)" class="text-gray-500 text-sm mt-1">
+      {{ distance }} km away
+    </p>
+    
       <!-- People going -->
       <p class="text-blue-600 font-medium text-sm mt-2 h-5 flex items-center gap-1">
         <span v-if="loadingGoing" class="inline-flex items-center gap-2 text-gray-400">

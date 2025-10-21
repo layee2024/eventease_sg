@@ -24,6 +24,14 @@ const userLocation = ref(null)
 const routeDetails = ref(null)
 const showSteps = ref(false)
 
+
+navigator.geolocation.getCurrentPosition((pos) => {
+  userLocation.value = {
+    lat: pos.coords.latitude,
+    lng: pos.coords.longitude
+  }
+})
+
 // Load Google Maps API
 function loadGoogleMapsAPI(apiKey) {
   return new Promise((resolve, reject) => {
@@ -219,6 +227,8 @@ async function getCurrLoc() {
     const position = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject))
     const pos = { lat: position.coords.latitude, lng: position.coords.longitude }
     userLocation.value = pos
+    //added line
+    emit("locationFound",pos)
     const pin = new PinElement({ glyph: "👤", background: "white", borderColor: "black" })
     new AdvancedMarkerElement({ map, position: pos, content: pin.element, gmpClickable: false, zIndex: 9999 })
     map.setCenter(pos)
