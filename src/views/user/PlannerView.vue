@@ -1,287 +1,316 @@
 <script setup>
-import { ref, computed, onMounted, watch } from "vue"
-import { supabase } from "@/utils/supabase"
+import { ClockIcon, SparklesIcon, BoltIcon } from '@heroicons/vue/24/outline';
+import { CalendarIcon, FireIcon, StarIcon } from '@heroicons/vue/24/solid';
+import { GoogleGenAI } from "@google/genai";
+import { supabase } from "@/utils/supabase";
+import { ref, onMounted } from 'vue';
 
-const loading = ref(true)
-const error = ref("")
-const selectedDate = ref(new Date().toISOString().slice(0, 10))
-const events = ref([])
 
-const TIME_SLOTS = [
-  {
-    id: "morning",
-    label: "Morning",
-    startHour: 6,
-    endHour: 11,
-    accent: "bg-sky-100 text-sky-700",
-  },
-  {
-    id: "lunch",
-    label: "Lunch",
-    startHour: 11,
-    endHour: 14,
-    accent: "bg-amber-100 text-amber-700",
-  },
-  {
-    id: "afternoon",
-    label: "Afternoon",
-    startHour: 14,
-    endHour: 17,
-    accent: "bg-emerald-100 text-emerald-700",
-  },
-  {
-    id: "evening",
-    label: "Late Afternoon",
-    startHour: 17,
-    endHour: 21,
-    accent: "bg-violet-100 text-violet-700",
-  },
-]
+const showForm = ref(false);
 
-const formattedDateLabel = computed(() => {
-  const date = new Date(`${selectedDate.value}T00:00:00`)
-  return date.toLocaleDateString("en-SG", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  })
-})
+const timeUp = ref(null);
+const interest = ref(null);
+const goal = ref(null);
+const energy = ref('low');
 
-const friendlyDateShort = computed(() => {
-  const date = new Date(`${selectedDate.value}T00:00:00`)
-  return date.toLocaleDateString("en-SG", {
-    month: "short",
-    day: "numeric",
-  })
-})
+const isLoading = ref(false);
+const parsedIntro = ref(null);
+const parsedSchedule = ref(null);
 
-const slotPlans = computed(() => {
-  const plans = TIME_SLOTS.map((slot) => ({ ...slot, event: null }))
-  const sorted = [...events.value].sort(
-    (a, b) => new Date(a.start_date) - new Date(b.start_date)
-  )
+const api = import.meta.env.VITE_GEMINI_API_KEY
+const ai = new GoogleGenAI({
+  apiKey: api
+});
 
-  for (const event of sorted) {
-    const startHour = new Date(event.start_date).getHours()
-    const slot = plans.find(
-      (candidate) =>
-        startHour >= candidate.startHour && startHour < candidate.endHour
-    )
-    if (slot && !slot.event) slot.event = event
+async function getCat() {
+  const { data, error } = await supabase.from("events").select("*")
+  if (error) {
+    console.error("Error fetching events:", error)
+    return []
   }
 
-  return plans
-})
-
-const hasAnyEvents = computed(() => events.value.length > 0)
-
-const curatedCount = computed(
-  () => slotPlans.value.filter((slot) => slot.event).length
-)
-
-const heroMessage = computed(() => {
-  if (loading.value) return "Hold tight, we're crafting your day plan..."
-  if (!hasAnyEvents.value)
-    return "We couldn't find events for this day. Try a different date."
-  return `Here's a curated plan with ${curatedCount.value} ${
-    curatedCount.value === 1 ? "experience" : "experiences"
-  } to explore.`
-})
-
-function formatTimeRange(event) {
-  if (!event?.start_date) return "Time TBC"
-  const start = new Date(event.start_date)
-  const end = event.end_date ? new Date(event.end_date) : null
-  const startLabel = start.toLocaleTimeString("en-SG", {
-    hour: "numeric",
-    minute: "2-digit",
-  })
-  if (!end) return startLabel
-  const endLabel = end.toLocaleTimeString("en-SG", {
-    hour: "numeric",
-    minute: "2-digit",
-  })
-  return `${startLabel} - ${endLabel}`
+  // console.log(data)
+  return data
 }
 
-function formatPrice(price) {
-  if (price === null || price === undefined) return "Pricing TBC"
-  if (Number(price) === 0) return "Free"
-  return `$${Number(price).toFixed(2)}`
-}
-
-async function fetchPlan(dateString) {
-  loading.value = true
-  error.value = ""
+async function handleSubmit() {
+  isLoading.value = true;
 
   try {
-    const start = new Date(`${dateString}T00:00:00`)
-    const end = new Date(start)
-    end.setDate(end.getDate() + 1)
+    const dict = {
+      interest: interest.value,
+      goal: goal.value,
+      timeUp: timeUp.value,
+      energy: energy.value
+    };
 
-    const { data, error: fetchError } = await supabase
-      .from("events")
-      .select("*")
-      .gte("start_date", start.toISOString())
-      .lt("start_date", end.toISOString())
-      .order("start_date", { ascending: true })
-      .limit(40)
+    console.log("User input:", dict);
 
-    if (fetchError) throw fetchError
-    events.value = data || []
-  } catch (err) {
-    console.error("Failed to load planner events", err)
-    error.value =
-      "We couldn't load events for this day. Please try again later."
-    events.value = []
-  } finally {
-    loading.value = false
+    // Get events from Supabase
+    const eventList = await getCat();
+
+    // // Create a prompt using user data and events
+    const prompt = `
+      You are a productivity coach.
+
+      A user has provided the following information:
+      - Interests: ${dict.interest}
+      - Goal: ${dict.goal}
+      - Wake-up time: ${dict.timeUp}
+      - Energy level: ${dict.energy}
+      - List of events happening around Singapore (in ISO 8601 format): ${JSON.stringify(eventList, null, 2)}
+
+      Create a personalized, achievable schedule for today based on this information.
+
+      Guidelines:
+      - Break the schedule into clear time blocks (e.g., 10:00 AM - 10:30 AM). Important!
+      - Avoid overlapping with the user's scheduled events.
+      - Make sure to suggest users events that are in the list of events happening aroung Singapore.
+      - Make sure to give the start time and start date (parsed) at which the event is happening.
+      - Make sure that all the events that are suggested fall on the same date, if it does not fall on the same date, it is ok to suggest other activites that do not align with the hobbies and interest(very important)
+      - Align suggestions with the user's energy level.
+      - Include short breaks if needed.
+      - Include meal times if needed.
+      - Focus on helping the user progress toward their goal in an enjoyable and sustainable way.
+      - If no scheduled events match the user's interests, suggest alternative activities aligned with their goal and energy, making sure the events are still from the list of events available.
+      - Output format: plain text schedule, one line per time block.
+      `;
+
+    const result = await ai.models.generateContent({
+      model: "gemini-2.5-flash-lite",
+      contents: prompt,
+      config: {
+        thinkingConfig: {
+          thinkingBudget: 0, // Disables thinking
+        },
+      }
+    });
+    console.log(result.text);
+
+    // const result = `
+    //     Here is a productivity-focused schedule designed to help you make an impact in the environment, keeping your 10 am wake-up time and high energy levels in mind:
+
+    //     10:00 AM - 10:30 AM: Wake up, hydrate, and light stretching to energize for the day.
+    //     10:30 AM - 11:30 AM: Breakfast and review today's schedule and environmental goals.
+    //     11:30 AM - 12:00 PM: Travel to Pasir Ris Beach.
+    //     12:00 PM - 2:00 PM: Volunteer at the Community Beach Cleanup (Event ID: 3777455b-f9e0-47fd-b3a1-9e614b76e787). This aligns perfectly with your interest in volunteer work and goal of helping the environment. Your high energy will be well-utilized here.
+    //     2:00 PM - 2:30 PM: Travel to a nearby lunch spot.
+    //     2:30 PM - 3:30 PM: Lunch and a short break to recharge.
+    //     3:30 PM - 5:00 PM: Attend the Eco Action Forum (Event ID: 2b57aa85-b92d-486d-b1ef-45477fcceb43). This event offers valuable insights and workshops on climate solutions and green innovation, further supporting your environmental goals.
+    //     5:00 PM - 6:00 PM: Travel back home.
+    //     6:00 PM - 7:00 PM: Relax and reflect on the day's activities. Consider journaling about your experience at the cleanup and what you learned at the forum.
+    //     7:00 PM - 8:00 PM: Dinner.
+    //     8:00 PM onwards: Free time. You could use this to research local environmental organizations, plan future volunteer opportunities, or engage in activities that help you unwind.
+    //   `;
+
+    const resultText = result.text;
+    console.log(parseScheduleText(resultText));
+
+    const resultObject = parseScheduleText(resultText);
+    parsedIntro.value = resultObject.intro;
+    parsedSchedule.value = resultObject.schedule;
+
   }
+  catch (error) {
+    console.log("Error generating schedule:", error);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+function parseScheduleText(text) {
+  const timeBlockRegex = /^(\d{1,2}:\d{2}\s*[APMapm]{2})\s*(?:-\s*(\d{1,2}:\d{2}\s*[APMapm]{2})|onwards):\s*([\s\S]*?)(?=^\d{1,2}:\d{2}\s*[APMapm]{2}(?:\s*-\s*\d{1,2}:\d{2}\s*[APMapm]{2}|onwards):|\Z)/gmi;
+  const schedule = [];
+  let match;
+
+  while ((match = timeBlockRegex.exec(text)) !== null) {
+    schedule.push({
+      start: match[1].toUpperCase().replace(/\s+/, ''),
+      end: match[2].toUpperCase().replace(/\s+/, ''),
+      activity: match[3].trim()
+    });
+  }
+
+  const firstTimeIndex = text.search(timeBlockRegex);
+  const intro = text.slice(0, firstTimeIndex).trim();
+
+  return { intro, schedule };
 }
 
 onMounted(() => {
-  fetchPlan(selectedDate.value)
+  getCat()
 })
 
-watch(selectedDate, (next) => {
-  fetchPlan(next)
-})
 </script>
 
 <template>
-  <section class="min-h-screen bg-white py-14 px-6 md:px-12 xl:px-20">
-    <div class="max-w-6xl mx-auto space-y-12 text-center">
-      <!-- Heading -->
-      <div class="space-y-4">
-        <h1 class="text-4xl font-extrabold text-gray-900">
-          AI Assistant Planner
-        </h1>
-        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-          The AI assistant helps you plan activities, recommend events, and
-          balance your day with smart, conversation-ready suggestions.
-        </p>
-        <div
-          class="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 sm:flex-wrap"
-        >
-          <label
-            class="text-sm font-medium text-gray-700"
-            for="planner-date"
-          >
-            Plan a day for
-          </label>
-          <input
-            id="planner-date"
-            v-model="selectedDate"
-            type="date"
-            class="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-800 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-          />
-          <span class="text-sm text-gray-500">
-            Latest picks for {{ formattedDateLabel }}
-          </span>
+  <section class="min-h-screen bg-white py-12 px-6 md:px-12 xl:px-20">
+    <!-- Header -->
+    <div class="container">
+      <div class="row justify-self-center">
+
+        <div class="bg-gray-100 rounded-full p-2">
+          <SparklesIcon class="h-9"></SparklesIcon>
         </div>
+        <br>
+
       </div>
 
-      <div class="flex justify-center">
-        <div class="relative w-full max-w-4xl">
-          <div
-            class="absolute inset-0 -z-10 rounded-[2.5rem] bg-gradient-to-br from-indigo-100 via-white to-transparent blur-3xl"
-          ></div>
-          <div
-            class="rounded-[2.5rem] border border-gray-200 bg-white shadow-2xl p-8 space-y-6"
-          >
-            <div class="flex items-center gap-4 flex-wrap justify-center sm:justify-between">
-              <div class="flex items-center gap-4">
-                <div
-                  class="h-12 w-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl"
-                >
-                  🤖
-                </div>
-                <div class="text-left">
-                  <p class="text-sm font-semibold text-indigo-600 uppercase">
-                    AI Itinerary Planner
-                  </p>
-                  <h2 class="text-2xl font-semibold text-gray-900">
-                    Plan {{ friendlyDateShort }}
-                  </h2>
-                </div>
-              </div>
-              <span class="text-sm text-gray-500">
-                Curated from Supabase events
-              </span>
+      <div class="justify-self-center">
+        <h1 class="text-5xl font-extrabold pb-1">Plan your perfect day</h1>
+      </div>
+      <br>
+
+      <div class="text-center">
+        <p class="text-3xl text-gray-400 font-extralight "> Let AI help you create a personalised schedule that matches
+          your goals, interest and energy level</p>
+      </div>
+
+
+    </div>
+    <br><br>
+    <div class="container flex flex-col xl:flex-row gap-6">
+
+      <div class="shadow-lg border rounded-md xl:w-full p-5 h-fit">
+        <div class="flex items-center">
+          <SparklesIcon class="h-8 mr-2"> </SparklesIcon>
+          <h2 class="text-3xl text-black font-semibold">Tell us about your day</h2>
+        </div>
+        <h4 class="text-gray-400 italic">Share your preference and we'll create the perfect schedule for you</h4>
+
+        <br>
+
+        <form @submit.prevent="handleSubmit">
+          <div class="row">
+
+            <div class="flex items-center pb-2">
+              <CalendarIcon class="h-6 mr-1 text-gray-600" stroke-width="2.5"></CalendarIcon>
+              <label for="timeUp" class="text-xl text-black font-bold dark:bg-gray-700">Wake-up Time</label>
             </div>
 
-            <div
-              class="rounded-2xl bg-indigo-50 text-indigo-700 px-5 py-4 text-sm leading-relaxed"
-            >
-              {{ heroMessage }}
-            </div>
+            <div class="relative w-full">
+              <input type="text" placeholder="Enter time" v-model="timeUp" required
+                class="w-full py-2 pr-10 pl-3 rounded border text-black shadow-sm text-lg" />
 
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div
-                v-for="slot in slotPlans"
-                :key="slot.id"
-                class="rounded-2xl border border-gray-200 bg-white/90 p-5 shadow-sm flex flex-col gap-3"
-              >
-                <div class="flex items-center justify-between">
-                  <span
-                    class="text-[0.65rem] font-semibold uppercase tracking-wide px-3 py-1 rounded-full"
-                    :class="slot.accent"
-                  >
-                    {{ slot.label }}
-                  </span>
-                  <span class="text-xs text-gray-400"> Curated pick </span>
-                </div>
-
-                <div v-if="slot.event" class="space-y-2">
-                  <p class="text-base font-semibold text-gray-900 leading-snug">
-                    {{ slot.event.title }}
-                  </p>
-                  <p class="text-sm text-gray-500">
-                    {{ slot.event.venue || "Venue to be confirmed" }}
-                  </p>
-                  <div class="flex items-center justify-between text-sm">
-                    <span class="font-medium text-gray-900">
-                      {{ formatPrice(slot.event.ticket_price) }}
-                    </span>
-                    <span class="text-gray-600">
-                      {{ formatTimeRange(slot.event) }}
-                    </span>
-                  </div>
-                  <RouterLink
-                    :to="`/event/${slot.event.id}`"
-                    class="inline-flex items-center justify-center rounded-xl bg-indigo-600 text-white text-sm font-medium px-4 py-2 hover:bg-indigo-700 transition"
-                  >
-                    View event
-                  </RouterLink>
-                </div>
-
-                <div v-else class="space-y-2 text-sm text-gray-500">
-                  <p class="font-medium text-gray-700">No match yet</p>
-                  <p>
-                    Looks like this part of the day is still free. Pick another
-                    date or refresh your interests.
-                  </p>
-                </div>
+              <div class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer" @click="showForm = !showForm">
+                <ClockIcon class="w-5 h-5 text-gray-600" />
               </div>
             </div>
 
-            <div
-              v-if="loading"
-              class="text-xs text-gray-500 text-center pt-2 border-t border-dashed border-gray-200"
-            >
-              Fetching events directly from Supabase…
+          </div>
+
+          <br>
+
+          <div class="row">
+            <div class="flex items-center pb-2">
+              <FireIcon class="h-5 mr-1 text-gray-600"></FireIcon>
+              <label for="interest" class="text-xl text-black font-bold">Interest & Hobbies</label>
             </div>
 
-            <div
-              v-else-if="error"
-              class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
-            >
-              {{ error }}
+            <div class="w-full">
+              <textarea v-model="interest" name="interest" id="interesr" required
+                class="border shadow-sm rounded-sm w-[100%] p-2 text-lg" rows="4"
+                placeholder="Enter interests & hobbies here"></textarea>
             </div>
           </div>
-        </div>
+
+          <br>
+
+          <div class="row">
+            <div class="flex items-center pb-2">
+              <StarIcon class="h-5 mr-1 text-gray-600"></StarIcon>
+              <label for="interest" class="text-xl text-black font-bold">Goals</label>
+            </div>
+
+            <div class="w-full">
+              <textarea name="interest" v-model="goal" id="interest" required
+                class="border shadow-sm rounded-sm w-[100%] p-2 text-lg" rows="4"
+                placeholder="Enter interests & hobbies here"></textarea>
+            </div>
+          </div>
+
+          <br>
+
+          <div class="row">
+            <div class="flex items-center pb-2">
+              <BoltIcon class="h-5 mr-1 text-gray-600"></BoltIcon>
+              <label for="interest" class="text-xl text-black font-bold dark:bg-gray-700 dark:border-gray-600">Energy
+                Level</label>
+            </div>
+
+            <select id="countries" v-model="energy" class="border shadow-sm text-lg rounded-sm block w-full p-3">
+              <option value="low">Low - slow, relaxing day to unwind and recharge</option>
+              <option value="medium">Medium - A balanced day with a mix of work and leisure</option>
+              <option value="high">High - A high-energy day, ready to conquer your goals!</option>
+            </select>
+
+          </div>
+          <br><br>
+
+          <div class="row flex flex-col items-center">
+            <button type="submit"
+              class="flex items-center gap2 bg-black rounded-lg border text-white h-[50px] w-full text-lg font-semibold gap-2 justify-center">
+              <SparklesIcon class="h-6 w-6"></SparklesIcon> Plan my day!
+            </button>
+            <button type="reset" class="underline text-gray-400 text-lg">
+              Reset
+            </button>
+          </div>
+
+        </form>
       </div>
+
+      <br> <br>
+
+      <div class="border shadow-lg rounded-md xl:w-[100%] p-8 h-fit w-full">
+        <div class="row">
+          <div class="col">
+            <h2 class="text-2xl font-semibold pb-2"> Your Perfect Day</h2>
+            <p class="text-xl text-gray-400 italic"> AI-powered personalised schedule just for you</p>
+          </div>
+
+        </div>
+
+        <!-- show loading spinner -->
+        <div class="row">
+          <div v-if="isLoading" class="w-full flex flex-col items-center py-10">
+            <svg class="animate-spin h-10 w-10 text-gray-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <p class="text-xl text-gray-400">Planning your day...</p>
+          </div>
+
+          <div v-else-if="parsedSchedule && parsedSchedule.length" class="w-full">
+            <br>
+            <div v-if="parsedIntro" class="text-xl text-gray-700 italic mb-4"> {{ parsedIntro }}</div>
+            <ul class="space-y-4 mt-4">
+              <li v-for="item in parsedSchedule" :key="item.start"
+                class="text-lg text-black bg-gray-100 rounded-md p-4 shadow-sm">
+                <strong>{{ item.start }} - {{ item.end }}</strong>: {{ item.activity }}
+              </li>
+            </ul>
+
+            <br>
+            <p class="text-sm text-yellow-700 bg-yellow-100 border border-yellow-300 rounded-md p-3 mt-4">
+                  ⚠️ <strong>Note:</strong> This schedule is generated by AI and may contain inaccuracies or timing conflicts. Please double-check event times and details before making plans.
+            </p>
+          </div>
+
+          <div v-else class="col text-center py-10">
+            <calendar-icon class="h-20 w-20 text-gray-200 mx-auto" />
+            <p class="text-gray-400 text-xl mt-4">Your perfect day is just one form away!</p>
+          </div>
+        </div>
+
+        
+      </div>
+
+
     </div>
+
+
   </section>
 </template>
 
