@@ -219,7 +219,7 @@ async function getCurrLoc() {
     const position = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject))
     const pos = { lat: position.coords.latitude, lng: position.coords.longitude }
     userLocation.value = pos
-    const pin = new PinElement({ glyph: "📍", background: "white", borderColor: "black" })
+    const pin = new PinElement({ glyph: "👤", background: "white", borderColor: "black" })
     new AdvancedMarkerElement({ map, position: pos, content: pin.element, gmpClickable: false, zIndex: 9999 })
     map.setCenter(pos)
   } catch (error) {

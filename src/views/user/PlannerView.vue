@@ -153,7 +153,7 @@ onMounted(() => {
     </div>
 
     <div class="text-center mb-10">
-    <h1 class="text-3xl font-extrabold text-gray-900">Plan your perfect day</h1>
+    <h1 class="text-2xl font-extrabold text-gray-900">Plan your perfect day</h1>
     <p class="text-lg text-gray-600 mt-2">
       Let AI help you create a personalised schedule that matches
         your goals, interest and energy level
@@ -168,7 +168,7 @@ onMounted(() => {
             <SparklesIcon class="h-8 mr-2"> </SparklesIcon>
             <h2 class="text-3xl text-black font-semibold">Tell us about your day</h2>
           </div>
-          <h4 class="text-gray-400 italic">Share your preference and we'll create the perfect schedule for you</h4>
+          <p class="text-gray-400 italic">Share your preference and we'll create the perfect schedule for you</p>
         </div>
 
         <br>
@@ -178,7 +178,7 @@ onMounted(() => {
 
             <div class="flex items-center pb-2">
               <CalendarIcon class="h-6 mr-1 text-gray-600" stroke-width="2.5"></CalendarIcon>
-              <label for="timeUp" class="text-xl text-black font-bold dark:bg-gray-700">Wake-up Time</label>
+              <label for="timeUp" class="text-xl text-black font-bold dark:bg-gray-700">Activity Start Time</label>
             </div>
 
             <div class="relative w-full">
@@ -255,11 +255,11 @@ onMounted(() => {
 
       <br> <br>
 
-      <div class="border shadow-lg rounded-md xl:w-[100%] p-8 h-fit w-full">
+      <div class="border shadow-lg rounded-md xl:w-[100%] p-5 h-fit w-full">
         <div class="row">
           <div class="col">
             <h2 class="text-2xl font-semibold pb-2"> Your Perfect Day</h2>
-            <p class="text-xl text-gray-400 italic"> AI-powered personalised schedule just for you</p>
+            <p class="text-gray-400 italic"> AI-powered personalised schedule just for you</p>
           </div>
 
         </div>
