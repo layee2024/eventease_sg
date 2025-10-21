@@ -147,24 +147,27 @@ onMounted(() => {
   <section class="min-h-screen bg-white py-12 px-6 md:px-12 xl:px-20">
     <!-- Header -->
     <div class="container">
-      <div class="row justify-self-center">
 
+      <!-- header -->
+      <div class="row justify-self-center">
         <div class="bg-gray-100 rounded-full p-2">
           <SparklesIcon class="h-9"></SparklesIcon>
         </div>
-        <br>
-
       </div>
 
-      <div class="justify-self-center">
-        <h1 class="text-5xl font-extrabold pb-1">Plan your perfect day</h1>
-      </div>
-      <br>
+      <div class="text-center mb-10">
+      <h1 class="text-3xl font-extrabold text-gray-900">Plan your perfect day</h1>
+      <p class="text-lg text-gray-600 mt-2">
+        Let AI help you create a personalised schedule that matches
+          your goals, interest and energy level
+      </p>
+    </div>
 
-      <div class="text-center">
-        <p class="text-3xl text-gray-400 font-extralight "> Let AI help you create a personalised schedule that matches
-          your goals, interest and energy level</p>
-      </div>
+      
+      <!-- header end -->
+
+
+
 
 
     </div>
@@ -252,7 +255,7 @@ onMounted(() => {
               class="flex items-center gap2 bg-black rounded-lg border text-white h-[50px] w-full text-lg font-semibold gap-2 justify-center">
               <SparklesIcon class="h-6 w-6"></SparklesIcon> Plan my day!
             </button>
-            <button type="reset" class="underline text-gray-400 text-lg">
+            <button type="reset" class="underline text-gray-400 text-lg pt-3">
               Reset
             </button>
           </div>
