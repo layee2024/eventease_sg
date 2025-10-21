@@ -10,7 +10,9 @@
 <template>
   <div id="app" class="min-h-screen flex flex-col">
   <NavBar />
-  <Toaster position="bottom-right" />
+  <div class="fixed top-[5%] right-0 z-[100] flex max-h-screen w-full translate-y-[-5%] p-4 sm:right-0 sm:flex-col md:max-w-[420px]">
+    <Toaster position="top-right" />
+  </div>
 
   <main class="flex-1 overflow-y-auto">
     <RouterView v-slot="{ Component }">

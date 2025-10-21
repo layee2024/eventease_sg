@@ -6,6 +6,7 @@ import EventCard from "@/components/comp/user/EventCard.vue"
 const savedEvents = ref([])
 const savedIds = ref([])
 const loading = ref(true)
+const today = new Date().toISOString()
 
 async function loadSavedEvents() {
   loading.value = true
@@ -41,8 +42,8 @@ async function loadSavedEvents() {
   const { data: events, error: eventErr } = await supabase
     .from("events")
     .select("*")
-    .in("id", savedIds.value)
     .gte("end_date", today) 
+    .in("id", savedIds.value)
 
   if (eventErr) {
     console.error("Error fetching saved events:", eventErr)
