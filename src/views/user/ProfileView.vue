@@ -75,9 +75,11 @@ onMounted(async () => {
     return
   }
 
+  console.log("AUTH USER:", auth.user)
+
   user.value = auth.user
   userId.value = auth.user.id
-  name.value = auth.user.user_metadata?.full_name || "Anonymous User"
+  name.value = auth.user.user_metadata?.first_name + " " + auth.user.user_metadata?.last_name
   email.value = auth.user.email
 
   // Load preferences (now includes going)
@@ -226,7 +228,7 @@ const initials = computed(() =>
               Change Photo
             </Button>
             <div class="space-y-1">
-              <h1 class="text-blue-100 text-xl font-semibold">{{ email }}</h1>
+              <h1 class="text-blue-100 text-xl font-semibold">{{ name }}</h1>
             </div>
           </div>
         </div>
@@ -259,7 +261,7 @@ const initials = computed(() =>
               <p class="text-gray-700 capitalize mb-4">
                 {{ budget === 'all' ? 'All budgets' :
                    budget === 'low' ? 'Below $20' :
-                   budget === 'mid' ? '$20–$50' : 'Above $50' }}
+                   budget === 'mid' ? '$20-$50' : 'Above $50' }}
               </p>
               <Button variant="outline" size="sm" @click="budgetOpen = true" class="cursor-pointer">Manage</Button>
             </CardContent>
