@@ -6,18 +6,25 @@ import { Button } from "@/components/ui/button"
 import EventCard from "@/components/comp/user/EventCard.vue"
 import EventFilter from "@/components/comp/user/EventFilter.vue"
 import ReviewPreview from "@/components/comp/user/ReviewPreview.vue"
+import { userLocation, fetchUserLocation } from './location.js'
 
 //  Fetch the event
 const event = ref(null)
 const route = useRoute()
 
-//  Get lat/lng from query
-const userLocation = computed(() => {
-  const lat = parseFloat(route.query.lat)
-  const lng = parseFloat(route.query.lng)
-  if (isNaN(lat) || isNaN(lng)) return null
-  return { lat, lng }
+onMounted(async () => {
+  {
+    await fetchUserLocation() // fetch location once
+    
+  }
 })
+// //  Get lat/lng from query
+// const userLocation = computed(() => {
+//   const lat = parseFloat(route.query.lat)
+//   const lng = parseFloat(route.query.lng)
+//   if (isNaN(lat) || isNaN(lng)) return null
+//   return { lat, lng }
+// })
 
 const router = useRouter()
 const trendingEvents = ref([])

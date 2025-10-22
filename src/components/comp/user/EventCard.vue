@@ -205,10 +205,6 @@ const crowdColor = computed(() => {
       <h3 class="font-semibold text-gray-900 text-base truncate mb-1">{{ title }}</h3>
       <p class="text-sm text-gray-500 truncate">{{ location }}</p>
 
-    <!-- Show distance if available -->
-    <p v-if="distance !== undefined && distance !== Infinity && !isNaN(distance)" class="text-gray-500 text-sm mt-1">
-      {{ distance }} km away
-    </p>
     
       <!-- People going -->
       <p class="text-blue-600 font-medium text-sm mt-2 h-5 flex items-center gap-1">
@@ -237,11 +233,21 @@ const crowdColor = computed(() => {
         <span class="text-sm text-gray-400">{{ date }}</span>
 
       </div>
-      <!-- ⭐ Mini Review Preview -->
+      <!-- ⭐ Mini Review Preview + distance -->
       <div
         class="mt-2 flex items-center justify-between text-[11px] text-gray-500 border-t border-gray-100 pt-2"
       >
         <ReviewPreview :eventId="id" />
+        <!-- Distance  -->
+        <div v-if="distance !== undefined && distance !== Infinity && !isNaN(distance)" class="flex items-center gap-1 text-gray-500">
+      <!-- Nicer pin icon from Heroicons -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7zM12 11a2 2 0 110-4 2 2 0 010 4z"/>
+      </svg>
+      <span class="font-semibold">{{ distance.toFixed(1) }} km</span>
+
+    </div>          
+      
       </div>
     </CardContent>
   </Card>

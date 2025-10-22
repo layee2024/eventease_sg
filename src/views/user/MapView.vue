@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { supabase } from "@/utils/supabase"
 import { format, parseISO } from 'date-fns'
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { userLocation } from './events/location.js'
 
 let map
 let infowindow
@@ -20,10 +21,14 @@ const popupRef = ref(null)
 
 const destination = ref("")
 const travelMode = ref("DRIVING")
-const userLocation = ref(null)
+// const userLocation = ref(null)
 const routeDetails = ref(null)
 const showSteps = ref(false)
 
+onMounted(async () => {
+  await getCurrLoc() 
+  console.log('User location fetched in MapView:', userLocation.value)
+})
 
 navigator.geolocation.getCurrentPosition((pos) => {
   userLocation.value = {
@@ -227,8 +232,6 @@ async function getCurrLoc() {
     const position = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject))
     const pos = { lat: position.coords.latitude, lng: position.coords.longitude }
     userLocation.value = pos
-    //added line
-    emit("locationFound",pos)
     const pin = new PinElement({ glyph: "👤", background: "white", borderColor: "black" })
     new AdvancedMarkerElement({ map, position: pos, content: pin.element, gmpClickable: false, zIndex: 9999 })
     map.setCenter(pos)
