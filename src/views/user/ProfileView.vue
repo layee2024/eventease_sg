@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue"
+import { ref, computed, onMounted, watch } from "vue"
 import { useRouter } from "vue-router"
 import { supabase } from "@/utils/supabase"
 import { toast } from "vue-sonner"
@@ -26,10 +26,40 @@ const interests = ref([])
 const budget = ref("all")
 const transportModes = ref([])
 
+// Joined events
 const joinedEvents = ref([])
 const loadingEvents = ref(false)
 const joinedOpen = ref(false)
 
+// Pagination
+const joinedCurrentPage = ref(1)
+const joinedItemsPerPage = 5
+
+const totalJoinedPages = computed(() =>
+  Math.ceil(joinedEvents.value.length / joinedItemsPerPage)
+)
+
+const paginatedJoinedEvents = computed(() => {
+  const start = (joinedCurrentPage.value - 1) * joinedItemsPerPage
+  const end = start + joinedItemsPerPage
+  return joinedEvents.value.slice(start, end)
+})
+
+function nextJoinedPage() {
+  if (joinedCurrentPage.value < totalJoinedPages.value)
+    joinedCurrentPage.value++
+}
+
+function prevJoinedPage() {
+  if (joinedCurrentPage.value > 1) joinedCurrentPage.value--
+}
+
+// Reset to first page whenever modal opens
+watch(joinedOpen, (open) => {
+  if (open) joinedCurrentPage.value = 1
+})
+
+// Modal
 const avatarOpen = ref(false)
 const interestsOpen = ref(false)
 const budgetOpen = ref(false)
@@ -44,6 +74,15 @@ const AVATARS = Array.from({ length: 10 }, (_, i) => {
   const ids = [1, 2, 3, 4, 5, 61, 62, 63, 64, 65]
   return `/avatars/${ids[i]}.png`
 })
+
+const PLACEHOLDER =
+  "https://cdn.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-symbol-vector.jpg"
+
+const categories = [
+  "Music","Food","Arts","Technology","Sports",
+  "Education","Business","Culture","Health","Social","Environment",
+]
+const transportOptions = ["MRT", "Bus", "Car", "Bicycle", "Walk"]
 
 const categoryColor = (cat) =>
   ({
@@ -60,15 +99,6 @@ const categoryColor = (cat) =>
     Environment: "bg-green-600",
   }[cat] || "bg-gray-500")
 
-const PLACEHOLDER =
-  "https://cdn.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-symbol-vector.jpg"
-
-const categories = [
-  "Music","Food","Arts","Technology","Sports",
-  "Education","Business","Culture","Health","Social","Environment",
-]
-const transportOptions = ["MRT", "Bus", "Car", "Bicycle", "Walk"]
-
 onMounted(async () => {
   const { data: auth } = await supabase.auth.getUser()
   if (!auth?.user) {
@@ -79,7 +109,7 @@ onMounted(async () => {
 
   user.value = auth.user
   userId.value = auth.user.id
-  name.value = auth.user.user_metadata?.first_name + " " + auth.user.user_metadata?.last_name
+  name.value = `${auth.user.user_metadata?.first_name || ""} ${auth.user.user_metadata?.last_name || ""}`.trim() || "Anonymous User"
   email.value = auth.user.email
 
   const { data, error } = await supabase
@@ -120,7 +150,7 @@ onMounted(async () => {
   await fetchJoinedEvents(eventIds)
 })
 
-// ---------- fetch joined events ----------
+// Fetch joined events
 async function fetchJoinedEvents(ids) {
   try {
     if (!Array.isArray(ids) || ids.length === 0) {
@@ -136,9 +166,11 @@ async function fetchJoinedEvents(ids) {
 
     if (error) throw error
 
-    joinedEvents.value = (data || []).sort(
-      (a, b) => new Date(b.start_date) - new Date(a.start_date)
-    )
+    // Filter out past events
+    const now = new Date()
+    joinedEvents.value = (data || [])
+      .filter((e) => new Date(e.start_date) >= now)
+      .sort((a, b) => new Date(b.start_date) - new Date(a.start_date))
   } catch (err) {
     console.error("Error fetching joined events:", err?.message || err)
     toast.error("Failed to load joined events.")
@@ -147,7 +179,6 @@ async function fetchJoinedEvents(ids) {
   }
 }
 
-// ---------- helpers ----------
 async function updatePrefs(patch) {
   const { error } = await supabase
     .from("user_preferences")
@@ -215,7 +246,6 @@ async function chooseAvatar(src) {
   }
 }
 
-// ---------- computed ----------
 const initials = computed(() =>
   name.value
     .split(" ")
@@ -225,6 +255,7 @@ const initials = computed(() =>
     .toUpperCase()
 )
 </script>
+
 
 <template>
   <section class="min-h-[93vh] py-10 md:py-16">
@@ -359,21 +390,30 @@ const initials = computed(() =>
           <DialogTitle>Your Joined Events</DialogTitle>
         </DialogHeader>
 
-        <div v-if="loadingEvents" class="flex items-center justify-center py-10 text-gray-500">
-          <Loader2 class="h-6 w-6 animate-spin mr-2 text-blue-600" /> Loading events...
+        <div
+          v-if="loadingEvents"
+          class="flex items-center justify-center py-10 text-gray-500"
+        >
+          <Loader2 class="h-6 w-6 animate-spin mr-2 text-blue-600" />
+          Loading events...
         </div>
 
         <div v-else>
-          <ul v-if="joinedEvents.length" class="divide-y divide-gray-200">
+          <!-- Paginated Events -->
+          <ul
+            v-if="paginatedJoinedEvents.length"
+            class="divide-y divide-gray-200"
+          >
             <li
-              v-for="e in joinedEvents"
+              v-for="e in paginatedJoinedEvents"
               :key="e.id"
               class="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
                 <p class="font-semibold text-gray-900">{{ e.title }}</p>
                 <p class="text-sm text-gray-600">
-                  {{ new Date(e.start_date).toLocaleDateString() }} • {{ e.venue }}
+                  {{ new Date(e.start_date).toLocaleDateString() }} •
+                  {{ e.venue }}
                 </p>
               </div>
               <Button
@@ -390,6 +430,48 @@ const initials = computed(() =>
           <p v-else class="text-center text-gray-500 py-6">
             You haven't joined any events yet.
           </p>
+
+          <!-- Pagination Controls -->
+          <div
+            v-if="totalJoinedPages > 1"
+            class="flex flex-col items-center justify-center mt-6"
+          >
+            <div class="flex items-center justify-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                :disabled="joinedCurrentPage === 1"
+                @click="prevJoinedPage"
+                class="cursor-pointer"
+              >
+                Previous
+              </Button>
+
+              <span class="text-gray-700 font-medium text-sm">
+                Page {{ joinedCurrentPage }} of {{ totalJoinedPages }}
+              </span>
+
+              <Button
+                variant="outline"
+                size="sm"
+                :disabled="joinedCurrentPage === totalJoinedPages"
+                @click="nextJoinedPage"
+                class="cursor-pointer"
+              >
+                Next
+              </Button>
+            </div>
+
+            <div class="text-gray-500 text-xs mt-2">
+              Showing
+              {{ (joinedCurrentPage - 1) * joinedItemsPerPage + 1 }} -
+              {{ Math.min(
+                joinedCurrentPage * joinedItemsPerPage,
+                joinedEvents.length
+              ) }}
+              of {{ joinedEvents.length }} joined events
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

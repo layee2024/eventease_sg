@@ -155,14 +155,36 @@ function prevPage() {
   if (currentPage.value > 1) currentPage.value--
 }
 
+function applySearchFilter(query) {
+  const q = query.toLowerCase()
+  filteredEvents.value = trendingEvents.value.filter(
+    (event) =>
+      event.title.toLowerCase().includes(q) ||
+      event.category?.toLowerCase().includes(q) ||
+      event.venue?.toLowerCase().includes(q)
+  )
+  currentPage.value = 1
+}
+watch(
+  () => route.query.search,
+  (newQuery) => {
+    if (newQuery && trendingEvents.value.length) {
+      applySearchFilter(newQuery)
+    }
+  },
+  { immediate: true }
+)
+
+
 onMounted(async () => {
   await getTrendingEvents()
   await loadUserSaved()
+
+
+  const initialQuery = route.query.search
+  if (initialQuery) applySearchFilter(initialQuery)
 })
-
 </script>
-
-
 
 <template>
   <section class="min-h-screen py-12 px-6 md:px-12 xl:px-20 bg-white">
@@ -175,11 +197,12 @@ onMounted(async () => {
     </div>
 
     <!-- Filter Bar -->
-
     <div class="flex justify-center mb-8">
-      <EventFilter @update-filter="handleFilterChange" />
+      <EventFilter 
+        :initial-search="route.query.search || ''"
+        @update-filter="handleFilterChange" 
+      />
     </div>
-
 
     <!-- Events -->
     <div

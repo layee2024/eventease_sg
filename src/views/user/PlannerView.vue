@@ -145,20 +145,17 @@ onMounted(() => {
 
 <template>
   <section class="min-h-[93vh] bg-white py-12 px-6 md:px-12 xl:px-20">
-    <!-- header -->
-    <div class="row justify-self-center">
-      <div class="bg-gray-100 rounded-full p-2">
-        <SparklesIcon class="h-9"></SparklesIcon>
-      </div>
-    </div>
-
+    <!-- Header -->
     <div class="text-center mb-10">
-    <h1 class="text-2xl font-extrabold text-gray-900">Plan your perfect day</h1>
-    <p class="text-lg text-gray-600 mt-2">
-      Let AI help you create a personalised schedule that matches
-        your goals, interest and energy level
-    </p>
-  </div>
+      <div class="flex justify-center items-center gap-1">
+        <h1 class="text-3xl font-extrabold text-gray-900">Plan your perfect day</h1>
+        <SparklesIcon class="h-6 text-purple-700"></SparklesIcon>
+    </div>
+      <p class="text-lg text-gray-600 mt-2">
+        Let AI help you create a personalised schedule that matches
+          your goals, interest and energy level
+      </p>
+    </div>
     <br><br>
     <div class="flex flex-col xl:flex-row gap-6">
 
