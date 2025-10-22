@@ -28,8 +28,7 @@ async function getCat() {
     console.error("Error fetching events:", error)
     return []
   }
-
-  // console.log(data)
+  
   return data
 }
 
