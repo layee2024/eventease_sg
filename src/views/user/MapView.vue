@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch, computed } from 'vue'
 import { supabase } from "@/utils/supabase"
 import { format, parseISO } from 'date-fns'
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
@@ -21,7 +21,6 @@ const popupRef = ref(null)
 
 const destination = ref("")
 const travelMode = ref("DRIVING")
-// const userLocation = ref(null)
 const routeDetails = ref(null)
 const showSteps = ref(false)
 
@@ -56,10 +55,8 @@ function loadGoogleMapsAPI(apiKey) {
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=beta`
     script.async = true
     script.defer = true
-
     script.onload = () => resolve(window.google)
     script.onerror = () => reject(new Error('Google Maps API failed to load'))
-
     document.head.appendChild(script)
   })
 }
@@ -107,15 +104,11 @@ async function initMap() {
 // get all categories
 async function getCat() {
   const today = new Date().toISOString()
-  
-  const { data, error } = await supabase.from("events")
-  .select("*")
-  .gte("end_date", today) 
+  const { data, error } = await supabase.from("events").select("*").gte("end_date", today) 
   if (error) {
     console.error("Error fetching events:", error)
     return []
   }
-
   categories.value = ['All Events', ...new Set(data.map(event => event.category).filter(Boolean))]
   return data
 }
@@ -170,9 +163,9 @@ function createEventPopupContent(event) {
         id="getDirectionsBtn"
         data-lat="${event.latitude}" 
         data-lng="${event.longitude}"
-        class="bg-indigo-600 text-white px-3 py-2 mt-3 rounded w-full hover:bg-indigo-500 transition"
+        class="bg-indigo-600 text-white px-3 py-2 mt-3 rounded w-full hover:bg-indigo-500 transition cursor-pointer"
       >
-        🚗 Get Directions
+        Get Directions
       </button>
     </div>
   `
@@ -199,14 +192,12 @@ function getEventMarkerByCat(cat, list) {
 function filterBySearch() {
   const search = searchVal.value.trim().toLowerCase()
   let filtered = getEventMarkerByCat(eventCat.value, allEvents.value)
-
   if (search) {
     filtered = filtered.filter(event =>
       event.title?.toLowerCase().includes(search) ||
       event.description?.toLowerCase().includes(search)
     )
   }
-
   clearMarkers()
   filtered.forEach(event => makeMarker(event, map))
 }
@@ -246,7 +237,7 @@ async function showRouteToDestination(destCoords) {
     const request = {
       origin: userLocation.value,
       destination: destCoords,
-      travelMode: google.maps.TravelMode.DRIVING,
+      travelMode: travelMode.value,
     }
 
     directionsService.route(request, (result, status) => {
@@ -260,11 +251,25 @@ async function showRouteToDestination(destCoords) {
         google.maps.event.addListener(directionsRenderer, "click", () => {
           showSteps.value = !showSteps.value
         })
+      } else {
+        console.warn("Directions request failed:", status)
+        alert("Could not fetch route for this mode.")
       }
     })
   } catch (error) {
     console.error("Directions error:", error)
   }
+}
+
+// change travel mode
+async function changeTravelMode(mode) {
+  travelMode.value = mode
+  if (!routeDetails.value) return
+  const destCoords = {
+    lat: routeDetails.value.end_location.lat(),
+    lng: routeDetails.value.end_location.lng()
+  }
+  await showRouteToDestination(destCoords)
 }
 
 onMounted(async () => {
@@ -291,25 +296,52 @@ watch([searchVal, eventCat], filterBySearch)
         id="searchcontainer"
         class="fixed z-40 top-[100px] sm:top-[80px] left-1/2 transform -translate-x-1/2 bg-white border border-gray-300 rounded-lg shadow-lg p-6 flex flex-col sm:flex-row sm:space-x-5 space-y-4 sm:space-y-0"
       >
-        <input v-model="searchVal" placeholder="🔍 Search" class="input" />
+        <input v-model="searchVal" placeholder="Search" class="input" />
         <select v-model="eventCat" class="select">
           <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
         </select>
-        <button class="btn" @click="showForm = true">Directions</button>
       </div>
 
       <!-- Route Summary Card -->
+      <transition name="fade" mode="out-in">
       <div
         v-if="routeDetails"
-        class="fixed bottom-5 right-5 bg-white shadow-xl rounded-2xl border border-gray-200 w-[350px] overflow-hidden"
+        class="fixed bottom-5 right-5 bg-white shadow-xl rounded-2xl border border-gray-200 w-[350px] overflow-hidden transition-all duration-300"
       >
         <Card class="pt-0">
-          <CardHeader class="pt-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+          <CardHeader class="py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white flex justify-between items-center">
             <CardTitle class="text-lg font-semibold flex items-center gap-2">
               Route Summary
             </CardTitle>
+            <button
+              @click="routeDetails = null"
+              class="text-white hover:text-gray-200 text-xl font-bold transition cursor-pointer"
+              title="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
           </CardHeader>
-          <CardContent class="p-4 text-sm text-gray-700 space-y-2">
+
+          <!-- Travel Mode Buttons -->
+          <div class="flex justify-around items-center">
+            <button
+              v-for="mode in ['DRIVING','TRANSIT','BICYCLING','WALKING']"
+              :key="mode"
+              @click="changeTravelMode(mode)"
+              :class="[
+                'px-3 py-1.5 rounded-md text-sm font-medium transition',
+                travelMode === mode ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
+              ]"
+            >
+              {{ mode === 'DRIVING' ? 'Car' :
+                 mode === 'TRANSIT' ? 'Bus/MRT' :
+                 mode === 'BICYCLING' ? 'Bicycle' : 'Walk' }}
+            </button>
+          </div>
+
+          <CardContent class="pb-2 text-sm text-gray-700 space-y-2">
             <div>
               <p><span class="font-semibold">From:</span> {{ routeDetails.start_address }}</p>
               <p><span class="font-semibold">To:</span> {{ routeDetails.end_address }}</p>
@@ -321,7 +353,7 @@ watch([searchVal, eventCat], filterBySearch)
           </CardContent>
         </Card>
 
-        <!-- Steps List (only visible when line is clicked) -->
+        <!-- Steps List -->
         <Card v-if="showSteps" class="mt-2 border-indigo-200">
           <CardHeader>
             <CardTitle class="text-gray-800 text-base">Step-by-Step Directions</CardTitle>
@@ -333,6 +365,7 @@ watch([searchVal, eventCat], filterBySearch)
           </CardContent>
         </Card>
       </div>
+      </transition>
     </div>
   </section>
 </template>
@@ -352,15 +385,10 @@ watch([searchVal, eventCat], filterBySearch)
   padding: 0.625rem 1rem;
   font-size: 0.875rem;
 }
-.btn {
-  background-color: #4f46e5;
-  color: white;
-  padding: 0.625rem 1.25rem;
-  border-radius: 0.375rem;
-  font-weight: 600;
-  transition: background 0.2s;
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
 }
-.btn:hover {
-  background-color: #4338ca;
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 </style>
