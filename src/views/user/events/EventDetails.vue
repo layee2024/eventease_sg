@@ -71,26 +71,32 @@ function formatDate(start, end) {
 
 // Fetch event details
 async function fetchEvent() {
-  const { data, error } = await supabase
-    .from("events")
-    .select("*")
-    .eq("id", eventId)
-    .maybeSingle()
+  loading.value = true
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .eq("id", eventId)
+      .maybeSingle()
 
-  if (error || !data) {
-    console.error(error)
-    toast.error("Event not found")
+    if (error || !data) {
+      console.error(error)
+      toast.error("Event not found")
+      return
+    }
+
+    event.value = data
+    await checkSavedStatus()
+    await checkGoingStatus()
+    await countGoingUsers()
+  } catch (err) {
+    console.error("Error fetching event:", err)
+    toast.error("An unexpected error occurred.")
+  } finally {
     loading.value = false
-    return
   }
-
-  event.value = data
-  await checkSavedStatus()
-  await checkGoingStatus()
-  await countGoingUsers()
-  loading.value = false
-
 }
+
 
 // Check if user has saved the event
 async function checkSavedStatus() {
@@ -197,12 +203,15 @@ async function toggleJoinEvent() {
 onMounted(fetchEvent)
 </script>
 
+
 <template>
   <section class="min-h-min">
+    <!-- Loading Spinner -->
     <div v-if="loading" class="flex justify-center items-center h-[80vh]">
       <div class="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full"></div>
     </div>
 
+    <!-- Event Found -->
     <div v-else-if="event" class="relative max-w-5xl mx-auto bg-white shadow-md rounded-lg overflow-hidden my-10">
       <!-- Back Button -->
       <Button
@@ -327,15 +336,15 @@ onMounted(fetchEvent)
           </div>
         </div>
 
-         <!-- Reviews Section -->
-         <div class="mt-12 border-t border-gray-200 pt-8">
+        <!-- Reviews Section -->
+        <div class="mt-12 border-t border-gray-200 pt-8">
           <ReviewList ref="reviewList" :eventId="eventId" />
           <ReviewForm :eventId="eventId" @review-added="refreshReviews" />
         </div>
-
       </div>
     </div>
 
+    <!-- Event Not Found -->
     <div v-else class="text-center py-20 text-gray-600">
       <p>Event not found.</p>
       <Button @click="router.push('/events')" variant="outline" class="mt-4">

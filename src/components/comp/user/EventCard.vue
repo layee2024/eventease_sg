@@ -24,7 +24,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update-saved"])
 const router = useRouter()
-
+const isJoined = ref(false)
 const isLiked = ref(props.liked)
 const goingCount = ref(0)
 const friendsGoingCount = ref(0)
@@ -42,6 +42,15 @@ async function fetchGoingStats(eventId) {
       loadingGoing.value = false
       return
     }
+
+    const { data: pref, error: prefErr } = await supabase
+      .from("user_preferences")
+      .select("going")
+      .eq("id", user.id)
+      .single()
+
+    if (prefErr) throw prefErr
+    isJoined.value = pref?.going?.includes(eventId)
 
     const { count, error: countErr } = await supabase
       .from("user_preferences")
@@ -157,7 +166,7 @@ const crowdColor = computed(() => {
 
 <template>
   <Card
-    class="relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 duration-300 cursor-pointer"
+    class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 duration-300 cursor-pointer"
     @click="goToDetails"
   >
     <div class="relative">
@@ -168,6 +177,17 @@ const crowdColor = computed(() => {
       />
 
       <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+      <div
+        v-if="isJoined"
+        class="absolute top-0 left-0 w-full h-full bg-black/40 flex items-center justify-center backdrop-blur-xs"
+      >
+        <span
+          class="text-white font-semibold text-sm sm:text-base bg-green-400/80 px-4 py-1.5 rounded-full shadow-lg animate-fade-in"
+        >
+          Joined
+        </span>
+      </div>
 
       <!-- Like -->
       <button
@@ -233,21 +253,18 @@ const crowdColor = computed(() => {
         <span class="text-sm text-gray-400">{{ date }}</span>
 
       </div>
-      <!-- ⭐ Mini Review Preview + distance -->
       <div
-        class="mt-2 flex items-center justify-between text-[11px] text-gray-500 border-t border-gray-100 pt-2"
+        class="mt-2 pt-2 flex items-center justify-between text-[11px] text-gray-500 border-t border-gray-100"
       >
         <ReviewPreview :eventId="id" />
-        <!-- Distance  -->
+        <!-- Distance -->
         <div v-if="distance !== undefined && distance !== Infinity && !isNaN(distance)" class="flex items-center gap-1 text-gray-500">
-      <!-- Nicer pin icon from Heroicons -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7zM12 11a2 2 0 110-4 2 2 0 010 4z"/>
-      </svg>
-      <span class="font-semibold">{{ distance.toFixed(1) }} km</span>
-
-    </div>          
-      
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7zM12 11a2 2 0 110-4 2 2 0 010 4z"/>
+          </svg>
+          <span class="font-semibold whitespace-nowrap">{{ distance.toFixed(1) }} km</span>
+        </div>          
+    
       </div>
     </CardContent>
   </Card>

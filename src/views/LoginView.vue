@@ -18,7 +18,6 @@ const router = useRouter()
 const email = ref("")
 const password = ref("")
 const loading = ref(false)
-const isOrganiser = ref(false)
 
 onMounted(async () => {
   const {
@@ -50,11 +49,7 @@ async function handleLogin() {
 
     toast.success("Welcome back!")
 
-    if (isOrganiser.value) {
-      router.push("/dashboard")
-    } else {
-      router.push("/") // Onboarding handled in Home page now
-    }
+    router.push("/") // Onboarding handled in Home page now
   } catch (err) {
     console.error(err)
     toast.error("Login failed. Try again.")
@@ -68,31 +63,10 @@ async function handleLogin() {
   <div class="min-h-[93vh] flex items-center justify-center px-4 py-10 h-full">
     <Card class="mx-auto max-w-md w-full">
       <CardHeader>
-        <CardTitle class="text-xl">Login</CardTitle>
-        <CardDescription>
-          Toggle below to login as a
-          <b>{{ isOrganiser ? "Organiser" : "User" }}</b>.
-        </CardDescription>
+        <CardTitle class="text-xl text-center">Login</CardTitle>
       </CardHeader>
 
       <CardContent>
-        <div class="relative flex bg-gray-100 rounded-xl p-1 mb-6">
-          <button
-            class="w-1/2 py-2 rounded-lg font-medium transition-all duration-300"
-            :class="isOrganiser ? 'text-gray-500' : 'bg-black text-white'"
-            @click="isOrganiser = false"
-          >
-            User
-          </button>
-          <button
-            class="w-1/2 py-2 rounded-lg font-medium transition-all duration-300"
-            :class="isOrganiser ? 'bg-black text-white' : 'text-gray-500'"
-            @click="isOrganiser = true"
-          >
-            Organiser
-          </button>
-        </div>
-
         <form @submit.prevent="handleLogin" class="grid gap-4">
           <div class="grid gap-2">
             <Label for="email">Email</Label>
