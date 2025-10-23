@@ -321,13 +321,6 @@ function isActive(path) {
                     />
                   </svg>
                   <span>Friends</span>
-
-                  <span
-                    v-show="requestCount > 0"
-                    class="flex justify-center items-center bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white shadow"
-                  >
-                    {{ requestCount }}
-                  </span>
                 </div>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

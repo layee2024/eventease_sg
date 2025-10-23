@@ -13,13 +13,32 @@ const searchResults = ref([])
 const friends = ref([])
 const requests = ref([])
 const user = ref(null)
+
 const currentPage = ref(1)
 const perPage = 5
+
 const loading = ref(false)
 const pageLoading = ref(true)
+
 const confirmOpen = ref(false)
 const friendToRemove = ref(null)
+
 const requestsOpen = ref(false)
+
+const inviteOpen = ref(false)
+const inviteTarget = ref(null)
+const joinedEvents = ref([])
+const eventPage = ref(1)
+const eventPerPage = 4
+
+const totalEventPages = computed(() => Math.ceil(joinedEvents.value.length / eventPerPage))
+const paginatedEvents = computed(() => {
+  const start = (eventPage.value - 1) * eventPerPage
+  return joinedEvents.value.slice(start, start + eventPerPage)
+})
+
+const inviteRequestsOpen = ref(false)
+const invites = ref([])
 
 const totalPages = computed(() => Math.ceil(friends.value.length / perPage))
 const paginatedFriends = computed(() => {
@@ -29,49 +48,105 @@ const paginatedFriends = computed(() => {
 
 onMounted(async () => {
   const { data: auth } = await supabase.auth.getUser()
-  if (!auth?.user) return toast.error("Please login first.")
+  if (!auth?.user) {
+    toast.error("Please login first.")
+    return
+  }
   user.value = auth.user
-  await Promise.all([fetchFriends(), fetchRequests()])
+  await Promise.all([fetchFriends(), fetchRequests(), fetchInvites()])
   pageLoading.value = false
 })
 
-// Fetch current friends
+// Friends I already have
 async function fetchFriends() {
   const { data, error } = await supabase
     .from("user_preferences")
     .select("friends")
     .eq("id", user.value.id)
     .single()
-  if (error) return toast.error("Failed to load friends.")
+  if (error) {
+    toast.error("Failed to load friends.")
+    friends.value = []
+    return
+  }
   const ids = data?.friends || []
-  if (!ids.length) return (friends.value = [])
+  if (!ids.length) {
+    friends.value = []
+    return
+  }
   const { data: users } = await supabase
     .from("user_preferences")
-    .select("id,name,email")
+    .select("id,name,email,profile_picture")
     .in("id", ids)
   friends.value = users || []
 }
 
-// Fetch friend requests
 async function fetchRequests() {
   const { data, error } = await supabase
     .from("user_preferences")
     .select("friend_requests")
     .eq("id", user.value.id)
     .single()
-  if (error) return toast.error("Failed to load requests.")
+  if (error) {
+    toast.error("Failed to load requests.")
+    requests.value = []
+    return
+  }
   const ids = data?.friend_requests || []
-  if (!ids.length) return (requests.value = [])
+  if (!ids.length) {
+    requests.value = []
+    return
+  }
   const { data: reqUsers } = await supabase
     .from("user_preferences")
-    .select("id,name,email")
+    .select("id,name,email,profile_picture")
     .in("id", ids)
   requests.value = reqUsers || []
 }
 
-// Live search
+async function fetchInvites() {
+  const { data, error } = await supabase
+    .from("user_preferences")
+    .select("invite_requests")
+    .eq("id", user.value.id)
+    .single()
+
+  if (error) {
+    console.error(error)
+    invites.value = []
+    toast.error("Failed to load invites.")
+    return
+  }
+
+  const raw = data?.invite_requests || []
+  if (!raw.length) {
+    invites.value = []
+    return
+  }
+
+  const eventIds = [...new Set(raw.map(i => i.event_id))]
+  const fromIds = [...new Set(raw.map(i => i.from))]
+
+  const [{ data: evs }, { data: users }] = await Promise.all([
+    supabase.from("events").select("id,title").in("id", eventIds),
+    supabase.from("user_preferences").select("id,name,email").in("id", fromIds)
+  ])
+
+  const evMap = new Map((evs || []).map(e => [e.id, e]))
+  const userMap = new Map((users || []).map(u => [u.id, u]))
+
+  invites.value = raw.map(i => ({
+    ...i,
+    eventTitle: evMap.get(i.event_id)?.title || "(Unknown event)",
+    fromUser: userMap.get(i.from) || { name: "Someone" }
+  }))
+}
+
 watch(searchQuery, async (q) => {
-  if (!q.trim()) return (searchResults.value = [])
+  if (!q.trim()) {
+    searchResults.value = []
+    return
+  }
   loading.value = true
   const { data, error } = await supabase
     .from("user_preferences")
@@ -79,16 +154,16 @@ watch(searchQuery, async (q) => {
     .or(`name.ilike.%${q}%,email.ilike.%${q}%`)
     .limit(8)
   loading.value = false
-  if (error) return toast.error("Search failed.")
+  if (error) {
+    toast.error("Search failed.")
+    return
+  }
   const friendIds = friends.value.map((f) => f.id)
-  searchResults.value = data.filter(
-    (u) =>
-      u.id !== user.value.id &&
-      !friendIds.includes(u.id)
+  searchResults.value = (data || []).filter(
+    (u) => u.id !== user.value.id && !friendIds.includes(u.id)
   )
 })
 
-// Send friend request
 async function sendRequest(targetId) {
   if (!targetId) return
   const { data: me } = await supabase
@@ -114,13 +189,15 @@ async function sendRequest(targetId) {
     .update({ friend_requests: targetPending })
     .eq("id", targetId)
 
-  if (e1 || e2) return toast.error("Failed to send request.")
+  if (e1 || e2) {
+    toast.error("Failed to send request.")
+    return
+  }
   toast.success("Friend request sent!")
   searchResults.value = []
   searchQuery.value = ""
 }
 
-// Accept request
 async function acceptRequest(requesterId) {
   const { data: me } = await supabase
     .from("user_preferences")
@@ -147,12 +224,14 @@ async function acceptRequest(requesterId) {
     .update({ friends: requesterFriends, sent_requests: updatedRequesterSent })
     .eq("id", requesterId)
 
-  if (e1 || e2) return toast.error("Failed to accept request.")
+  if (e1 || e2) {
+    toast.error("Failed to accept request.")
+    return
+  }
   toast.success("Friend added!")
   await Promise.all([fetchFriends(), fetchRequests()])
 }
 
-// Decline request
 async function declineRequest(requesterId) {
   const { data: me } = await supabase
     .from("user_preferences")
@@ -187,7 +266,6 @@ async function removeFriendConfirmed() {
       return
     }
 
-    // Fetch both users’ current friend lists
     const { data: me, error: meErr } = await supabase
       .from("user_preferences")
       .select("friends")
@@ -205,7 +283,6 @@ async function removeFriendConfirmed() {
     const myFriends = (me?.friends || []).map(String).filter((id) => id !== String(friendId))
     const friendFriends = (friend?.friends || []).map(String).filter((id) => id !== String(user.value.id))
 
-    // Update both records
     const { error: e1 } = await supabase
       .from("user_preferences")
       .update({ friends: myFriends })
@@ -228,6 +305,139 @@ async function removeFriendConfirmed() {
   }
 }
 
+// open modal and load my joined events
+async function openInviteModal(friend) {
+  inviteTarget.value = friend
+  inviteOpen.value = true
+  await fetchJoinedEvents()
+}
+
+async function fetchJoinedEvents() {
+  try {
+    const { data: userPref, error: userErr } = await supabase
+      .from("user_preferences")
+      .select("going")
+      .eq("id", user.value.id)
+      .single()
+
+    if (userErr) throw userErr
+
+    const joinedIds = userPref?.going || []
+
+    if (!joinedIds.length) {
+      toast.info("You haven't joined any events yet.")
+      joinedEvents.value = []
+      return
+    }
+
+    const { data: events, error: eventErr } = await supabase
+      .from("events")
+      .select("id, title, venue, start_date, end_date")
+      .in("id", joinedIds)
+
+    if (eventErr) throw eventErr
+
+    console.log("Fetched events:", events)
+    joinedEvents.value = events || []
+  } catch (err) {
+    console.error("fetchJoinedEvents error:", err)
+    toast.error("Failed to load your joined events.")
+    joinedEvents.value = []
+  }
+}
+
+async function sendEventInvite(targetId, eventId) {
+  try {
+    const [{ data: me }, { data: target }] = await Promise.all([
+      supabase.from("user_preferences").select("sent_invites").eq("id", user.value.id).single(),
+      supabase.from("user_preferences").select("invite_requests").eq("id", targetId).single()
+    ])
+
+    const newSent = [...(me?.sent_invites || []), { event_id: eventId, to: targetId }]
+    const newReceived = [...(target?.invite_requests || []), { event_id: eventId, from: user.value.id }]
+
+    const [{ error: e1 }, { error: e2 }] = await Promise.all([
+      supabase.from("user_preferences").update({ sent_invites: newSent }).eq("id", user.value.id),
+      supabase.from("user_preferences").update({ invite_requests: newReceived }).eq("id", targetId)
+    ])
+
+    if (e1 || e2) throw new Error("Failed to update records")
+    toast.success("Invite sent!")
+    inviteOpen.value = false
+    await fetchInvites()
+  } catch (err) {
+    console.error(err)
+    toast.error("Could not send invite.")
+  }
+}
+
+async function acceptInvite(inv) {
+  try {
+    const { data: me, error: meErr } = await supabase
+      .from("user_preferences")
+      .select("going")
+      .eq("id", user.value.id)
+      .single()
+    if (meErr) throw meErr
+
+    const updatedGoing = Array.from(new Set([...(me?.going || []), inv.event_id]))
+    const { error: eGoing } = await supabase
+      .from("user_preferences")
+      .update({ going: updatedGoing })
+      .eq("id", user.value.id)
+    if (eGoing) throw eGoing
+
+    const [{ data: myInvites }, { data: senderInvites }] = await Promise.all([
+      supabase.from("user_preferences").select("invite_requests").eq("id", user.value.id).single(),
+      supabase.from("user_preferences").select("sent_invites").eq("id", inv.from).single(),
+    ])
+
+    const myUpdated = (myInvites?.invite_requests || [])
+      .filter((i) => !(i.event_id === inv.event_id && i.from === inv.from))
+    const senderUpdated = (senderInvites?.sent_invites || [])
+      .filter((i) => !(i.event_id === inv.event_id && i.to === user.value.id))
+
+    const [{ error: e1 }, { error: e2 }] = await Promise.all([
+      supabase.from("user_preferences").update({ invite_requests: myUpdated }).eq("id", user.value.id),
+      supabase.from("user_preferences").update({ sent_invites: senderUpdated }).eq("id", inv.from),
+    ])
+    if (e1 || e2) throw new Error("Failed to finalize invite")
+
+    toast.success("Joined event successfully!")
+    await fetchInvites()
+    await fetchJoinedEvents()
+  } catch (err) {
+    console.error("acceptInvite error:", err)
+    toast.error("Could not accept invite.")
+  }
+}
+
+
+async function declineInvite(inv) {
+  try {
+    const [{ data: me }, { data: sender }] = await Promise.all([
+      supabase.from("user_preferences").select("invite_requests").eq("id", user.value.id).single(),
+      supabase.from("user_preferences").select("sent_invites").eq("id", inv.from).single()
+    ])
+
+    const myUpdated = (me?.invite_requests || [])
+      .filter(i => !(i.event_id === inv.event_id && i.from === inv.from))
+    const senderUpdated = (sender?.sent_invites || [])
+      .filter(i => !(i.event_id === inv.event_id && i.to === user.value.id))
+
+    const [{ error: e1 }, { error: e2 }] = await Promise.all([
+      supabase.from("user_preferences").update({ invite_requests: myUpdated }).eq("id", user.value.id),
+      supabase.from("user_preferences").update({ sent_invites: senderUpdated }).eq("id", inv.from)
+    ])
+    if (e1 || e2) throw new Error("Failed to update invite")
+
+    toast.info("Invite declined.")
+    await fetchInvites()
+  } catch (err) {
+    console.error(err)
+    toast.error("Could not decline invite.")
+  }
+}
 </script>
 
 <template>
@@ -247,19 +457,30 @@ async function removeFriendConfirmed() {
     <!-- Search -->
     <div class="max-w-md mx-auto mb-8 relative">
       <div class="flex gap-2 relative">
-        <Input v-model="searchQuery" placeholder="Search users by name or email..."
-          class="flex-1 border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-4" />
-        <Button class="cursor-pointer" @click="searchQuery ? null : toast.info('Type a name or email to search!')">Search</Button>
+        <Input
+          v-model="searchQuery"
+          placeholder="Search users by name or email..."
+          class="flex-1 border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-4"
+        />
+        <Button class="cursor-pointer" @click="searchQuery ? null : toast.info('Type a name or email to search!')">
+          Search
+        </Button>
       </div>
 
       <!-- Autocomplete -->
-      <ul v-if="searchResults.length || loading" class="absolute left-0 right-0 mt-2 bg-white border rounded-lg shadow-lg z-10 max-h-72 overflow-y-auto">
+      <ul
+        v-if="searchResults.length || loading"
+        class="absolute left-0 right-0 mt-2 bg-white border rounded-lg shadow-lg z-10 max-h-72 overflow-y-auto"
+      >
         <li v-if="loading" class="px-4 py-3 text-gray-500 text-sm flex justify-center items-center">
           <Loader2 class="h-4 w-4 text-blue-500 animate-spin mr-2" /> Searching...
         </li>
 
-        <li v-for="user in searchResults" :key="user.id"
-          class="px-4 py-2 flex justify-between items-center hover:bg-gray-50 transition">
+        <li
+          v-for="user in searchResults"
+          :key="user.id"
+          class="px-4 py-2 flex justify-between items-center hover:bg-gray-50 transition"
+        >
           <div>
             <p class="font-semibold text-gray-900">{{ user.name }}</p>
             <p class="text-sm text-gray-500">{{ user.email }}</p>
@@ -267,8 +488,7 @@ async function removeFriendConfirmed() {
           <Button size="sm" class="cursor-pointer" @click="sendRequest(user.id)">Request</Button>
         </li>
 
-        <li v-if="!loading && searchResults.length === 0 && searchQuery"
-          class="px-4 py-3 text-gray-500 text-sm text-center">
+        <li v-if="!loading && searchResults.length === 0 && searchQuery" class="px-4 py-3 text-gray-500 text-sm text-center">
           No users found.
         </li>
       </ul>
@@ -279,15 +499,15 @@ async function removeFriendConfirmed() {
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3 text-center sm:text-left">
         <h2 class="text-xl font-extrabold text-gray-800">Friends List</h2>
 
-        <Button
-          variant="outline"
-          class="sm:w-auto mx-auto sm:mx-4 cursor-pointer max-w-1/2"
-          @click="requestsOpen = true"
-        >
-          Friend Requests ({{ requests.length }})
-        </Button>
+        <div class="flex justify-center sm:justify-end gap-2">
+          <Button variant="outline" class="cursor-pointer" @click="requestsOpen = true">
+            Friend Requests ({{ requests.length }})
+          </Button>
+          <Button variant="outline" class="cursor-pointer" @click="inviteRequestsOpen = true">
+            Invite Requests ({{ invites.length }})
+          </Button>
+        </div>
       </div>
-
 
       <Table>
         <TableCaption v-if="friends.length === 0 && !pageLoading">You have no friends yet 😢</TableCaption>
@@ -297,17 +517,33 @@ async function removeFriendConfirmed() {
             <TableHead class="w-[60px] text-center">S/N</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead class="text-center w-[120px]">Actions</TableHead>
+            <TableHead class="text-center w-[200px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
           <TableRow v-for="(f, index) in paginatedFriends" :key="f.id" class="hover:bg-gray-50">
-            <TableCell class="text-center font-medium text-gray-600">{{ index + 1 + (currentPage - 1) * perPage }}</TableCell>
-            <TableCell><p class="font-semibold text-gray-900">{{ f.name }}</p></TableCell>
-            <TableCell><p class="text-sm text-gray-500">{{ f.email }}</p></TableCell>
+            <TableCell class="text-center font-medium text-gray-600">
+              {{ index + 1 + (currentPage - 1) * perPage }}
+            </TableCell>
+            <TableCell class="flex items-center gap-3">
+              <img
+                :src="f.profile_picture || '/default-avatar.png'"
+                alt="Profile Picture"
+                class="w-10 h-10 rounded-full object-cover border border-gray-200"
+              />
+              <p class="font-semibold text-gray-900">{{ f.name }}</p>
+            </TableCell>
+            <TableCell>
+              <p class="text-sm text-gray-500">{{ f.email }}</p>
+            </TableCell>
             <TableCell class="text-center">
-              <Button variant="destructive" size="sm" class="cursor-pointer" @click="confirmRemove(f)">Remove</Button>
+              <div class="flex justify-center gap-2">
+                <Button variant="secondary" size="sm" class="cursor-pointer" @click="openInviteModal(f)">
+                  Invite
+                </Button>
+                <Button size="sm" variant="destructive" class="cursor-pointer" @click="confirmRemove(f)">Remove</Button>
+              </div>
             </TableCell>
           </TableRow>
         </TableBody>
@@ -321,7 +557,7 @@ async function removeFriendConfirmed() {
       </div>
     </div>
 
-    <!-- Requests Dialog -->
+    <!-- Friend Requests Dialog -->
     <Dialog v-model:open="requestsOpen">
       <DialogContent class="max-w-md">
         <DialogHeader><DialogTitle>Pending Friend Requests</DialogTitle></DialogHeader>
@@ -338,6 +574,70 @@ async function removeFriendConfirmed() {
           </li>
         </ul>
         <p v-else class="text-center text-gray-500 py-4">No pending requests.</p>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Invite Friend Dialog -->
+    <Dialog v-model:open="inviteOpen">
+      <DialogContent class="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Invite {{ inviteTarget?.name }} to an Event</DialogTitle>
+        </DialogHeader>
+
+        <!-- Pagination Setup -->
+        <div v-if="joinedEvents.length" class="space-y-3 mt-2">
+          <div
+            v-for="ev in paginatedEvents"
+            :key="ev.id"
+            class="border border-gray-200 rounded-lg p-3 flex justify-between items-center"
+          >
+            <div>
+              <p class="font-semibold text-gray-800">{{ ev.title }}</p>
+              <p class="text-sm text-gray-500">{{ ev.venue }}</p>
+            </div>
+            <Button size="sm" class="cursor-pointer" @click="sendEventInvite(inviteTarget.id, ev.id)">
+              Invite
+            </Button>
+          </div>
+
+          <!-- Dot Pagination -->
+          <div v-if="totalEventPages > 1" class="flex justify-center mt-3 space-x-2">
+            <span
+              v-for="n in totalEventPages"
+              :key="'event-dot-' + n"
+              class="w-3 h-3 rounded-full cursor-pointer transition-all duration-300"
+              :class="eventPage === n ? 'bg-blue-600 scale-110' : 'bg-gray-400 opacity-50'"
+              @click="eventPage = n"
+            ></span>
+          </div>
+        </div>
+
+        <p v-else class="text-gray-500 text-center py-3">
+          You haven't joined any events yet.
+        </p>
+      </DialogContent>
+    </Dialog>
+
+
+    <!-- Invite Requests Dialog -->
+    <Dialog v-model:open="inviteRequestsOpen">
+      <DialogContent class="max-w-md">
+        <DialogHeader><DialogTitle>Event Invites</DialogTitle></DialogHeader>
+
+        <ul v-if="invites.length" class="divide-y divide-gray-200">
+          <li v-for="i in invites" :key="i.event_id + '-' + i.from" class="py-3 flex justify-between items-center">
+            <div>
+              <p class="font-semibold text-gray-900">{{ i.fromUser?.name }} invited you</p>
+              <p class="text-sm text-gray-500">{{ i.eventTitle }}</p>
+            </div>
+            <div class="flex gap-2">
+              <Button size="sm" class="cursor-pointer" @click="acceptInvite(i)">Accept</Button>
+              <Button variant="outline" size="sm" class="cursor-pointer" @click="declineInvite(i)">Decline</Button>
+            </div>
+          </li>
+        </ul>
+
+        <p v-else class="text-center text-gray-500 py-4">No event invites yet.</p>
       </DialogContent>
     </Dialog>
 
@@ -360,7 +660,3 @@ async function removeFriendConfirmed() {
     </Dialog>
   </section>
 </template>
-
-<style scoped>
-
-</style>

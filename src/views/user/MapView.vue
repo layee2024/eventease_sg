@@ -261,7 +261,6 @@ async function showRouteToDestination(destCoords) {
   }
 }
 
-// change travel mode
 async function changeTravelMode(mode) {
   travelMode.value = mode
   if (!routeDetails.value) return
@@ -330,6 +329,7 @@ watch([searchVal, eventCat], filterBySearch)
               v-for="mode in ['DRIVING','TRANSIT','BICYCLING','WALKING']"
               :key="mode"
               @click="changeTravelMode(mode)"
+              class="cursor-pointer"
               :class="[
                 'px-3 py-1.5 rounded-md text-sm font-medium transition',
                 travelMode === mode ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
