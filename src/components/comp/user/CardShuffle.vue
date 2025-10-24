@@ -237,7 +237,7 @@ function getCategoryColor(category) {
         @click="shuffleCards"
         :disabled="isShuffling || props.events.length === 0"
         size="lg"
-        class="gap-2 px-8 py-6 text-lg font-bold"
+        class="gap-2 px-8 py-6 text-lg font-bold cursor-pointer"
         :class="isShuffling ? 'animate-pulse' : ''"
       >
         <Sparkles v-if="!isShuffling" class="w-6 h-6" />

@@ -61,6 +61,26 @@ function loadGoogleMapsAPI(apiKey) {
   })
 }
 
+const joinedIds = ref([])
+
+async function loadJoinedEvents() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const { data, error } = await supabase
+    .from("user_preferences")
+    .select("going")
+    .eq("id", user.id)
+    .single()
+
+  if (error) {
+    console.error("Error fetching joined events:", error)
+    return
+  }
+  joinedIds.value = data?.going || []
+}
+
+
 // Initialize map
 async function initMap() {
   const apiKey = import.meta.env.VITE_Google_map_API_key
@@ -114,15 +134,24 @@ async function getCat() {
 }
 
 async function makeMarker(event, map) {
-  const { AdvancedMarkerElement } = await google.maps.importLibrary('marker')
+  const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary('marker')
   const lat = parseFloat(event.latitude)
   const lng = parseFloat(event.longitude)
   if (!lat || !lng) return
+
+  // Green if going, blue otherwise
+  const isJoined = joinedIds.value.includes(event.id)
+  const pin = new PinElement({
+    background: isJoined ? "#16A34A" : "#EA4335",
+    borderColor: "#FFFFFF",
+    glyphColor: "#FFFFFF"
+  })
 
   const marker = new AdvancedMarkerElement({
     map,
     position: { lat, lng },
     title: event.title,
+    content: pin.element,
     gmpClickable: true
   })
 
@@ -146,6 +175,7 @@ async function makeMarker(event, map) {
       }
     }, 300)
   })
+
   markers.value.push(marker)
 }
 
@@ -273,6 +303,7 @@ async function changeTravelMode(mode) {
 
 onMounted(async () => {
   document.body.style.overflow = 'hidden'
+  await loadJoinedEvents()
   await initMap()
   getCurrLoc()
 })
@@ -288,15 +319,15 @@ watch([searchVal, eventCat], filterBySearch)
 
 <template>
   <section>
-    <div id="map-container" class="relative w-full h-screen">
-      <div id="map" class="inset-0 z-0 h-[95vh] w-screen"></div>
+    <div id="map-container" class="relative w-full h-[93vh]">
+      <div id="map" class="inset-0 z-0 pt-2 h-[92vh] w-screen"></div>
 
       <div
         id="searchcontainer"
         class="fixed z-40 top-[100px] sm:top-[80px] left-1/2 transform -translate-x-1/2 bg-white border border-gray-300 rounded-lg shadow-lg p-6 flex flex-col sm:flex-row sm:space-x-5 space-y-4 sm:space-y-0"
       >
         <input v-model="searchVal" placeholder="Search" class="input" />
-        <select v-model="eventCat" class="select">
+        <select v-model="eventCat" class="select cursor-pointer">
           <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
         </select>
       </div>
@@ -367,6 +398,53 @@ watch([searchVal, eventCat], filterBySearch)
       </div>
       </transition>
     </div>
+    <!-- Map Legend -->
+<div
+  id="map-legend"
+  class="fixed bottom-6 left-6 bg-white border border-gray-300 shadow-md rounded-lg px-4 py-3 text-sm text-gray-700 space-y-3 z-40"
+>
+  <div class="font-semibold text-gray-800 mb-1">Legend</div>
+
+  <!-- Joined Events -->
+  <div class="flex items-center gap-2">
+    <div class="w-4 h-5">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full text-[#16A34A]">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+      </svg>
+    </div>
+    <span>Joined Events</span>
+  </div>
+
+  <!-- Available Events -->
+  <div class="flex items-center gap-2">
+    <div class="w-4 h-5">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full text-[#EA4335]">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+      </svg>
+    </div>
+    <span>Available Events</span>
+  </div>
+
+  <!-- Your Current Location -->
+  <div class="flex items-center gap-2">
+    <div class="w-4 h-5">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+      </svg>
+    </div>
+    <span>Your Location</span>
+  </div>
+
+  <!-- Route Line -->
+  <div class="flex items-center gap-2">
+    <div class="w-4 h-[3px] bg-indigo-500 rounded"></div>
+    <span>Route Path</span>
+  </div>
+</div>
+
+
   </section>
 </template>
 

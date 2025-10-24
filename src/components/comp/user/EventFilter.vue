@@ -83,7 +83,7 @@ watch(searchQuery, () => {
   <!-- Category -->
   <select
     v-model="category"
-    class="border rounded-lg px-3 py-2 w-full text-sm sm:text-base"
+    class="border rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
   >
     <option value="">All Categories</option>
     <option value="Music">Music</option>
@@ -102,7 +102,7 @@ watch(searchQuery, () => {
   <!-- Crowd Level -->
   <select
     v-model="crowdLevel"
-    class="border rounded-lg px-3 py-2 w-full text-sm sm:text-base"
+    class="border rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
   >
     <option value="">Any Crowd</option>
     <option value="High">High</option>
@@ -113,7 +113,7 @@ watch(searchQuery, () => {
   <!-- Sort By -->
   <select
     v-model="sortOption"
-    class="border rounded-lg px-3 py-2 w-full text-sm sm:text-base"
+    class="border rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
   >
     <option value="">Sort By</option>
     <option value="distance">Nearest</option>
@@ -129,14 +129,14 @@ watch(searchQuery, () => {
   <div class="flex flex-col sm:flex-row gap-3 justify-center w-full col-span-full md:col-span-1">
     <button
       @click="applyFilter"
-      class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition w-full sm:w-auto"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition w-full sm:w-auto cursor-pointer"
     >
       Search
     </button>
 
     <button
       @click="resetFilter"
-      class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg font-medium transition w-full sm:w-auto"
+      class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg font-medium transition w-full sm:w-auto cursor-pointer"
     >
       Reset
     </button>

@@ -247,10 +247,10 @@ function isActive(path) {
 
         <template v-else>
           <DropdownMenu>
-            <DropdownMenuTrigger as-child>
+            <DropdownMenuTrigger as-child class="cursor-pointer">
               <Button
                 variant="outline"
-                class="font-medium flex items-center gap-1 cursor-pointer"
+                class="font-medium flex items-center gap-1"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

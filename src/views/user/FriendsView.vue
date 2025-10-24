@@ -43,6 +43,7 @@ const invites = ref([])
 const totalPages = computed(() => Math.ceil(friends.value.length / perPage))
 const paginatedFriends = computed(() => {
   const start = (currentPage.value - 1) * perPage
+  console.log(paginatedFriends)
   return friends.value.slice(start, start + perPage)
 })
 
@@ -348,20 +349,51 @@ async function fetchJoinedEvents() {
 
 async function sendEventInvite(targetId, eventId) {
   try {
-    const [{ data: me }, { data: target }] = await Promise.all([
-      supabase.from("user_preferences").select("sent_invites").eq("id", user.value.id).single(),
-      supabase.from("user_preferences").select("invite_requests").eq("id", targetId).single()
+    // Check if the friend is already in the event
+    const { data: target } = await supabase
+      .from("user_preferences")
+      .select("going")
+      .eq("id", targetId)
+      .single()
+
+    if (target?.going?.includes(eventId)) {
+      toast.info("User already joined this event.")
+      return
+    }
+
+    // Get invite data
+    const [{ data: me }, { data: targetInvites }] = await Promise.all([
+      supabase
+        .from("user_preferences")
+        .select("sent_invites")
+        .eq("id", user.value.id)
+        .single(),
+      supabase
+        .from("user_preferences")
+        .select("invite_requests")
+        .eq("id", targetId)
+        .single(),
     ])
 
+    // Check if an invite for this event already exists
+    const alreadyInvited = (targetInvites?.invite_requests || []).some(
+      (i) => i.event_id === eventId && i.from === user.value.id
+    )
+    if (alreadyInvited) {
+      toast.info("Invite already sent.")
+      return
+    }
+
     const newSent = [...(me?.sent_invites || []), { event_id: eventId, to: targetId }]
-    const newReceived = [...(target?.invite_requests || []), { event_id: eventId, from: user.value.id }]
+    const newReceived = [...(targetInvites?.invite_requests || []), { event_id: eventId, from: user.value.id }]
 
     const [{ error: e1 }, { error: e2 }] = await Promise.all([
       supabase.from("user_preferences").update({ sent_invites: newSent }).eq("id", user.value.id),
-      supabase.from("user_preferences").update({ invite_requests: newReceived }).eq("id", targetId)
+      supabase.from("user_preferences").update({ invite_requests: newReceived }).eq("id", targetId),
     ])
 
     if (e1 || e2) throw new Error("Failed to update records")
+
     toast.success("Invite sent!")
     inviteOpen.value = false
     await fetchInvites()
@@ -370,6 +402,7 @@ async function sendEventInvite(targetId, eventId) {
     toast.error("Could not send invite.")
   }
 }
+
 
 async function acceptInvite(inv) {
   try {
@@ -654,7 +687,7 @@ async function declineInvite(inv) {
         </p>
         <DialogFooter>
           <Button variant="outline" class="cursor-pointer" @click="confirmOpen = false">Cancel</Button>
-          <Button variant="destructive" class="cursor-pointer" @click="removeFriendConfirmed">Yes, Remove</Button>
+          <Button variant="destructive" class="cursor-pointer" @click="removeFriendConfirmed">Yes</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

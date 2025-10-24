@@ -5,8 +5,13 @@ import { supabase } from "@/utils/supabase"
 import { Card, CardContent } from "@/components/ui/card"
 import { Heart } from "lucide-vue-next"
 import { toast } from "vue-sonner"
-import ReviewPreview  from "@/components/comp/user/ReviewPreview.vue"
-
+import ReviewPreview from "@/components/comp/user/ReviewPreview.vue"
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider
+} from "@/components/ui/tooltip"
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -27,7 +32,7 @@ const router = useRouter()
 const isJoined = ref(false)
 const isLiked = ref(props.liked)
 const goingCount = ref(0)
-const friendsGoingCount = ref(0)
+const friendsGoing = ref([]) // holds array of friend objects
 const loadingGoing = ref(true)
 
 async function fetchGoingStats(eventId) {
@@ -38,28 +43,29 @@ async function fetchGoingStats(eventId) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       goingCount.value = 0
-      friendsGoingCount.value = 0
+      friendsGoing.value = []
       loadingGoing.value = false
       return
     }
 
+    // check if user joined
     const { data: pref, error: prefErr } = await supabase
       .from("user_preferences")
       .select("going")
       .eq("id", user.id)
       .single()
-
     if (prefErr) throw prefErr
     isJoined.value = pref?.going?.includes(eventId)
 
+    // total going
     const { count, error: countErr } = await supabase
       .from("user_preferences")
       .select("id", { count: "exact", head: true })
       .contains("going", [eventId])
-
     if (countErr) throw countErr
     goingCount.value = count ?? 0
 
+    // get friends list
     const { data: me, error: meErr } = await supabase
       .from("user_preferences")
       .select("friends")
@@ -68,26 +74,26 @@ async function fetchGoingStats(eventId) {
     if (meErr) throw meErr
 
     const friends = me?.friends || []
-    if (friends.length === 0) {
-      friendsGoingCount.value = 0
+    if (!friends.length) {
+      friendsGoing.value = []
       loadingGoing.value = false
       return
     }
 
-    // friends
-    const { count: fCount, error: fErr } = await supabase
+    // get which friends are going
+    const { data: goingFriends, error: fErr } = await supabase
       .from("user_preferences")
-      .select("id", { count: "exact", head: true })
+      .select("id, name, profile_picture, going")
       .in("id", friends)
-      .contains("going", [eventId])
-
     if (fErr) throw fErr
-    friendsGoingCount.value = fCount ?? 0
+
+    const filtered = (goingFriends || []).filter(f => (f.going || []).includes(eventId))
+    friendsGoing.value = filtered
   } catch (err) {
     console.error("Error fetching going stats:", err)
     toast.error("Failed to load going stats")
     goingCount.value = 0
-    friendsGoingCount.value = 0
+    friendsGoing.value = []
   } finally {
     loadingGoing.value = false
   }
@@ -161,8 +167,15 @@ const crowdColor = computed(() => {
   if (level.includes("high") || level.includes("busy")) return "bg-red-500"
   return "bg-gray-400"
 })
-</script>
 
+const friendHoverText = computed(() => {
+  const names = friendsGoing.value.map(f => f.name)
+  if (names.length < 3) return names.join(", ")
+  const firstThree = names.slice(0, 3)
+  const others = names.length - 3
+  return `${firstThree.join(", ")} + ${others} others`
+})
+</script>
 
 <template>
   <Card
@@ -216,29 +229,63 @@ const crowdColor = computed(() => {
         <span :class="['w-2 h-2 rounded-full', crowdColor]" />
         {{ crowd }}
       </span>
-
-   
-
     </div>
 
-    <CardContent class="p-4">
+    <CardContent class="px-4">
       <h3 class="font-semibold text-gray-900 text-base truncate mb-1">{{ title }}</h3>
       <p class="text-sm text-gray-500 truncate">{{ location }}</p>
 
-    
-      <!-- People going -->
-      <p class="text-blue-600 font-medium text-sm mt-2 h-5 flex items-center gap-1">
-        <span v-if="loadingGoing" class="inline-flex items-center gap-2 text-gray-400">
-          <span class="h-3 w-3 border-2 border-gray-300 border-t-transparent rounded-full animate-spin"></span>
-          Loading…
-        </span>
-        <span v-else>
-          {{ goingCount }} {{ goingCount === 1 ? 'person' : 'people' }} going
-          <span v-if="friendsGoingCount > 0" class="text-gray-500 text-xs ml-1">
-            • {{ friendsGoingCount }} {{ friendsGoingCount === 1 ? 'friend' : 'friends' }} going
+      <div class="mt-2 flex items-center gap-2">
+        <!-- People going -->
+        <p class="text-blue-600 font-medium text-sm flex items-center gap-1">
+          <span v-if="loadingGoing" class="inline-flex items-center gap-2 text-gray-400">
+            <span class="h-3 w-3 border-2 border-gray-300 border-t-transparent rounded-full animate-spin"></span>
+            Loading…
           </span>
+          <span v-else>
+            {{ goingCount }} {{ goingCount === 1 ? 'person' : 'people' }} going
+          </span>
+        </p>
+        <span>
+          •
         </span>
-      </p>
+        
+        <!-- Friends going -->
+         <div class="flex justify-center items-center">
+           <div
+           v-if="!loadingGoing && friendsGoing.length"
+           class="flex -space-x-2 items-center"
+           :title="friendHoverText"
+           >
+           <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <div class="flex -space-x-2 items-center cursor-pointer">
+                  <img
+                    v-for="(f, index) in friendsGoing.slice(0, 3)"
+                    :key="f.id"
+                    :src="f.profile_picture || '/default-avatar.png'"
+                    :alt="f.name"
+                    :style="{
+                      left: `${index * 20}%`,
+                      zIndex: 10 + index
+                    }"
+                    class="w-6 h-6 rounded-full border-2 border-white hover:scale-110 transition-all duration-150"
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent class="bg-gray-900 text-white text-xs px-2 py-1 rounded">
+                {{ friendHoverText }}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          </div>
+          <span class="text-gray-500 text-xs">
+            {{ friendsGoing.length }} friends going
+          </span>
+        </div>
+      </div>
 
       <div class="flex justify-between items-center mt-3">
         <span
@@ -251,20 +298,21 @@ const crowdColor = computed(() => {
           {{ price }}
         </span>
         <span class="text-sm text-gray-400">{{ date }}</span>
-
       </div>
+
       <div
         class="mt-2 pt-2 flex items-center justify-between text-[11px] text-gray-500 border-t border-gray-100"
       >
         <ReviewPreview :eventId="id" />
-        <!-- Distance -->
-        <div v-if="distance !== undefined && distance !== Infinity && !isNaN(distance)" class="flex items-center gap-1 text-gray-500">
+        <div
+          v-if="distance !== undefined && distance !== Infinity && !isNaN(distance)"
+          class="flex items-center gap-1 text-gray-500"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7zM12 11a2 2 0 110-4 2 2 0 010 4z"/>
           </svg>
           <span class="font-semibold whitespace-nowrap">{{ distance.toFixed(1) }} km</span>
-        </div>          
-    
+        </div>
       </div>
     </CardContent>
   </Card>

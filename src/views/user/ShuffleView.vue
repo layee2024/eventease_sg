@@ -164,7 +164,8 @@ function viewEventDetails() {
     return;
   }
 
-  router.push(`/event/${selectedEvent.value.id}`);
+  // Add query param to remember source
+  router.push({ path: `/event/${selectedEvent.value.id}`, query: { from: "shuffle" } });
 }
 
 // Go to preferences to customize filters
