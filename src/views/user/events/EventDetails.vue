@@ -509,10 +509,10 @@ onMounted(async () => {
               {{ goingCount }} {{ goingCount === 1 ? "person is" : "people are" }} going
             </p>
 
-            <span class="text-gray-500 text-xs"> • </span>
-
+            
             <!-- Friends going avatars -->
             <div v-if="!loadingFriends && friendsGoing.length" class="flex items-center gap-2">
+              <span class="text-gray-500 text-xs"> • </span>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger as-child>
