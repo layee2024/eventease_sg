@@ -196,7 +196,6 @@ onMounted(() => getCat());
               <SparklesIcon class="h-6 w-6" /> {{ isLoading ? 'Generating...' : 'Plan my day!' }}
             </button>
             <button type="button" @click="resetForm" class="underline text-gray-400 hover:text-gray-600">Reset</button>
-            hello world
           </div>
         </form>
       </div>
