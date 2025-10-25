@@ -2,17 +2,19 @@
 import { ref, onMounted, computed, watch } from "vue"
 import { useRouter } from "vue-router"
 import { supabase } from "@/utils/supabase"
-import { Card, CardContent } from "@/components/ui/card"
-import { Heart } from "lucide-vue-next"
 import { toast } from "vue-sonner"
 import ReviewPreview from "@/components/comp/user/ReviewPreview.vue"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider
 } from "@/components/ui/tooltip"
+import { Card, CardContent } from "@/components/ui/card"
+import { Heart } from "lucide-vue-next"
 
+// === Props & Emits ===
 const props = defineProps({
   id: { type: String, required: true },
   title: String,
@@ -28,27 +30,31 @@ const props = defineProps({
 })
 
 const emit = defineEmits(["update-saved"])
+
+// === State ===
 const router = useRouter()
 const isJoined = ref(false)
 const isLiked = ref(props.liked)
 const goingCount = ref(0)
-const friendsGoing = ref([]) // holds array of friend objects
-const loadingGoing = ref(true)
+const friendsGoing = ref([])
+const loadingOverall = ref(true) // 👈 NEW main loading state
 
+// === Fetch all data ===
 async function fetchGoingStats(eventId) {
   if (!eventId) return
-  loadingGoing.value = true
+  loadingOverall.value = true // 👈 start of all loading
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
+      isJoined.value = false
       goingCount.value = 0
       friendsGoing.value = []
-      loadingGoing.value = false
+      loadingOverall.value = false
       return
     }
 
-    // check if user joined
+    // --- 1️⃣ Get user join status ---
     const { data: pref, error: prefErr } = await supabase
       .from("user_preferences")
       .select("going")
@@ -57,7 +63,7 @@ async function fetchGoingStats(eventId) {
     if (prefErr) throw prefErr
     isJoined.value = pref?.going?.includes(eventId)
 
-    // total going
+    // --- 2️⃣ Get total going count ---
     const { count, error: countErr } = await supabase
       .from("user_preferences")
       .select("id", { count: "exact", head: true })
@@ -65,7 +71,7 @@ async function fetchGoingStats(eventId) {
     if (countErr) throw countErr
     goingCount.value = count ?? 0
 
-    // get friends list
+    // --- 3️⃣ Get friends going ---
     const { data: me, error: meErr } = await supabase
       .from("user_preferences")
       .select("friends")
@@ -76,11 +82,10 @@ async function fetchGoingStats(eventId) {
     const friends = me?.friends || []
     if (!friends.length) {
       friendsGoing.value = []
-      loadingGoing.value = false
+      loadingOverall.value = false
       return
     }
 
-    // get which friends are going
     const { data: goingFriends, error: fErr } = await supabase
       .from("user_preferences")
       .select("id, name, profile_picture, going")
@@ -90,15 +95,17 @@ async function fetchGoingStats(eventId) {
     const filtered = (goingFriends || []).filter(f => (f.going || []).includes(eventId))
     friendsGoing.value = filtered
   } catch (err) {
-    console.error("Error fetching going stats:", err)
-    toast.error("Failed to load going stats")
+    console.error("Error fetching event data:", err)
+    toast.error("Failed to load event data")
+    isJoined.value = false
     goingCount.value = 0
     friendsGoing.value = []
   } finally {
-    loadingGoing.value = false
+    loadingOverall.value = false // 👈 all done, hide loading
   }
 }
 
+// === Lifecycle & Watchers ===
 onMounted(() => {
   fetchGoingStats(props.id)
 })
@@ -107,17 +114,16 @@ watch(() => props.id, (newId) => {
   if (newId) fetchGoingStats(newId)
 })
 
-watch(
-  () => props.liked,
-  (val) => (isLiked.value = val)
-)
+watch(() => props.liked, (val) => {
+  isLiked.value = val
+})
 
+// === UI Logic ===
 function goToDetails() {
-  if (!props.id) return
-  router.push(`/event/${props.id}`)
+  if (props.id) router.push(`/event/${props.id}`)
 }
 
-// Toggle like
+// === Toggle Like ===
 async function toggleLike() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
@@ -160,6 +166,7 @@ async function toggleLike() {
   }
 }
 
+// === Computed ===
 const crowdColor = computed(() => {
   const level = (props.crowd || "").toLowerCase()
   if (level.includes("low") || level.includes("quiet")) return "bg-green-500"
@@ -177,8 +184,11 @@ const friendHoverText = computed(() => {
 })
 </script>
 
+
 <template>
+  
   <Card
+  v-if="!loadingOverall"
     class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 duration-300 cursor-pointer"
     @click="goToDetails"
   >
@@ -313,6 +323,40 @@ const friendHoverText = computed(() => {
           </svg>
           <span class="font-semibold whitespace-nowrap">{{ distance.toFixed(1) }} km</span>
         </div>
+      </div>
+    </CardContent>
+  </Card>
+
+  <Card
+    v-else
+    class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm animate-pulse"
+  >
+    <Skeleton class="w-full h-52 rounded-t-2xl" />
+
+    <CardContent class="px-4 mt-2 space-y-2">
+      <Skeleton class="h-4 w-3/4" />
+      <Skeleton class="h-3 w-1/2" />
+
+      <div class="mt-2 flex items-center gap-2">
+        <Skeleton class="h-3 w-20" />
+        <Skeleton class="h-3 w-16" />
+      </div>
+
+      <div class="flex items-center gap-2 mt-2">
+        <Skeleton class="w-6 h-6 rounded-full" />
+        <Skeleton class="w-6 h-6 rounded-full" />
+        <Skeleton class="w-6 h-6 rounded-full" />
+        <Skeleton class="h-3 w-20" />
+      </div>
+
+      <div class="flex justify-between items-center mt-3">
+        <Skeleton class="h-3 w-16" />
+        <Skeleton class="h-3 w-12" />
+      </div>
+
+      <div class="mt-2 pt-2 flex items-center justify-between border-t border-gray-100">
+        <Skeleton class="h-3 w-24" />
+        <Skeleton class="h-3 w-10" />
       </div>
     </CardContent>
   </Card>

@@ -24,7 +24,7 @@ const user = ref(null)
 const { start: startWatcher, stop: stopWatcher } = useInviteWatcher()
 
 // Tabs
-const activeTab = ref("invites")
+const activeTab = newInvites.length > 0 ? ref("invites") : ref("friends")
 
 // Pagination
 const invitePage = ref(1)
@@ -86,7 +86,7 @@ onMounted(async () => {
         </DialogHeader>
 
         <!-- Tabs -->
-        <div class="flex justify-center items-center mb-2">
+        <div v-show="newInvites.length > 0 && newFriendRequests > 0" class="flex justify-center items-center mb-2">
           <div class="flex space-x-6">
             <button
               class="pb-1 font-medium border-b-2 transition-colors duration-200 cursor-pointer"
