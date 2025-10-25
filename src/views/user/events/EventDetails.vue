@@ -5,12 +5,8 @@ import { supabase } from "@/utils/supabase"
 import { toast } from "vue-sonner"
 import { CalendarDays, MapPin, DollarSign, Users, ArrowLeft, Heart } from "lucide-vue-next"
 import { Button } from "@/components/ui/button"
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipProvider
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 const route = useRoute()
 const router = useRouter()
@@ -23,6 +19,13 @@ const goingCount = ref(0)
 const user = ref(null)
 const friendsGoing = ref([])
 const loadingFriends = ref(true)
+
+// Invite functionality
+const inviteOpen = ref(false)
+const friends = ref([])
+const loadingFriends2 = ref(false)
+const invitedFriends = ref(new Set())
+
 const friendHoverText = computed(() => {
   const names = friendsGoing.value.map(f => f.name)
   if (names.length <= 3) return names.join(", ")
@@ -61,6 +64,7 @@ async function fetchReviews() {
   }
 
   reviews.value = data || []
+
   if (user.value) {
     userReview.value = reviews.value.find((r) => r.user_id === user.value.id) || null
     if (userReview.value) {
@@ -121,6 +125,7 @@ async function fetchFriendsGoing() {
       .select("friends")
       .eq("id", authUser.id)
       .single()
+
     if (meErr) throw meErr
 
     const friends = me?.friends || []
@@ -134,6 +139,7 @@ async function fetchFriendsGoing() {
       .from("user_preferences")
       .select("id, name, profile_picture, going")
       .in("id", friends)
+
     if (fErr) throw fErr
 
     const filtered = (goingFriends || []).filter(f => (f.going || []).includes(eventId))
@@ -147,6 +153,117 @@ async function fetchFriendsGoing() {
   }
 }
 
+// Fetch all friends for invite modal
+async function fetchFriendsForInvite() {
+  loadingFriends2.value = true
+  try {
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser) {
+      friends.value = []
+      return
+    }
+
+    const { data: me, error: meErr } = await supabase
+      .from("user_preferences")
+      .select("friends")
+      .eq("id", authUser.id)
+      .single()
+
+    if (meErr) throw meErr
+
+    const friendIds = me?.friends || []
+    if (!friendIds.length) {
+      friends.value = []
+      return
+    }
+
+    const { data: friendsList, error: fErr } = await supabase
+      .from("user_preferences")
+      .select("id, name, email, profile_picture, going")
+      .in("id", friendIds)
+
+    if (fErr) throw fErr
+
+    friends.value = friendsList || []
+  } catch (err) {
+    console.error("Error fetching friends for invite:", err)
+    toast.error("Failed to load friends")
+    friends.value = []
+  } finally {
+    loadingFriends2.value = false
+  }
+}
+
+// Send event invite
+async function sendEventInvite(targetId) {
+  try {
+    // Check if already invited
+    if (invitedFriends.value.has(targetId)) {
+      toast.info("Already invited this friend.")
+      return
+    }
+
+    // Check if friend is already going
+    const friend = friends.value.find(f => f.id === targetId)
+    if (friend?.going?.includes(eventId)) {
+      toast.info("This friend already joined the event.")
+      return
+    }
+
+    // Get invite data
+    const [{ data: me }, { data: targetInvites }] = await Promise.all([
+      supabase
+        .from("user_preferences")
+        .select("sent_invites")
+        .eq("id", user.value.id)
+        .single(),
+      supabase
+        .from("user_preferences")
+        .select("invite_requests")
+        .eq("id", targetId)
+        .single(),
+    ])
+
+    // Check if invite already exists
+    const alreadyInvited = (targetInvites?.invite_requests || []).some(
+      (i) => i.event_id === eventId && i.from === user.value.id
+    )
+
+    if (alreadyInvited) {
+      toast.info("Invite already sent to this friend.")
+      return
+    }
+
+    const newSent = [...(me?.sent_invites || []), { event_id: eventId, to: targetId }]
+    const newReceived = [...(targetInvites?.invite_requests || []), { event_id: eventId, from: user.value.id }]
+
+    const [{ error: e1 }, { error: e2 }] = await Promise.all([
+      supabase
+        .from("user_preferences")
+        .update({ sent_invites: newSent })
+        .eq("id", user.value.id),
+      supabase
+        .from("user_preferences")
+        .update({ invite_requests: newReceived })
+        .eq("id", targetId),
+    ])
+
+    if (e1 || e2) throw new Error("Failed to update records")
+
+    invitedFriends.value.add(targetId)
+    toast.success(`Invited ${friend?.name}!`)
+  } catch (err) {
+    console.error(err)
+    toast.error("Could not send invite.")
+  }
+}
+
+// Open invite modal
+async function openInviteModal() {
+  inviteOpen.value = true
+  invitedFriends.value.clear()
+  await fetchFriendsForInvite()
+}
 
 const categoryColor = computed(() => {
   if (!event.value) return "bg-gray-500"
@@ -218,6 +335,7 @@ async function fetchEvent() {
 async function checkSavedStatus() {
   const { data: auth } = await supabase.auth.getUser()
   if (!auth?.user) return
+
   user.value = auth.user
 
   const { data: pref } = await supabase
@@ -232,6 +350,7 @@ async function checkSavedStatus() {
 async function checkGoingStatus() {
   const { data: auth } = await supabase.auth.getUser()
   if (!auth?.user) return
+
   user.value = auth.user
 
   const { data: pref } = await supabase
@@ -248,6 +367,7 @@ async function countGoingUsers() {
     .from("user_preferences")
     .select("id", { count: "exact", head: true })
     .contains("going", [eventId])
+
   goingCount.value = count || 0
 }
 
@@ -255,6 +375,7 @@ async function toggleSave() {
   if (!user.value) return toast.error("Please login to save events")
 
   isSaved.value = !isSaved.value
+
   const { data: pref } = await supabase
     .from("user_preferences")
     .select("saved")
@@ -315,7 +436,8 @@ onMounted(async () => {
         @click="route.query.from === 'shuffle' ? router.push('/shuffle') : router.push('/events')"
         class="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white/90 backdrop-blur-md shadow-sm hover:bg-gray-200 cursor-pointer"
       >
-        <ArrowLeft class="w-4 h-4" /> Back
+        <ArrowLeft class="w-4 h-4" />
+        Back
       </Button>
 
       <!-- Header -->
@@ -380,15 +502,15 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- Save & Join -->
+        <!-- Save & Join & Invite -->
         <div class="mt-4 flex flex-col md:flex-row md:justify-between items-center gap-8 md:gap-2">
           <div class="flex items-center gap-3">
             <p class="text-blue-600 font-medium">
               {{ goingCount }} {{ goingCount === 1 ? "person is" : "people are" }} going
             </p>
-            <span class="text-gray-500 text-xs">
-              •
-            </span>
+
+            <span class="text-gray-500 text-xs"> • </span>
+
             <!-- Friends going avatars -->
             <div v-if="!loadingFriends && friendsGoing.length" class="flex items-center gap-2">
               <TooltipProvider>
@@ -399,10 +521,7 @@ onMounted(async () => {
                         v-for="(f, index) in friendsGoing.slice(0, 3)"
                         :key="f.id"
                         class="absolute transition-transform duration-150"
-                        :style="{
-                          left: `${index * 30}%`,
-                          zIndex: 10 + index
-                        }"
+                        :style="{ left: `${index * 30}%`, zIndex: 10 + index }"
                       >
                         <img
                           :src="f.profile_picture || '/default-avatar.png'"
@@ -419,33 +538,34 @@ onMounted(async () => {
               </TooltipProvider>
 
               <span class="text-gray-500 text-xs">
-                {{ friendsGoing.length }} friend{{ friendsGoing.length > 1 ? 's' : '' }} going
+                {{ friendsGoing.length }} friend{{ friendsGoing.length > 1 ? "s" : "" }} going
               </span>
             </div>
           </div>
 
-          <!-- Save & Join Buttons -->
+          <!-- Save & Join & Invite Buttons -->
           <div class="flex gap-3">
-            <Button
-              @click="toggleSave"
-              :variant="isSaved ? 'secondary' : 'outline'"
-              class="cursor-pointer flex items-center gap-2"
-            >
+            <Button @click="toggleSave" :variant="isSaved ? 'secondary' : 'outline'" class="cursor-pointer flex items-center gap-2">
               <Heart
                 :class="[
                   'w-4 h-4',
-                  isSaved ? 'fill-red-500 text-red-500' : 'fill-none text-gray-600'
+                  isSaved ? 'fill-red-500 text-red-500' : 'fill-none text-gray-600',
                 ]"
               />
               {{ isSaved ? "Saved" : "Save" }}
             </Button>
 
-            <Button
-              :variant="isGoing ? 'secondary' : 'default'"
-              class="cursor-pointer"
-              @click="toggleJoinEvent"
-            >
+            <Button :variant="isGoing ? 'secondary' : 'default'" class="cursor-pointer" @click="toggleJoinEvent">
               {{ isGoing ? "Leave Event" : "Join Event" }}
+            </Button>
+
+            <Button
+              v-if="isGoing"
+              variant="outline"
+              class="cursor-pointer"
+              @click="openInviteModal"
+            >
+              Invite Friends
             </Button>
           </div>
         </div>
@@ -461,12 +581,9 @@ onMounted(async () => {
             loading="lazy"
             class="rounded-xl"
           ></iframe>
-          <div
-            v-else
-            class="flex items-center justify-center h-64 bg-gray-100 text-gray-500"
-          >
-            Map unavailable
 
+          <div v-else class="flex items-center justify-center h-64 bg-gray-100 text-gray-500">
+            Map unavailable
           </div>
         </div>
 
@@ -509,27 +626,17 @@ onMounted(async () => {
 
           <!-- Reviews List -->
           <div v-if="reviews.length" class="space-y-5">
-            <div
-              v-for="r in paginatedReviews"
-              :key="r.id"
-              class="p-4 border border-gray-200 rounded-lg bg-white"
-            >
+            <div v-for="r in paginatedReviews" :key="r.id" class="p-4 border border-gray-200 rounded-lg bg-white">
               <div class="flex items-center gap-3 mb-1">
-                <img
-                  :src="r.user_preferences?.profile_picture || '/default-avatar.png'"
-                  class="w-10 h-10 rounded-full object-cover border"
-                />
+                <img :src="r.user_preferences?.profile_picture || '/default-avatar.png'" class="w-10 h-10 rounded-full object-cover border" />
                 <p class="font-semibold text-gray-900">{{ r.user_preferences?.name }}</p>
               </div>
+
               <div class="flex text-yellow-400 mb-1">
                 <span v-for="n in r.rating" :key="n">★</span>
-                <span
-                  v-for="n in 5 - r.rating"
-                  :key="'empty' + n"
-                  class="text-gray-300"
-                  >★</span
-                >
+                <span v-for="n in 5 - r.rating" :key="'empty' + n" class="text-gray-300">★</span>
               </div>
+
               <p class="text-gray-700">{{ r.comment }}</p>
               <p class="text-xs text-gray-500 mt-1">
                 {{ new Date(r.created_at).toLocaleString("en-SG") }}
@@ -537,10 +644,7 @@ onMounted(async () => {
             </div>
 
             <!-- Pagination -->
-            <div
-              v-if="totalReviewPages > 1"
-              class="flex items-center justify-center gap-4 mt-5"
-            >
+            <div v-if="totalReviewPages > 1" class="flex items-center justify-center gap-4 mt-5">
               <Button
                 variant="outline"
                 :disabled="reviewPage === 1"
@@ -564,6 +668,7 @@ onMounted(async () => {
               </Button>
             </div>
           </div>
+
           <p v-else class="text-gray-500 text-center py-6">No reviews yet.</p>
         </div>
       </div>
@@ -575,5 +680,52 @@ onMounted(async () => {
         Back to Events
       </Button>
     </div>
+
+    <!-- Invite Friends Dialog -->
+    <Dialog v-model:open="inviteOpen">
+      <DialogContent class="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Invite Friends to {{ event?.title }}</DialogTitle>
+        </DialogHeader>
+
+        <div v-if="loadingFriends2" class="flex justify-center py-6">
+          <div class="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+        </div>
+
+        <div v-else-if="friends.length" class="space-y-3 max-h-96 overflow-y-auto">
+          <div
+            v-for="friend in friends"
+            :key="friend.id"
+            class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+          >
+            <div class="flex items-center gap-3">
+              <img :src="friend.profile_picture || '/default-avatar.png'" class="w-10 h-10 rounded-full object-cover" />
+              <div>
+                <p class="font-semibold text-gray-900">{{ friend.name }}</p>
+                <p class="text-xs text-gray-500">{{ friend.email }}</p>
+              </div>
+            </div>
+
+            <Button
+              size="sm"
+              :variant="invitedFriends.has(friend.id) || friend.going?.includes(eventId) ? 'secondary' : 'default'"
+              class="cursor-pointer"
+              :disabled="invitedFriends.has(friend.id) || friend.going?.includes(eventId)"
+              @click="sendEventInvite(friend.id)"
+            >
+              {{
+                friend.going?.includes(eventId)
+                  ? "Joined"
+                  : invitedFriends.has(friend.id)
+                    ? "Invited"
+                    : "Invite"
+              }}
+            </Button>
+          </div>
+        </div>
+
+        <p v-else class="text-gray-500 text-center py-6">No friends to invite.</p>
+      </DialogContent>
+    </Dialog>
   </section>
 </template>
