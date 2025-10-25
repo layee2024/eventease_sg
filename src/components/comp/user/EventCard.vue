@@ -178,7 +178,7 @@ const crowdColor = computed(() => {
 
 const friendHoverText = computed(() => {
   const names = friendsGoing.value.map(f => f.name)
-  if (names.length < 3) return names.join(", ")
+  if (names.length <= 3) return names.join(", ")
   const firstThree = names.slice(0, 3)
   const others = names.length - 3
   return `${firstThree.join(", ")} + ${others} others`
