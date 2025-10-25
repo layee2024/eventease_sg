@@ -27,6 +27,7 @@ const props = defineProps({
   image: String,
   liked: { type: Boolean, default: false },
   distance: Number,
+  parentLoading: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(["update-saved"])
@@ -188,7 +189,7 @@ const friendHoverText = computed(() => {
 <template>
   
   <Card
-  v-if="!loadingOverall"
+  v-if="!loadingOverall && !parentLoading"
     class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 duration-300 cursor-pointer"
     @click="goToDetails"
   >

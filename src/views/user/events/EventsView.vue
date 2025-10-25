@@ -11,6 +11,7 @@ import { userLocation, fetchUserLocation } from './location.js'
 //  Fetch the event
 const event = ref(null)
 const route = useRoute()
+const allLoading = ref(true)
 
 onMounted(async () => {
   {
@@ -184,12 +185,15 @@ watch(
 
 
 onMounted(async () => {
+  allLoading.value = true
+  
   await getTrendingEvents()
   await loadUserSaved()
 
-
   const initialQuery = route.query.search
   if (initialQuery) applySearchFilter(initialQuery)
+
+  allLoading.value = false
 })
 </script>
 
@@ -216,7 +220,7 @@ onMounted(async () => {
       v-if="paginatedEvents.length"
       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
     >
-      <EventCard
+    <EventCard
         v-for="event in paginatedEvents"
         :key="event.id"
         :id="event.id"
@@ -230,21 +234,19 @@ onMounted(async () => {
           Sports: 'bg-green-500',
         }[event.category] || 'bg-gray-500'"
         :location="event.venue || 'Unknown venue'"
-        :price="
-          event.ticket_price === 0 ? 'Free' : `$${event.ticket_price}`
-        "
-        :date="
-          new Date(event.start_date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-          })
-        "
+        :price="event.ticket_price === 0 ? 'Free' : `$${event.ticket_price}`"
+        :date="new Date(event.start_date).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        })"
         :crowd="event.crowd_level"
         :image="event.image_url"
         :liked="savedIds.includes(event.id)"
         :distance="getEventDistance(event)"
+        :parentLoading="allLoading"
         @update-saved="handleSavedUpdate"
       />
+
     
 
     </div>
