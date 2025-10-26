@@ -13,33 +13,63 @@ function returnBack() {
     router.push("/planner")
 }
 
+function generateSchedulePDF() {
+  const doc = new jsPDF();
+
+  // Title
+  doc.setFontSize(18);
+  doc.text('Your Perfect Day Schedule', 20, 20);
+
+  // Intro
+  const intro = parsedIntro.value || "Here's your personalized schedule:";
+  doc.setFontSize(12);
+  doc.text(intro, 20, 30);
+
+  // Schedule items
+  let yPosition = 40;
+  parsedSchedule.value.forEach(item => {
+    const textLine = `${item.start} - ${item.activity}`;
+    const lines = doc.splitTextToSize(textLine, 170);
+    doc.text(lines, 20, yPosition);
+    yPosition += lines.length * 8;
+  });
+
+  return doc;
+}
+
+
 function saveSchedule() {
-    const doc = new jsPDF();
-
-    // Title
-    doc.setFontSize(18);
-    doc.text('Your Perfect Day Schedule', 20, 20);
-
-    // Intro
-    const intro = parsedIntro.value || "Here's your personalized schedule:";
-    doc.setFontSize(12);
-    doc.text(intro, 20, 30);
-
-    // Schedule items
-    let yPosition = 40;
-    parsedSchedule.value.forEach(item => {
-        const textLine = `${item.start} - ${item.activity}`;
-        const lines = doc.splitTextToSize(textLine, 170); // Split long lines
-        doc.text(lines, 20, yPosition);
-        yPosition += lines.length * 8; // Add spacing per line
-    });
-
-    doc.save('my-schedule.pdf');
+  const doc = generateSchedulePDF();
+  doc.save('my-schedule.pdf');
 }
 
 function goMap() {
     router.push('/map')
 }
+
+async function shareFunc() {
+  const doc = generateSchedulePDF();
+
+  const pdfBlob = doc.output('blob');
+  const file = new File([pdfBlob], 'my-schedule.pdf', { type: 'application/pdf' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        title: 'My AI-Powered Perfect Day ✨',
+        text: parsedIntro.value || "Check out my AI-generated schedule!",
+        files: [file]
+      });
+      console.log('✅ Shared successfully!');
+    } catch (err) {
+      console.error('❌ Error sharing:', err);
+    }
+  } else {
+    doc.save('my-schedule.pdf');
+    alert('Sharing is not supported in this browser. The PDF has been saved instead.');
+  }
+}
+
 
 onMounted(() => {
     const saved = localStorage.getItem('aiSchedule')
@@ -83,7 +113,7 @@ onMounted(() => {
 
                     </div>
                     <div class="absolute right-0">
-                        <ShareIcon class="h-7 text-blue-600" />
+                        <ShareIcon class="h-7 text-blue-600 cursor-pointer" @click="shareFunc"/>
                     </div>
                 </div>
             </div>
