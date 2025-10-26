@@ -5,6 +5,7 @@ import { ClockIcon} from '@heroicons/vue/24/outline';
 import { FireIcon, StarIcon, BoltIcon, SparklesIcon } from '@heroicons/vue/24/solid';
 import { GoogleGenAI } from "@google/genai";
 import { supabase } from "@/utils/supabase";
+import { toast } from 'vue-sonner';
 
 const router = useRouter();
 const timeUp = ref('');
@@ -39,6 +40,15 @@ function formatTimeTo12Hour(time24) {
   return `${hours}${ampm}`;
 }
 
+function isEndTimeValid(start, end) {
+  const [startH, startM] = start.split(':').map(Number)
+  const [endH, endM] = end.split(':').map(Number)
+  const startTotal = startH * 60 + startM
+  const endTotal = endH * 60 + endM
+  return endTotal > startTotal
+}
+
+
 function parseScheduleText(text) {
   const timeBlockRegex = /^(\d{1,2}\s*(?:am|pm)):\s*(.+)$/gmi;
   const schedule = [];
@@ -61,10 +71,22 @@ function resetForm() {
 }
 
 async function handleSubmit() {
-  if (!timeUp.value || !endTime.value || !interest.value || !goal.value) return;
-  isLoading.value = true;
-  parsedSchedule.value = null;
-  parsedIntro.value = null;
+  if (!timeUp.value || !endTime.value || !interest.value || !goal.value) {
+    toast.error("Please fill in all fields before continuing.")
+    return
+  }
+
+  if (!isEndTimeValid(timeUp.value, endTime.value)) {
+    validstart.value = false
+    toast.error("End time cannot be before start time.")
+    return
+  } else {
+    validstart.value = true
+  }
+
+  isLoading.value = true
+  parsedSchedule.value = null
+  parsedIntro.value = null
 
   try {
     const dict = {
@@ -138,7 +160,7 @@ onMounted(() => getCat());
         <h1 class="text-3xl font-extrabold ">Plan your perfect day</h1>
         <SparklesIcon class="h-7 text-blue-600" />
       </div>
-      <p class="text-lg mt-2 font-bold bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-500 bg-clip-text text-transparent">
+      <p class="text-lg text-gray-600 mt-2">
         Let AI help you create a personalised schedule that matches your goals, interests, and energy level.
       </p> 
     </div>
@@ -152,7 +174,7 @@ onMounted(() => getCat());
             <SparklesIcon class="h-7 text-blue-600" />
             <h2 class="text-2xl font-extrabold">Tell us about your day</h2>
           </div>
-          <p class="text-blue-600 font-bold italic bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-500 bg-clip-text text-transparent">
+          <p class="font-bold italic bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-500 bg-clip-text text-transparent">
             Share your preferences and we'll create the perfect schedule for you
           </p>
         </div>

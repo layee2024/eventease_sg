@@ -226,8 +226,7 @@ function getCategoryColor(category) {
 
       <!-- Card counter -->
       <div class="text-center mt-4 text-gray-500 text-sm">
-        <p v-if="!isShuffling">Showing {{ displayCards.length }} of {{ props.events.length }} events</p>
-        <p v-else class="animate-pulse font-bold text-purple-600">Shuffling... {{ shuffleCount }}</p>
+        <p v-show="!isShuffling">Showing {{ displayCards.length }} of {{ props.events.length }} events</p>
       </div>
     </div>
 
