@@ -140,7 +140,7 @@ async function handleSubmit() {
     parsedSchedule.value = resultObject.schedule;
 
     localStorage.setItem('aiSchedule', JSON.stringify({ intro: parsedIntro.value, schedule: parsedSchedule.value }));
-    router.push('/schedule')
+    router.push('/ScheduleView')
 
   } catch (error) {
     console.error("Error generating schedule:", error);
