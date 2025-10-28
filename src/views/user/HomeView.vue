@@ -300,7 +300,7 @@ function initStarAnimation() {
           >
           <TypeWriter 
             class="text-white"
-            :text="['Discover Events', 'Share Experiences', 'Join the Fun']"
+            :text="['Discover Events', 'Share Experiences', 'Join Moments']"
             :typingSpeed="75"
             :pauseDuration="1500"
             :showCursor="true"
