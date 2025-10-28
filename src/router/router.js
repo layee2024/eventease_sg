@@ -17,6 +17,7 @@ import OnboardingView from '../views/user/Onboarding.vue'
 import ScheduleView from '../views/user/ScheduleView.vue'
   
 
+
 // Organiser
 import DashboardView from '../views/organiser/DashboardView.vue'
 import PlannerView from '../views/user/PlannerView.vue'
