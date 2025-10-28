@@ -236,12 +236,12 @@ async function logout() {
       <div class="hidden lg:flex items-center space-x-3">
         <template v-if="!isLoggedIn">
           <Button
-            variant="outline"
+            variant="outline bg-inherit"
             @click="router.push('/register')"
-            class="font-medium"
+            class="font-medium border-1 border-gray-300"
             >Register</Button
           >
-          <Button @click="router.push('/login')" class="font-medium"
+          <Button @click="router.push('/login')" class="font-medium border border-white"
             >Login</Button
           >
         </template>

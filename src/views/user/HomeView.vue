@@ -1,12 +1,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from "vue";
 import { useRouter } from "vue-router";
-import Typewriter from "../../components/comp/user/Typewriter.vue";
 import GithubGlobe from "../../components/comp/user/GithubGlobe.vue";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/utils/supabase";
 import { toast } from "vue-sonner";
 import Hyper from "@/components/bits/Hyper.vue";
+import TypeWriter from "@/components/bits/TypeWriter.vue";
 
 const router = useRouter();
 const problem = ref(null);
@@ -298,11 +298,14 @@ function initStarAnimation() {
                 : 'opacity-0 translate-y-4'
             "
           >
-            <Typewriter
-              text="Discover Singapore"
-              classes="text-white"
-              cursorColor="bg-white"
-            />
+          <TypeWriter 
+            class="text-white"
+            :text="['Discover Events', 'Share Experiences', 'Join the Fun']"
+            :typingSpeed="75"
+            :pauseDuration="1500"
+            :showCursor="true"
+            cursorCharacter="|"
+          />
           </h1>
 
           <!-- Subheadline with Stats -->
@@ -331,7 +334,7 @@ function initStarAnimation() {
             "
           >
             <div class="relative flex items-center">
-              <div class="absolute left-4 text-gray-400">
+              <div class="absolute left-4 text-black">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -352,7 +355,7 @@ function initStarAnimation() {
                 @keypress="handleSearchKeypress"
                 type="text"
                 placeholder="Search events"
-                class="w-full pl-12 pr-32 py-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:bg-white/20 focus:shadow-xl"
+                class="w-full pl-12 pr-32 py-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-gray-400 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:bg-white/20 focus:shadow-xl"
               />
               <Button
                 variant="primary"
