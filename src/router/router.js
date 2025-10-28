@@ -14,7 +14,7 @@ import EventsView from '../views/user/events/EventsView.vue'
 import EventDetails from '../views/user/events/EventDetails.vue'
 import ShuffleView from '../views/user/ShuffleView.vue'
 import OnboardingView from '../views/user/Onboarding.vue'
-import ScheduleView from '../views/user/ScheduleView.vue'
+import ScheduleView from '../views/user/scheduleView.vue'
   
 
 
