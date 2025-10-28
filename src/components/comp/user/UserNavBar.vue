@@ -83,6 +83,10 @@ onMounted(async () => {
     onUnmounted(() => supabase.removeChannel(channel));
   }
 });
+function isActive(path) {
+  console.log(route.path === path)
+  return route.path === path;
+}
 
 async function logout() {
   await supabase.auth.signOut();
@@ -91,21 +95,18 @@ async function logout() {
   router.push("/login");
 }
 
-function isActive(path) {
-  return route.path === path;
-}
 </script>
 
 <template>
-  <nav class="sticky top-0 z-50 bg-white shadow-sm w-full">
+  <nav class="sticky top-0 z-50 shadow-sm w-full" :class="[isActive('/') ? 'bg-black text-white' : 'bg-white']">
     <div class="flex items-center justify-between py-3 px-6">
       <!-- Logo -->
       <router-link to="/" class="flex items-center space-x-2">
-        <div class="flex justify-center items-center">
+        <div class="flex justify-center items-center gap-2">
           <img
             src="../../../assets/logo.png"
             alt="EventEase Logo"
-            class="h-10 w-auto"
+            class="h-10 w-auto rounded-full"
           />
           <span class="font-semibold text-sm">EventEase SG</span>
         </div>
@@ -251,6 +252,7 @@ function isActive(path) {
               <Button
                 variant="outline"
                 class="font-medium flex items-center gap-1"
+                :class="[isActive('/') ? 'bg-black text-white' : 'bg-white']"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
