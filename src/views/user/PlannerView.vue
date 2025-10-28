@@ -140,7 +140,7 @@ async function handleSubmit() {
     parsedSchedule.value = resultObject.schedule;
 
     localStorage.setItem('aiSchedule', JSON.stringify({ intro: parsedIntro.value, schedule: parsedSchedule.value }));
-    router.push('/schedule')
+    router.push('/ScheduleView')
 
   } catch (error) {
     console.error("Error generating schedule:", error);
@@ -168,7 +168,7 @@ onMounted(() => getCat());
   
     <div class="flex flex-col xl:flex-row gap-6">
    
-      <div class="shadow-xl border rounded-md xl:w-[70%] xl:justify-self-center p-5 xl:h-[80vh] mx-auto w-[100%] h-[80vh]">
+      <div class="shadow-xl border rounded-md xl:w-[70%] xl:justify-self-center p-5 xl:h-[100vh] mx-auto w-[100%] h-[80vh]">
         <div class="flex flex-col gap-2">
           <div class="flex items-center gap-2">
             <SparklesIcon class="h-7 text-blue-600" />

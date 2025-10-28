@@ -95,8 +95,8 @@ const routes = [
     component: ShuffleView,
   },
   {
-    path: '/schedule',
-    name: 'schedule',
+    path: '/ScheduleView',
+    name: 'ScheduleView',
     component: ScheduleView,
   },
 
