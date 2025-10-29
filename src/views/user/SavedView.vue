@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from "vue"
 import { supabase } from "@/utils/supabase"
 import EventCard from "@/components/comp/user/EventCard.vue"
+import { Button } from "@/components/ui/button"
 
 const savedEvents = ref([])
 const savedIds = ref([])
@@ -10,7 +11,7 @@ const today = new Date().toISOString()
 
 // Pagination
 const currentPage = ref(1)
-const eventsPerPage = 8
+const eventsPerPage = 20
 
 const totalPages = computed(() =>
   Math.ceil(savedEvents.value.length / eventsPerPage)
@@ -18,7 +19,8 @@ const totalPages = computed(() =>
 
 const paginatedEvents = computed(() => {
   const start = (currentPage.value - 1) * eventsPerPage
-  return savedEvents.value.slice(start, start + eventsPerPage)
+  const end = start + eventsPerPage
+  return savedEvents.value.slice(start, end)
 })
 
 // Fetch saved events
@@ -83,33 +85,40 @@ function handleSavedUpdate({ id, liked }) {
   }
 }
 
+// Pagination controls
 function nextPage() {
-  if (currentPage.value < totalPages.value) currentPage.value++
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" })
+  }
 }
 
 function prevPage() {
-  if (currentPage.value > 1) currentPage.value--
+  if (currentPage.value > 1) {
+    currentPage.value--
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" })
+  }
 }
 
 onMounted(loadSavedEvents)
 </script>
 
 <template>
-  <section class="py-12 px-6 md:px-12 xl:px-20 bg-white min-h-screen">
-    <div class="flex flex-col mb-8">
-      <h2 class="text-3xl font-bold text-gray-900">Saved Events</h2>
-      <p class="text-gray-500 mt-2">
-        View all the events you've saved for later.
+  <section class="py-12 px-6 md:px-12 xl:px-20 bg-white dark:bg-[#121212] min-h-screen">
+    <div class="flex flex-col mb-8 items-center">
+      <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Saved Events</h2>
+      <p class="text-gray-400 mt-2">
+        View all the events you've saved for later
       </p>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="text-center py-10 text-gray-500">
+    <div v-if="loading" class="text-center py-10 text-gray-500 dark:text-white">
       Loading your saved events...
     </div>
 
     <!-- No saved events -->
-    <div v-else-if="!savedEvents.length" class="text-center py-16 text-gray-500">
+    <div v-else-if="!savedEvents.length" class="text-center py-16 text-gray-500 dark:text-white">
       <p class="text-lg">You haven't saved any events yet.</p>
       <p class="text-sm text-gray-400 mt-1">
         Explore events and tap the saved icon to save them here!
@@ -145,33 +154,44 @@ onMounted(loadSavedEvents)
       <!-- Pagination -->
       <div
         v-if="totalPages > 1"
-        class="flex justify-center items-center gap-4 mt-8"
+        class="flex flex-col items-center justify-center mt-10"
       >
-        <button
-          @click="prevPage"
-          :disabled="currentPage === 1"
-          class="px-4 py-2 rounded-md border text-sm font-medium transition-colors duration-200 cursor-pointer"
-          :class="currentPage === 1
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-white hover:bg-gray-100 text-gray-700 border-gray-300'"
-        >
-          Previous
-        </button>
+        <div class="flex flex-col md:gap-3 text-sm text-gray-600 dark:text-white w-full text-center">
+          <!-- Buttons -->
+          <div class="flex items-center justify-center gap-3 mb-2 md:mb-0">
+            <Button
+              variant="outline"
+              :disabled="currentPage === 1"
+              @click="prevPage"
+              class="cursor-pointer"
+            >
+              Previous
+            </Button>
 
-        <span class="text-gray-600 text-sm">
-          Page {{ currentPage }} of {{ totalPages }}
-        </span>
+            <span class="text-gray-700 dark:text-white font-medium">
+              Page {{ currentPage }} of {{ totalPages }}
+            </span>
 
-        <button
-          @click="nextPage"
-          :disabled="currentPage === totalPages"
-          class="px-4 py-2 rounded-md border text-sm font-medium transition-colors duration-200 cursor-pointer"
-          :class="currentPage === totalPages
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-white hover:bg-gray-100 text-gray-700 border-gray-300'"
-        >
-          Next
-        </button>
+            <Button
+              variant="outline"
+              :disabled="currentPage === totalPages"
+              @click="nextPage"
+              class="cursor-pointer"
+            >
+              Next
+            </Button>
+          </div>
+
+          <div class="text-gray-500 dark:text-white text-xs md:text-sm mt-1 md:mt-0 md:ml-2">
+            Showing
+            {{ (currentPage - 1) * eventsPerPage + 1 }}
+            -
+            {{ Math.min(currentPage * eventsPerPage, savedEvents.length) }}
+            of
+            {{ savedEvents.length }}
+            events
+          </div>
+        </div>
       </div>
     </div>
   </section>

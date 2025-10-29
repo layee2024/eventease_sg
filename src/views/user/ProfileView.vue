@@ -13,6 +13,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select"
 
 const router = useRouter()
 
@@ -257,7 +264,6 @@ const initials = computed(() =>
 )
 </script>
 
-
 <template>
   <section class="min-h-[93vh] py-10 md:py-16">
     <div class="container mx-auto max-w-6xl px-4">
@@ -283,13 +289,14 @@ const initials = computed(() =>
           <!-- Interests -->
           <Card class="hover:shadow-md transition">
             <CardContent class="p-6">
-              <p class="text-sm text-gray-500 mb-2">Preferences</p>
+              <p class="text-sm text-gray-500 dark:text-gray-300 mb-2">Preferences</p>
               <h3 class="text-xl font-semibold mb-4">Interests</h3>
               <div class="flex flex-wrap gap-2 mb-4">
                 <span
                   v-for="cat in (interests.length ? interests : ['None selected'])"
                   :key="cat"
-                  class="px-2.5 py-1 rounded-full text-xs bg-gray-900 text-white"
+                  class="px-2.5 py-1 rounded-full text-xs text-white"
+                  :class="categoryColor(cat)"
                 >
                   {{ cat }}
                 </span>
@@ -301,9 +308,9 @@ const initials = computed(() =>
           <!-- Budget -->
           <Card class="hover:shadow-md transition">
             <CardContent class="p-6">
-              <p class="text-sm text-gray-500 mb-2">Preferences</p>
+              <p class="text-sm text-gray-500 dark:text-gray-300 mb-2">Preferences</p>
               <h3 class="text-xl font-semibold mb-4">Budget</h3>
-              <p class="text-gray-700 capitalize mb-4">
+              <p class="text-gray-700 dark:text-gray-100 capitalize mb-4">
                 {{ budget === 'all' ? 'All budgets' :
                    budget === 'low' ? 'Below $20' :
                    budget === 'mid' ? '$20-$50' : 'Above $50' }}
@@ -315,13 +322,13 @@ const initials = computed(() =>
           <!-- Transport -->
           <Card class="hover:shadow-md transition">
             <CardContent class="p-6">
-              <p class="text-sm text-gray-500 mb-2">Preferences</p>
+              <p class="text-sm text-gray-500 dark:text-gray-300 mb-2">Preferences</p>
               <h3 class="text-xl font-semibold mb-4">Transport</h3>
               <div class="flex flex-wrap gap-2 mb-4">
                 <span
                   v-for="mode in (transportModes.length ? transportModes : ['None selected'])"
                   :key="mode"
-                  class="px-2.5 py-1 rounded-full text-xs bg-gray-900 text-white"
+                  class="px-2.5 py-1 rounded-full text-xs bg-gray-900 dark:bg-white text-white dark:text-gray-900"
                 >
                   {{ mode }}
                 </span>
@@ -333,18 +340,18 @@ const initials = computed(() =>
           <!-- Current Events Joined -->
           <Card class="hover:shadow-md transition">
             <CardContent class="p-6">
-              <p class="text-sm text-gray-500 mb-2">Activity</p>
+              <p class="text-sm text-gray-500 dark:text-gray-300 mb-2">Activity</p>
               <h3 class="text-xl font-semibold mb-2">Current Events Joined</h3>
 
-              <p v-if="!joinedEvents.length" class="text-gray-700 mb-3">
+              <p v-if="!joinedEvents.length" class="text-gray-700 dark:text-gray-300 mb-3">
                 You haven't joined any events yet.
               </p>
 
               <div v-else class="mb-3">
-                <p class="text-gray-700">
+                <p class="text-gray-700 dark:text-gray-300">
                   {{ joinedEvents.length }} event<span v-if="joinedEvents.length > 1">s</span> joined
                 </p>
-                <p class="text-xs text-gray-500 mt-1">
+                <p class="text-xs text-gray-500 dark:text-gray-100 mt-1">
                   Most recent: {{ new Date(joinedEvents[0].start_date).toLocaleDateString() }}
                 </p>
               </div>
@@ -371,8 +378,8 @@ const initials = computed(() =>
             :key="src"
             :src="src"
             alt="Avatar option"
-            class="w-16 h-16 rounded-full cursor-pointer border-2 transition hover:border-blue-500"
-            :class="{ 'border-blue-600': profilePicture === src }"
+            class="w-16 h-16 rounded-full cursor-pointer border-3 transition hover:border-blue-500"
+            :class="{ 'border-sky-400': profilePicture === src }"
             @click="chooseAvatar(src)"
           />
         </div>
@@ -411,8 +418,8 @@ const initials = computed(() =>
               class="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
-                <p class="font-semibold text-gray-900">{{ e.title }}</p>
-                <p class="text-sm text-gray-600">
+                <p class="font-semibold text-gray-900 dark:text-gray-300">{{ e.title }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
                   {{ new Date(e.start_date).toLocaleDateString() }} •
                   {{ e.venue }}
                 </p>
@@ -448,7 +455,7 @@ const initials = computed(() =>
                 Previous
               </Button>
 
-              <span class="text-gray-700 font-medium text-sm">
+              <span class="text-gray-700 dark:text-white font-medium text-sm">
                 Page {{ joinedCurrentPage }} of {{ totalJoinedPages }}
               </span>
 
@@ -463,7 +470,7 @@ const initials = computed(() =>
               </Button>
             </div>
 
-            <div class="text-gray-500 text-xs mt-2">
+            <div class="text-gray-500 dark:text-white text-xs mt-2">
               Showing
               {{ (joinedCurrentPage - 1) * joinedItemsPerPage + 1 }} -
               {{ Math.min(
@@ -505,20 +512,39 @@ const initials = computed(() =>
 
     <!-- Budget modal -->
     <Dialog v-model:open="budgetOpen">
-      <DialogContent class="max-w-md">
-        <DialogHeader><DialogTitle>Edit budget</DialogTitle></DialogHeader>
-        <div class="flex flex-col gap-2">
-          <label class="flex items-center gap-2 cursor-pointer" v-for="opt in ['all','low','mid','high']" :key="opt">
-            <input type="radio" :value="opt" v-model="tempBudget" /> 
-            {{ opt === 'all' ? 'All budgets' : opt === 'low' ? 'Below $20' : opt === 'mid' ? '$20-$50' : 'Above $50' }}
-          </label>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" @click="budgetOpen = false" class="cursor-pointer">Cancel</Button>
-          <Button @click="saveBudget" class="cursor-pointer">Save</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+  <DialogContent class="max-w-md">
+    <DialogHeader>
+      <DialogTitle>Edit budget</DialogTitle>
+    </DialogHeader>
+
+    <div class="mt-4">
+      <Select v-model="tempBudget">
+        <SelectTrigger class="w-full">
+          <SelectValue :placeholder="tempBudget
+            ? (tempBudget === 'all' ? 'All budgets'
+              : tempBudget === 'low' ? 'Below $20'
+              : tempBudget === 'mid' ? '$20 - $50'
+              : 'Above $50')
+            : 'Select a budget range'"
+          />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All budgets</SelectItem>
+          <SelectItem value="low">Below $20</SelectItem>
+          <SelectItem value="mid">$20 - $50</SelectItem>
+          <SelectItem value="high">Above $50</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
+    <DialogFooter class="mt-6">
+      <Button variant="outline" @click="budgetOpen = false" class="cursor-pointer">Cancel</Button>
+      <Button @click="saveBudget" class="cursor-pointer">Save</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
+
 
     <!-- Transport modal -->
     <Dialog v-model:open="transportOpen">

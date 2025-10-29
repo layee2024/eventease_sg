@@ -14,7 +14,6 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import { Heart } from "lucide-vue-next"
 
-// === Props & Emits ===
 const props = defineProps({
   id: { type: String, required: true },
   title: String,
@@ -32,18 +31,16 @@ const props = defineProps({
 
 const emit = defineEmits(["update-saved"])
 
-// === State ===
 const router = useRouter()
 const isJoined = ref(false)
 const isLiked = ref(props.liked)
 const goingCount = ref(0)
 const friendsGoing = ref([])
-const loadingOverall = ref(true) // 👈 NEW main loading state
+const loadingOverall = ref(true)
 
-// === Fetch all data ===
 async function fetchGoingStats(eventId) {
   if (!eventId) return
-  loadingOverall.value = true // 👈 start of all loading
+  loadingOverall.value = true
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -55,7 +52,6 @@ async function fetchGoingStats(eventId) {
       return
     }
 
-    // --- 1️⃣ Get user join status ---
     const { data: pref, error: prefErr } = await supabase
       .from("user_preferences")
       .select("going")
@@ -64,7 +60,6 @@ async function fetchGoingStats(eventId) {
     if (prefErr) throw prefErr
     isJoined.value = pref?.going?.includes(eventId)
 
-    // --- 2️⃣ Get total going count ---
     const { count, error: countErr } = await supabase
       .from("user_preferences")
       .select("id", { count: "exact", head: true })
@@ -72,7 +67,6 @@ async function fetchGoingStats(eventId) {
     if (countErr) throw countErr
     goingCount.value = count ?? 0
 
-    // --- 3️⃣ Get friends going ---
     const { data: me, error: meErr } = await supabase
       .from("user_preferences")
       .select("friends")
@@ -102,11 +96,10 @@ async function fetchGoingStats(eventId) {
     goingCount.value = 0
     friendsGoing.value = []
   } finally {
-    loadingOverall.value = false // 👈 all done, hide loading
+    loadingOverall.value = false
   }
 }
 
-// === Lifecycle & Watchers ===
 onMounted(() => {
   fetchGoingStats(props.id)
 })
@@ -119,12 +112,10 @@ watch(() => props.liked, (val) => {
   isLiked.value = val
 })
 
-// === UI Logic ===
 function goToDetails() {
   if (props.id) router.push(`/event/${props.id}`)
 }
 
-// === Toggle Like ===
 async function toggleLike() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
@@ -167,7 +158,6 @@ async function toggleLike() {
   }
 }
 
-// === Computed ===
 const crowdColor = computed(() => {
   const level = (props.crowd || "").toLowerCase()
   if (level.includes("low") || level.includes("quiet")) return "bg-green-500"
@@ -190,7 +180,7 @@ const friendHoverText = computed(() => {
   
   <Card
   v-if="!loadingOverall && !parentLoading"
-    class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 duration-300 cursor-pointer"
+    class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 duration-300 cursor-pointer bg-white dark:bg-gray-200"
     @click="goToDetails"
   >
     <div class="relative">
@@ -300,24 +290,20 @@ const friendHoverText = computed(() => {
 
       <div class="flex justify-between items-center mt-3">
         <span
-          class="text-sm font-medium"
-          :class="{
-            'text-green-600': (price || '').toLowerCase() === 'free',
-            'text-black-600': (price || '').toLowerCase() !== 'free',
-          }"
+          class="text-sm font-medium dark:text-black"
         >
           {{ price }}
         </span>
-        <span class="text-sm text-gray-400">{{ date }}</span>
+        <span class="text-sm text-gray-400 dark:text-gray-700">{{ date }}</span>
       </div>
 
       <div
-        class="mt-2 pt-2 flex items-center justify-between text-[11px] text-gray-500 border-t border-gray-100"
+        class="mt-2 pt-2 flex items-center justify-between text-[11px] text-gray-500 border-t border-gray-100 dark:border-gray-500"
       >
         <ReviewPreview :eventId="id" />
         <div
           v-if="distance !== undefined && distance !== Infinity && !isNaN(distance) && distance !== null"
-          class="flex items-center gap-1 text-gray-500"
+          class="flex items-center gap-1 text-gray-500 dark:text-gray-200"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7zM12 11a2 2 0 110-4 2 2 0 010 4z"/>
@@ -330,7 +316,7 @@ const friendHoverText = computed(() => {
 
   <Card
     v-else
-    class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm animate-pulse"
+    class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm animate-pulse bg-white dark:bg-[#f5f5f5]"
   >
     <Skeleton class="w-full h-52 rounded-t-2xl" />
 

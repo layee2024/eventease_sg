@@ -10,6 +10,7 @@ import TypeWriter from "@/components/bits/TypeWriter.vue";
 import SpecialCard from "../../components/bits/SpecialCard.vue";
 import Particles from "../../components/bits/Particles.vue";
 import Popup from "../../components/bits/Popup.vue";
+import Cursor from "../../components/bits/Cursor.vue";
 
 const router = useRouter();
 const problem = ref(null);
@@ -283,10 +284,21 @@ function initStarAnimation() {
 
 <template>
   <div class="relative w-full">
+    <Cursor
+    text="★"
+    :delay="0.01"
+    :spacing="100"
+    :follow-mouse-direction="true"
+    :random-float="true"
+    :exit-duration="0.7"
+    :removal-interval="30"
+    :max-points="3"
+    class="z-9999 text-sky-400"
+  />
     <section class="p-0 relative w-full h-[93vh] overflow-hidden">
       <Hyper
         :effect-options="customOptions"
-        class="absolute top-0 left-0 z-10 bg-black"
+        class="absolute top-0 left-0 z-10 bg-[#efefef] dark:bg-black"
       />
       <div class="absolute top-0 left-0 flex flex-col w-full h-full">
         <!-- Main Headline with animation -->
@@ -294,7 +306,7 @@ function initStarAnimation() {
           class="m-0 w-full h-full flex flex-col justify-center items-center z-50"
         >
           <h1
-            class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight transition-all duration-700 ease-out"
+            class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-black dark:text-white leading-tight transition-all duration-700 ease-out"
             :class="
               heroElementsVisible
                 ? 'opacity-100 translate-y-0'
@@ -302,7 +314,7 @@ function initStarAnimation() {
             "
           >
             <TypeWriter
-              class="text-white"
+              class="text-sky-400 dark:text-[#efefef]"
               :text="[
                 'Discover Events',
                 'Share Experiences',
@@ -317,7 +329,7 @@ function initStarAnimation() {
 
           <!-- Subheadline with Stats -->
           <p
-            class="mt-4 text-base text-center sm:text-lg text-white font-medium transition-all duration-700 ease-out delay-150"
+            class="mt-4 text-base text-center sm:text-lg text-black dark:text-white font-medium transition-all duration-700 ease-out delay-150"
             :class="
               heroElementsVisible
                 ? 'opacity-100 translate-y-0'
@@ -341,34 +353,32 @@ function initStarAnimation() {
             "
           >
             <div class="relative flex items-center">
-              <div class="absolute left-4 text-black">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2"
-                  stroke="currentColor"
-                  class="w-5 h-5"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M21 21l-5.2-5.2m0 0A7.5 7.5 0 105.2 5.2a7.5 7.5 0 0010.6 10.6z"
-                  />
-                </svg>
-              </div>
               <input
-                v-model="searchQuery"
-                @keypress="handleSearchKeypress"
-                type="text"
-                placeholder="Search events"
-                class="w-full pl-12 pr-32 py-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-gray-400 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:bg-white/20 focus:shadow-xl"
+              v-model="searchQuery"
+              @keypress="handleSearchKeypress"
+              type="text"
+              placeholder="Search events"
+              class="relative w-full pl-12 pr-32 py-4 rounded-full bg-white/50 dark:bg-white/10 backdrop-blur-md border border-black/20 dark:border-white/20 text-black dark:text-white placeholder-black dark:placeholder-white focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-300 focus:bg-white/20 focus:shadow-xl"
               />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                class="w-5 h-5 absolute left-4 dark:text-white"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M21 21l-5.2-5.2m0 0A7.5 7.5 0 105.2 5.2a7.5 7.5 0 0010.6 10.6z"
+                />
+              </svg>
               <Button
                 variant="primary"
                 size="lg"
                 @click="handleSearch"
-                class="absolute right-2 px-6 py-2.5 text-white cursor-pointer rounded-full hover:bg-[#dbe1e3] hover:text-gray-700"
+                class="absolute right-2 px-6 py-2.5 text-black dark:text-white cursor-pointer rounded-full hover:bg-[#dbe1e3] hover:text-gray-700"
               >
                 Search
               </Button>
@@ -491,7 +501,7 @@ function initStarAnimation() {
                   },
                 ]"
                 :key="i"
-                class="custom-spotlight-card w-70 h-56 flex flex-col justify-center items-center"
+                class="custom-spotlight-card w-70 h-56 flex flex-col justify-center items-center border-white"
                 :spotlight-color="'rgba(255, 255, 255, 0.25)'"
               >
                 <template #default>
@@ -794,7 +804,7 @@ function initStarAnimation() {
 
               <!-- Content -->
               <h3
-                class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors duration-300"
+                class="text-2xl font-bold text-black mb-3 group-hover:text-purple-600 transition-colors duration-300"
               >
                 Browse Events
               </h3>
@@ -845,7 +855,7 @@ function initStarAnimation() {
 
               <!-- Content -->
               <h3
-                class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-pink-600 transition-colors duration-300"
+                class="text-2xl font-bold text-black mb-3 group-hover:text-pink-600 transition-colors duration-300"
               >
                 Save Your Favorites
               </h3>
@@ -896,7 +906,7 @@ function initStarAnimation() {
 
               <!-- Content -->
               <h3
-                class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-300"
+                class="text-2xl font-bold text-black mb-3 group-hover:text-blue-600 transition-colors duration-300"
               >
                 Plan with Friends
               </h3>

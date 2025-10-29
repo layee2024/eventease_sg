@@ -158,9 +158,19 @@ function handleFilterChange(filter) {
 // Pagination controls
 function nextPage() {
   if (currentPage.value < totalPages.value) currentPage.value++
+  window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+    });
 }
 function prevPage() {
   if (currentPage.value > 1) currentPage.value--
+  window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+    });
 }
 
 function applySearchFilter(query) {
@@ -198,11 +208,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="min-h-screen py-12 px-6 md:px-12 xl:px-20 bg-white">
+  <section class="min-h-screen py-12 px-6 md:px-12 xl:px-20 bg-white dark:bg-[#121212]">
     <!-- Header -->
     <div class="text-center mb-10">
-      <h1 class="text-3xl font-extrabold text-gray-900">Events</h1>
-      <p class="text-lg text-gray-600 mt-2">
+      <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Events</h1>
+      <p class="text-lg text-gray-400 mt-2">
         Discover upcoming events happening across Singapore
       </p>
     </div>
@@ -262,7 +272,7 @@ onMounted(async () => {
     >
       <!-- Pagination -->
       <div
-        class="flex flex-col md:gap-3 text-sm text-gray-600 w-full text-center"
+        class="flex flex-col md:gap-3 text-sm text-gray-600 dark:text-white w-full text-center"
       >
         <!-- Buttons -->
         <div class="flex items-center justify-center gap-3 mb-2 md:mb-0">
@@ -275,7 +285,7 @@ onMounted(async () => {
             Previous
           </Button>
 
-          <span class="text-gray-700 font-medium">
+          <span class="text-gray-700 dark:text-white font-medium">
             Page {{ currentPage }} of {{ totalPages }}
           </span>
 
@@ -290,7 +300,7 @@ onMounted(async () => {
         </div>
 
         <div
-          class="text-gray-500 text-xs md:text-sm mt-1 md:mt-0 md:ml-2"
+          class="text-gray-500 dark:text-white text-xs md:text-sm mt-1 md:mt-0 md:ml-2"
         >
           Showing
           {{ (currentPage - 1) * itemsPerPage + 1 }}

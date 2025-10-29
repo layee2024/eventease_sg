@@ -3,6 +3,8 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { supabase } from "../../../utils/supabase";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@iconify/vue";
+import { useColorMode } from "@vueuse/core";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -11,23 +13,24 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
+const mode = useColorMode({disableTransition: false });
 const router = useRouter();
 const route = useRoute();
 const user = ref(null);
 const name = ref("");
-const profilePicture = ref("")
+const profilePicture = ref("");
 const requestCount = ref(0);
 const isLoggedIn = ref(false);
 const mobileMenuOpen = ref(false);
 
 onMounted(() => {
-  window.addEventListener('profile-picture-updated', (event) => {
+  window.addEventListener("profile-picture-updated", (event) => {
     profilePicture.value = event.detail;
   });
 });
 
 onUnmounted(() => {
-  window.removeEventListener('profile-picture-updated', (event) => {
+  window.removeEventListener("profile-picture-updated", (event) => {
     profilePicture.value = event.detail;
   });
 });
@@ -58,40 +61,23 @@ onMounted(async () => {
 
 // Fetch
 async function fetchProfileData() {
-  if (!user.value) return
+  if (!user.value) return;
   const { data, error } = await supabase
     .from("user_preferences")
     .select("profile_picture, friend_requests", "name")
     .eq("id", user.value.id)
-    .maybeSingle()
+    .maybeSingle();
 
   if (error) {
-    console.error(error)
-    profilePicture.value = DEFAULT_AVATAR
-    requestCount.value = 0
-    return
+    console.error(error);
+    profilePicture.value = DEFAULT_AVATAR;
+    requestCount.value = 0;
+    return;
   }
 
-  name.value = data?.name || 'User'
-  profilePicture.value = data?.profile_picture
-  requestCount.value = data?.friend_requests?.length || 0
-
-  if (!subscription) {
-    subscription = supabase
-      .channel("user_updates")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "user_preferences", filter: `id=eq.${user.value.id}` },
-        (payload) => {
-          const newData = payload.new
-          if (newData) {
-            profilePicture.value = newData.profile_picture || DEFAULT_AVATAR
-            requestCount.value = newData.friend_requests?.length || 0
-          }
-        }
-      )
-      .subscribe()
-  }
+  name.value = data?.name || "User";
+  profilePicture.value = data?.profile_picture;
+  requestCount.value = data?.friend_requests?.length || 0;
 }
 
 onMounted(async () => {
@@ -129,11 +115,12 @@ async function logout() {
   requestCount.value = 0;
   router.push("/login");
 }
-
 </script>
 
 <template>
-  <nav class="sticky top-0 z-999 shadow-sm w-full" :class="[isActive('/') ? 'bg-black text-white' : 'bg-white']">
+  <nav
+    class="sticky top-0 z-999 shadow-sm w-full bg-white dark:bg-[#212121] dark:text-[#E0E0E0]"
+  >
     <div class="flex items-center justify-between py-3 px-6">
       <!-- Logo -->
       <router-link to="/" class="flex items-center space-x-2">
@@ -151,8 +138,8 @@ async function logout() {
       <div class="hidden lg:flex items-center space-x-6">
         <router-link
           to="/"
-          class="flex items-center gap-1 font-medium hover:text-blue-600 transition"
-          :class="{ 'text-blue-600 border-b-2 border-blue-600': isActive('/') }"
+          class="flex items-center gap-1 font-medium hover:text-sky-400 transition"
+          :class="{ 'text-sky-400 border-b-2 border-sky-400': isActive('/') }"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -172,9 +159,9 @@ async function logout() {
 
         <router-link
           to="/events"
-          class="flex items-center gap-1 font-medium hover:text-blue-600 transition"
+          class="flex items-center gap-1 font-medium hover:text-sky-400 transition"
           :class="{
-            'text-blue-600 border-b-2 border-blue-600': isActive('/events'),
+            'text-sky-400 border-b-2 border-sky-400': isActive('/events'),
           }"
         >
           <svg
@@ -197,9 +184,9 @@ async function logout() {
 
         <router-link
           to="/map"
-          class="flex items-center gap-1 font-medium hover:text-blue-600 transition"
+          class="flex items-center gap-1 font-medium hover:text-sky-400 transition"
           :class="{
-            'text-blue-600 border-b-2 border-blue-600': isActive('/map'),
+            'text-sky-400 border-b-2 border-sky-400': isActive('/map'),
           }"
         >
           <svg
@@ -219,9 +206,9 @@ async function logout() {
 
         <router-link
           to="/planner"
-          class="flex items-center gap-1 font-medium hover:text-blue-600 transition"
+          class="flex items-center gap-1 font-medium hover:text-sky-400 transition"
           :class="{
-            'text-blue-600 border-b-2 border-blue-600': isActive('/planner'),
+            'text-sky-400 border-b-2 border-sky-400': isActive('/planner'),
           }"
         >
           <svg
@@ -246,9 +233,9 @@ async function logout() {
 
         <router-link
           to="/shuffle"
-          class="flex items-center gap-1 font-medium hover:text-blue-600 transition"
+          class="flex items-center gap-1 font-medium hover:text-sky-400 transition"
           :class="{
-            'text-blue-600 border-b-2 border-blue-600': isActive('/shuffle'),
+            'text-sky-400 border-b-2 border-sky-400': isActive('/shuffle'),
           }"
         >
           <svg
@@ -276,26 +263,26 @@ async function logout() {
             class="font-medium border-1 border-gray-300 cursor-pointer"
             >Register</Button
           >
-          <Button @click="router.push('/login')" class="font-medium border border-white cursor-pointer"
+          <Button
+            @click="router.push('/login')"
+            class="font-medium border border-white cursor-pointer"
             >Login</Button
           >
         </template>
 
         <template v-else>
-          <DropdownMenu>
+          <DropdownMenu class="z-1000">
             <DropdownMenuTrigger as-child class="cursor-pointer">
               <Button
                 variant="ghost"
                 class="font-medium flex items-center gap-1 rounded-full"
-                :class="[isActive('/') ? 'bg-black text-white' : 'bg-white']"
               >
-                
-              <img
-                :key="profilePicture"
-                :src="profilePicture"
-                alt="Profile"
-                class="size-8"
-              />
+                <img
+                  :key="profilePicture"
+                  :src="profilePicture"
+                  alt="Profile"
+                  class="size-8"
+                />
               </Button>
             </DropdownMenuTrigger>
 
@@ -375,6 +362,30 @@ async function logout() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="outline" class="cursor-pointer">
+                <Icon
+                  icon="radix-icons:sun"
+                  class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+                />
+                <Icon
+                  icon="radix-icons:moon"
+                  class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+                />
+                <span class="sr-only">Toggle theme</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" class="z-1000">
+              <DropdownMenuItem @click="mode = 'light'">
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem @click="mode = 'dark'"> Dark </DropdownMenuItem>
+              <DropdownMenuItem @click="mode = 'auto'">
+                System
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </template>
       </div>
 
@@ -398,7 +409,7 @@ async function logout() {
         <router-link
           to="/"
           class="flex items-center gap-1 font-medium"
-          :class="{ 'text-blue-600': isActive('/') }"
+          :class="{ 'text-sky-400': isActive('/') }"
           @click="mobileMenuOpen = false"
         >
           <svg
@@ -420,7 +431,7 @@ async function logout() {
         <router-link
           to="/events"
           class="flex items-center gap-1 font-medium"
-          :class="{ 'text-blue-600': isActive('/events') }"
+          :class="{ 'text-sky-400': isActive('/events') }"
           @click="mobileMenuOpen = false"
         >
           <svg
@@ -444,7 +455,7 @@ async function logout() {
         <router-link
           to="/map"
           class="flex items-center gap-1 font-medium"
-          :class="{ 'text-blue-600': isActive('/map') }"
+          :class="{ 'text-sky-400': isActive('/map') }"
           @click="mobileMenuOpen = false"
         >
           <svg
@@ -464,7 +475,7 @@ async function logout() {
         <router-link
           to="/planner"
           class="flex items-center gap-1 font-medium"
-          :class="{ 'text-blue-600': isActive('/planner') }"
+          :class="{ 'text-sky-400': isActive('/planner') }"
           @click="mobileMenuOpen = false"
         >
           <svg
@@ -485,14 +496,14 @@ async function logout() {
             />
           </svg>
           Planner
-          </router-link>
+        </router-link>
         <router-link
           to="/shuffle"
           class="flex items-center gap-1 font-medium"
-          :class="{ 'text-blue-600': isActive('/shuffle') }"
+          :class="{ 'text-sky-400': isActive('/shuffle') }"
           @click="mobileMenuOpen = false"
         >
-        <svg
+          <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
@@ -505,8 +516,7 @@ async function logout() {
             />
           </svg>
           Shuffle
-          </router-link>
-
+        </router-link>
 
         <div class="border-t border-gray-200 my-2"></div>
 

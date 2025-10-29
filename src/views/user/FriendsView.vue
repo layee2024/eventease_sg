@@ -606,21 +606,21 @@ async function declineInvite(inv) {
 </script>
 
 <template>
-  <section class="min-h-screen py-12 px-6 md:px-12 xl:px-20 bg-white relative">
+  <section class="min-h-screen py-12 px-6 md:px-12 xl:px-20 bg-white dark:bg-[#121212] relative">
     <!-- Loading Spinner -->
     <div
       v-if="pageLoading"
       class="absolute inset-0 flex flex-col items-center justify-center bg-white/80 z-50"
     >
       <Loader2 class="h-10 w-10 text-blue-600 animate-spin mb-3" />
-      <p class="text-gray-600">Loading your friends...</p>
+      <p class="text-gray-600 dark:text-white">Loading your friends...</p>
     </div>
 
     <!-- Header -->
     <div class="text-center mb-10">
-      <h1 class="text-3xl font-extrabold text-gray-900">Friends</h1>
-      <p class="text-lg text-gray-600 mt-2">
-        Add new friends or manage your current connections.
+      <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Friends</h1>
+      <p class="text-lg text-gray-400 mt-2">
+        Add new friends or manage your current connections
       </p>
     </div>
 
@@ -630,7 +630,7 @@ async function declineInvite(inv) {
         <Input
           v-model="searchQuery"
           placeholder="Search users by name or email..."
-          class="flex-1 border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-4"
+          class="flex-1 border dark:text-white border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-4"
         />
         <Button
           class="cursor-pointer"
@@ -683,19 +683,19 @@ async function declineInvite(inv) {
       <div
         class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3 text-center sm:text-left"
       >
-        <h2 class="text-xl font-extrabold text-gray-800">Friends List</h2>
+        <h2 class="text-xl font-extrabold text-gray-800 dark:text-gray-200">Friends List</h2>
 
         <div class="flex justify-center sm:justify-end gap-2">
           <Button
             variant="outline"
-            class="cursor-pointer"
+            class="cursor-pointer dark:text-gray-200"
             @click="requestsOpen = true"
           >
             Friend Requests ({{ requests.length }})
           </Button>
           <Button
             variant="outline"
-            class="cursor-pointer"
+            class="cursor-pointer dark:text-gray-200"
             @click="inviteRequestsOpen = true"
           >
             Invite Requests ({{ invites.length }})
@@ -710,10 +710,10 @@ async function declineInvite(inv) {
 
         <TableHeader v-else>
           <TableRow>
-            <TableHead class="w-[60px] text-center">S/N</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead class="text-center w-[200px]">Actions</TableHead>
+            <TableHead class="w-[60px] text-center dark:text-white">S/N</TableHead>
+            <TableHead class="dark:text-white">Name</TableHead>
+            <TableHead class="dark:text-white">Email</TableHead>
+            <TableHead class="text-center w-[200px] dark:text-white">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -721,9 +721,9 @@ async function declineInvite(inv) {
           <TableRow
             v-for="(f, index) in paginatedFriends"
             :key="f.id"
-            class="hover:bg-gray-50"
+            class="hover:bg-gray-400"
           >
-            <TableCell class="text-center font-medium text-gray-600">
+            <TableCell class="text-center font-medium text-gray-600 dark:text-white">
               {{ index + 1 + (currentPage - 1) * perPage }}
             </TableCell>
             <TableCell class="flex items-center gap-3">
@@ -732,17 +732,17 @@ async function declineInvite(inv) {
                 alt="Profile Picture"
                 class="w-10 h-10 rounded-full object-cover border border-gray-200"
               />
-              <p class="font-semibold text-gray-900">{{ f.name }}</p>
+              <p class="font-semibold text-gray-900 dark:text-white">{{ f.name }}</p>
             </TableCell>
             <TableCell>
-              <p class="text-sm text-gray-500">{{ f.email }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-200">{{ f.email }}</p>
             </TableCell>
             <TableCell class="text-center">
               <div class="flex justify-center gap-2">
                 <Button size="sm" class="cursor-pointer" variant="secondary" @click="openFriendEvents(f)">
                   View Events
                 </Button>
-                <Button variant="outline" class="cursor-pointer" size="sm" @click="openInviteModal(f)">
+                <Button variant="outline" class="cursor-pointer dark:text-white" size="sm" @click="openInviteModal(f)">
                   Invite
                 </Button>
                 <Button size="sm" class="cursor-pointer" variant="destructive" @click="confirmRemove(f)">Remove</Button>
@@ -755,7 +755,7 @@ async function declineInvite(inv) {
       <!-- Pagination -->
       <div
         v-if="totalPages > 1"
-        class="flex justify-center gap-3 mt-6 items-center"
+        class="flex justify-center gap-3 mt-6 items-center dark:text-white"
       >
         <Button
           variant="outline"
@@ -764,7 +764,7 @@ async function declineInvite(inv) {
           @click="currentPage--"
           >Prev</Button
         >
-        <span class="text-gray-600 text-sm"
+        <span class="text-gray-700 dark:text-white text-sm"
           >Page {{ currentPage }} of {{ totalPages }}</span
         >
         <Button
@@ -790,8 +790,8 @@ async function declineInvite(inv) {
             class="py-3 flex justify-between items-center"
           >
             <div>
-              <p class="font-semibold text-gray-900">{{ r.name }}</p>
-              <p class="text-sm text-gray-500">{{ r.email }}</p>
+              <p class="font-semibold text-gray-900 dark:text-gray-200">{{ r.name }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ r.email }}</p>
             </div>
             <div class="flex gap-2">
               <Button
@@ -810,7 +810,7 @@ async function declineInvite(inv) {
             </div>
           </li>
         </ul>
-        <p v-else class="text-center text-gray-500 py-4">
+        <p v-else class="text-center text-gray-500 dark:text-gray-200 py-4">
           No pending requests.
         </p>
       </DialogContent>
@@ -831,8 +831,8 @@ async function declineInvite(inv) {
             class="border border-gray-200 rounded-lg p-3 flex justify-between items-center"
           >
             <div>
-              <p class="font-semibold text-gray-800">{{ ev.title }}</p>
-              <p class="text-sm text-gray-500">{{ ev.venue }}</p>
+              <p class="font-semibold text-gray-800 dark:text-gray-200">{{ ev.title }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ ev.venue }}</p>
             </div>
             <Button
               size="sm"
@@ -883,10 +883,10 @@ async function declineInvite(inv) {
             class="py-3 flex justify-between items-start"
           >
             <div>
-              <p class="font-semibold text-gray-900">{{ ev.title }}</p>
-              <p class="text-sm text-gray-600">
+              <p class="font-semibold text-gray-900 dark:text-gray-200">{{ ev.title }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
                 {{ ev.venue }}<br />
-                <span class="text-xs text-gray-500">
+                <span class="text-xs text-gray-500 dark:text-gray-300">
                   {{ ev.start_date }} → {{ ev.end_date }}
                 </span>
               </p>
@@ -896,24 +896,26 @@ async function declineInvite(inv) {
           <!-- Pagination Controls -->
           <div
             v-if="totalFriendEventPages > 1"
-            class="flex justify-center items-center gap-3 mt-4"
+            class="flex justify-center items-center gap-3 mt-4 dark:text-white"
           >
             <Button
               variant="outline"
               size="sm"
+              class="cursor-pointer"
               :disabled="friendEventsPage === 1"
               @click="friendEventsPage--"
             >
               Prev
             </Button>
 
-            <span class="text-sm text-gray-600">
+            <span class="text-sm text-gray-600 dark:text-white">
               Page {{ friendEventsPage }} of {{ totalFriendEventPages }}
             </span>
 
             <Button
               variant="outline"
               size="sm"
+              class="cursor-pointer"
               :disabled="friendEventsPage === totalFriendEventPages"
               @click="friendEventsPage++"
             >
@@ -922,8 +924,8 @@ async function declineInvite(inv) {
           </div>
         </div>
 
-        <p v-else class="text-center text-gray-500 py-4 italic">
-          This friend hasn’t joined any events yet.
+        <p v-else class="text-center text-gray-500 dark:text-white py-4 italic">
+          This friend hasn't joined any events yet.
         </p>
       </DialogContent>
     </Dialog>
@@ -940,10 +942,10 @@ async function declineInvite(inv) {
             class="py-3 flex justify-between items-center"
           >
             <div>
-              <p class="font-semibold text-gray-900">
+              <p class="font-semibold text-gray-900 dark:text-gray-200">
                 {{ i.fromUser?.name }} invited you
               </p>
-              <p class="text-sm text-gray-500">{{ i.eventTitle }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ i.eventTitle }}</p>
             </div>
             <div class="flex gap-2">
               <Button size="sm" class="cursor-pointer" @click="acceptInvite(i)"
@@ -960,7 +962,7 @@ async function declineInvite(inv) {
           </li>
         </ul>
 
-        <p v-else class="text-center text-gray-500 py-4">
+        <p v-else class="text-center text-gray-500 dark:text-gray-200 py-4">
           No event invites yet.
         </p>
       </DialogContent>
@@ -972,9 +974,9 @@ async function declineInvite(inv) {
         <DialogHeader>
           <DialogTitle>Remove Friend</DialogTitle>
         </DialogHeader>
-        <p class="text-gray-600 mb-4">
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
           Are you sure you want to remove
-          <span class="font-semibold text-gray-900">{{
+          <span class="font-semibold text-gray-900 dark:text-gray-200">{{
             friendToRemove?.name
           }}</span>
           from your friends list?

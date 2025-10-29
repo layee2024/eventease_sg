@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import NavBar from "@/components/comp/user/UserNavBar.vue";
 import Footer from "@/components/comp/Footer.vue";
 import { supabase } from "@/utils/supabase";
+
 import {
   Dialog,
   DialogContent,
@@ -64,12 +65,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div id="app" class="flex flex-col min-h-screen bg-inherit text-gray-900">
+  <div id="app" class="flex flex-col min-h-screen bg-white dark:bg-black text-gray-900">
     <NavBar />
-    <div class="fixed top-[5%] right-0 z-[100] flex max-h-screen w-full translate-y-[-5%] p-4 sm:right-0 sm:flex-col md:max-w-[420px]">
-      <Toaster position="top-right" closeButton />
+    <div class="fixed top-[10%] right-0 z-[100] flex max-h-screen w-full translate-y-[-5%] p-4 sm:right-0 sm:flex-col md:max-w-[420px]">
+      <Toaster position="top-right" closeButton class="text-black dark:text-white z-1000" />
     </div>
-
     <main>
       <RouterView v-slot="{ Component }">
         <template v-if="isHomePage">
@@ -100,8 +100,8 @@ onMounted(async () => {
             <button
               class="pb-1 font-medium border-b-2 transition-colors duration-200 cursor-pointer"
               :class="activeTab === 'invites'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'"
+                ? 'border-sky-400 text-sky-400'
+                : 'border-transparent text-gray-300 hover:text-gray-500'"
               @click="activeTab = 'invites'"
             >
               Event Invites ({{ newInvites.length }})
@@ -109,8 +109,8 @@ onMounted(async () => {
             <button
               class="pb-1 font-medium border-b-2 transition-colors duration-200 cursor-pointer"
               :class="activeTab === 'friends'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'"
+                ? 'border-sky-400 text-sky-400'
+                : 'border-transparent text-gray-300 hover:text-gray-500'"
               @click="activeTab = 'friends'"
             >
               Friend Requests ({{ newFriendRequests.length }})
@@ -131,7 +131,7 @@ onMounted(async () => {
                 class="w-8 h-8 rounded-full object-cover border border-gray-200"
               />
               <p class="font-medium text-gray-900">
-                <span class="text-blue-600">{{ inv.inviterName }}</span> invited you to
+                <span class="text-sky-400">{{ inv.inviterName }}</span> invited you to
                 <span class="font-semibold">“{{ inv.eventTitle }}”</span>
               </p>
             </div>
@@ -143,7 +143,7 @@ onMounted(async () => {
               v-for="n in totalInvitePages"
               :key="'invite-dot-' + n"
               class="w-3 h-3 rounded-full cursor-pointer transition-all duration-300"
-              :class="invitePage === n ? 'bg-blue-600 scale-110' : 'bg-gray-400 opacity-50'"
+              :class="invitePage === n ? 'bg-sky-400 scale-110' : 'bg-gray-400 opacity-50'"
               @click="invitePage = n"
             />
           </div>
@@ -162,7 +162,7 @@ onMounted(async () => {
                 class="w-8 h-8 rounded-full object-cover border border-gray-200"
               />
               <p class="font-medium text-gray-900">
-                <span class="text-blue-600">{{ req.name }}</span> sent you a friend request
+                <span class="text-sky-400">{{ req.name }}</span> sent you a friend request
               </p>
             </div>
           </div>
@@ -173,7 +173,7 @@ onMounted(async () => {
               v-for="n in totalFriendPages"
               :key="'friend-dot-' + n"
               class="w-3 h-3 rounded-full cursor-pointer transition-all duration-300"
-              :class="friendPage === n ? 'bg-blue-600 scale-110' : 'bg-gray-400 opacity-50'"
+              :class="friendPage === n ? 'bg-sky-400 scale-110' : 'bg-gray-400 opacity-50'"
               @click="friendPage = n"
             />
           </div>
@@ -183,14 +183,14 @@ onMounted(async () => {
         <div v-if="newInvites.length || newFriendRequests.length" class="text-center mt-6">
           <RouterLink
             to="/friends"
-            class="text-sm font-medium text-blue-600 hover:underline cursor-pointer"
+            class="text-sm font-medium text-sky-400 hover:underline cursor-pointer"
             @click="newInviteModalOpen = false"
           >
             Go to Friends to Accept →
           </RouterLink>
         </div>
 
-        <p v-if="!newInvites.length && !newFriendRequests.length" class="text-gray-500 text-center py-4">
+        <p v-if="!newInvites.length && !newFriendRequests.length" class="text-gray-300 text-center py-4">
           You have no new notifications.
         </p>
       </DialogContent>

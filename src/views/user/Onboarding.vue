@@ -87,7 +87,7 @@ async function savePreferences(data) {
 </script>
 
 <template>
-  <div class="flex flex-col justify-center items-center min-h-[93vh] bg-gray-50 px-6">
+  <div class="flex flex-col justify-center items-center min-h-[93vh] bg-gray-50 dark:bg-[#121212] px-6">
     <div class="max-w-lg w-full bg-white shadow-lg rounded-xl p-8 relative overflow-hidden">
 
       <div class="flex justify-center mb-6 space-x-2">
@@ -180,14 +180,14 @@ async function savePreferences(data) {
 
       <!-- Navigation -->
       <div class="flex justify-between mt-4">
-        <Button class="cursor-pointer" variant="outline" @click="skipOnboarding">Skip for now</Button>
+        <Button class="cursor-pointer dark:bg-white" variant="outline" @click="skipOnboarding">Skip for now</Button>
         <div class="flex gap-2">
-          <Button class="cursor-pointer" v-if="currentStep > 1" variant="outline" @click="prevStep">
+          <Button class="cursor-pointer dark:bg-white" v-if="currentStep > 1" variant="outline" @click="prevStep">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18" />
             </svg>
           </Button>
-          <Button class="cursor-pointer" v-if="currentStep < totalSteps" @click="nextStep">
+          <Button class="cursor-pointer dark:bg-white" variant="outline" v-if="currentStep < totalSteps" @click="nextStep">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
             </svg>

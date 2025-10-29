@@ -430,11 +430,11 @@ onMounted(async () => {
       <div class="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full"></div>
     </div>
 
-    <div v-else-if="event" class="relative max-w-5xl mx-auto bg-white shadow-md rounded-lg overflow-hidden my-10">
+    <div v-else-if="event" class="relative max-w-5xl mx-auto bg-white dark:bg-gray-200 shadow-md rounded-lg overflow-hidden my-10">
       <Button
         variant="outline"
         @click="route.query.from === 'shuffle' ? router.push('/shuffle') : router.push('/events')"
-        class="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white/90 backdrop-blur-md shadow-sm hover:bg-gray-200 cursor-pointer"
+        class="absolute top-4 left-4 z-20 flex items-center gap-2 dark:bg-white dark:border-gray-400 bg-white/90 backdrop-blur-md shadow-sm hover:bg-gray-200 cursor-pointer"
       >
         <ArrowLeft class="w-4 h-4" />
         Back
@@ -516,20 +516,7 @@ onMounted(async () => {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger as-child>
-                    <div class="relative h-8 w-12 cursor-pointer">
-                      <div
-                        v-for="(f, index) in friendsGoing.slice(0, 3)"
-                        :key="f.id"
-                        class="absolute transition-transform duration-150"
-                        :style="{ left: `${index * 30}%`, zIndex: 10 + index }"
-                      >
-                        <img
-                          :src="f.profile_picture || '/default-avatar.png'"
-                          :alt="f.name"
-                          class="w-8 h-8 rounded-full border-2 border-white bg-white shadow-sm hover:shadow-md hover:scale-110"
-                        />
-                      </div>
-                    </div>
+                      {{ friendsGoing.length }} friend{{ friendsGoing.length > 1 ? "s" : "" }} going
                   </TooltipTrigger>
                   <TooltipContent class="bg-gray-900 text-white text-xs px-2 py-1 rounded">
                     {{ friendHoverText }}
@@ -537,9 +524,6 @@ onMounted(async () => {
                 </Tooltip>
               </TooltipProvider>
 
-              <span class="text-gray-500 text-xs">
-                {{ friendsGoing.length }} friend{{ friendsGoing.length > 1 ? "s" : "" }} going
-              </span>
             </div>
           </div>
 
@@ -562,7 +546,7 @@ onMounted(async () => {
             <Button
               v-if="isGoing"
               variant="outline"
-              class="cursor-pointer"
+              class="cursor-pointer dark:bg-white dark:border-gray-400"
               @click="openInviteModal"
             >
               Invite Friends
@@ -676,7 +660,7 @@ onMounted(async () => {
 
     <div v-else class="text-center py-20 text-gray-600">
       <p>Event not found.</p>
-      <Button @click="router.push('/events')" variant="outline" class="mt-4">
+      <Button @click="router.push('/events')" variant="ghost" class="mt-4">
         Back to Events
       </Button>
     </div>
@@ -696,13 +680,13 @@ onMounted(async () => {
           <div
             v-for="friend in friends"
             :key="friend.id"
-            class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+            class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <div class="flex items-center gap-3">
               <img :src="friend.profile_picture || '/default-avatar.png'" class="w-10 h-10 rounded-full object-cover" />
               <div>
-                <p class="font-semibold text-gray-900">{{ friend.name }}</p>
-                <p class="text-xs text-gray-500">{{ friend.email }}</p>
+                <p class="font-semibold text-gray-900 dark:text-gray-300">{{ friend.name }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-300">{{ friend.email }}</p>
               </div>
             </div>
 

@@ -136,7 +136,7 @@ function getCategoryColor(category) {
             isShuffling && index === 0 ? 'animate-pulse' : ''
           ]"
         >
-          <Card class="h-full shadow-2xl border-4 border-white overflow-hidden">
+          <Card class="h-full shadow-2xl border-4 border-white bg-white overflow-hidden">
             <!-- Card Background -->
             <div
               :class="[
@@ -180,7 +180,7 @@ function getCategoryColor(category) {
 
                 <div class="space-y-2 text-sm">
                   <div class="flex items-center justify-between">
-                    <span class="text-gray-500">📍 Location:</span>
+                    <span class="text-gray-500 whitespace-nowrap">📍 Location:</span>
                     <span class="font-medium text-gray-900 truncate ml-2">{{ card.event.venue }}</span>
                   </div>
                   <div class="flex items-center justify-between">
@@ -225,7 +225,7 @@ function getCategoryColor(category) {
       </div>
 
       <!-- Card counter -->
-      <div class="text-center mt-4 text-gray-500 text-sm">
+      <div class="text-center mt-4 text-gray-500 dark:text-gray-200 text-sm">
         <p v-show="!isShuffling">Showing {{ displayCards.length }} of {{ props.events.length }} events</p>
       </div>
     </div>

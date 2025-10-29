@@ -56,11 +56,6 @@ const getRandomSpeed = () => {
   return Math.random() * (max - min) + min;
 };
 
-const getCurrentTextColor = () => {
-  if (!props.textColors.length) return '#ffffff';
-  return props.textColors[currentTextIndex.value % props.textColors.length];
-};
-
 let timeout: ReturnType<typeof setTimeout> | null = null;
 
 const clearTimeoutIfNeeded = () => {
@@ -160,7 +155,7 @@ onBeforeUnmount(() => {
     :class="`inline-block whitespace-pre-wrap tracking-tight ${className}`"
     v-bind="$attrs"
   >
-    <span class="inline" :style="{ color: getCurrentTextColor() }">
+    <span class="inline text-sky-400 dark:text-[#efefef]">
       {{ displayedText }}
     </span>
     <span

@@ -196,13 +196,13 @@ function handleSavedUpdate({ id, liked }) {
 </script>
 
 <template>
-  <section class="min-h-screen bg-white py-12 px-6 md:px-12 xl:px-20">
+  <section class="min-h-screen bg-white dark:bg-[#121212] py-12 px-6 md:px-12 xl:px-20">
     <!-- Header -->
     <div class="max-w-7xl mx-auto mb-12 text-center">
       <div class="flex items-center justify-center gap-3 mb-4">
-        <h1 class="text-3xl font-extrabold text-gray-900">Shuffle</h1>
+        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Shuffle</h1>
       </div>
-      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+      <p class="text-xl text-gray-400 max-w-2xl mx-auto">
         Can't decide what to do? Let fate choose your next adventure!<br/>
         Shuffle the cards and discover exciting events tailored to your preferences.
       </p>
@@ -211,7 +211,7 @@ function handleSavedUpdate({ id, liked }) {
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-20">
       <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto"></div>
-      <p class="mt-4 text-gray-600">Loading events...</p>
+      <p class="mt-4 text-gray-600 dark:text-white">Loading events...</p>
     </div>
 
     <!-- Main Content -->
@@ -253,7 +253,7 @@ function handleSavedUpdate({ id, liked }) {
 
       <!-- Result Card -->
       <div v-if="showResult && selectedEvent" class="max-w-4xl mx-auto">
-        <Card class="p-0 border-4 border-yellow-400 shadow-2xl">
+        <Card class="p-0 border-4 border-yellow-400 shadow-2xl bg-white">
           <CardHeader class="bg-yellow-400 text-white p-2">
             <CardTitle class="text-3xl text-center flex items-center justify-center gap-3">
               <Sparkles class="w-8 h-8" />
@@ -264,7 +264,7 @@ function handleSavedUpdate({ id, liked }) {
               The cards have chosen! Here's your next adventure:
             </CardDescription>
           </CardHeader>
-          <CardContent class="pt-2 pb-6">
+          <CardContent class="pt-2 pb-6 bg-white rounded-full">
             <div class="grid lg:grid-cols-2 gap-8">
               <!-- Event Card -->
               <div>
@@ -342,13 +342,13 @@ function handleSavedUpdate({ id, liked }) {
 
                 <!-- Action Buttons -->
                 <div class="flex flex-col gap-3 mt-6">
-                  <Button @click="saveEvent" size="lg" class="w-full cursor-pointer">
+                  <Button @click="saveEvent" size="lg" class="w-full cursor-pointer dark:bg-black dark:text-white">
                     Save This Event
                   </Button>
-                  <Button @click="viewEventDetails" size="lg" variant="outline" class="w-full cursor-pointer">
+                  <Button @click="viewEventDetails" size="lg" variant="outline" class="w-full cursor-pointer dark:bg-white dark:text-black">
                     View Full Details
                   </Button>
-                  <Button @click="resetShuffle" size="lg" variant="ghost" class="w-full cursor-pointer">
+                  <Button @click="resetShuffle" size="lg" variant="ghost" class="w-full cursor-pointer dark:text-black hover">
                     Shuffle Again
                   </Button>
                 </div>
@@ -359,7 +359,7 @@ function handleSavedUpdate({ id, liked }) {
       </div>
 
       <!-- Help Text -->
-      <div class="text-center mt-12 text-gray-600">
+      <div class="text-center mt-12 text-gray-600 dark:text-gray-400">
         <p>💡 Tip: Update your preferences in your profile to get more personalized shuffles!</p>
       </div>
     </div>

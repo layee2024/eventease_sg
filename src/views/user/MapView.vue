@@ -321,7 +321,6 @@ watch([searchVal, eventCat], filterBySearch)
   <section>
     <div id="map-container" class="relative w-full h-[93vh]">
       <div id="map" class="inset-0 z-0 pt-2 h-[92vh] w-screen"></div>
-
       <div
         id="searchcontainer"
         class="fixed z-40 top-[100px] sm:top-[80px] left-1/2 transform -translate-x-1/2 bg-white border border-gray-300 rounded-lg shadow-lg p-6 flex flex-col sm:flex-row sm:space-x-5 space-y-4 sm:space-y-0"

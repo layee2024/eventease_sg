@@ -43,31 +43,28 @@ watch(searchQuery, () => {
 
 
 <template>
-  <div class="bg-white shadow-sm rounded-xl p-5 space-y-4 w-full max-w-4xl mx-auto">
+  <div class="bg-white dark:bg-[#f5f5f5] shadow-sm rounded-xl p-5 space-y-4 w-full max-w-4xl mx-auto">
     
     <div
   class="grid gap-3 items-center 
-         grid-cols-1 
-         sm:grid-cols-2 
-         md:grid-cols-[20%_25%_20%_auto] 
-         lg:grid-cols-[25%_25%_25%_auto] 
-         xl:grid-cols-[25%_25%_25%_auto] 
-         2xl:grid-cols-[20%_20%_20%_20%_auto] 
+         grid-cols-2 
+         md:grid-cols-[25%_25%_20%_auto] 
+         lg:grid-cols-[18%_18%_18%_18%_auto_auto]
          w-full"
 >
   <!-- Search Bar -->
-  <div class="flex flex-col md:flex-row gap-3 col-span-full lg:col-span-4">
+  <div class="flex flex-col md:flex-row gap-3 col-span-full lg:col-span-6">
     <div
       class="flex items-center border rounded-lg px-3 py-2 
              focus-within:ring-2 focus-within:ring-blue-500 
              transition w-full"
     >
-      <Search class="w-5 h-5 text-gray-400 mr-2" />
+      <Search class="w-5 h-5 text-gray-400 border-gray-500 mr-2" />
       <input
         type="text"
         v-model="searchQuery"
         placeholder="Search events by title or venue..."
-        class="w-full outline-none text-gray-700 text-sm sm:text-base"
+        class="w-full outline-none text-gray-700 border-gray-500 text-sm sm:text-base"
       />
     </div>
   </div>
@@ -77,13 +74,13 @@ watch(searchQuery, () => {
     type="number"
     v-model="maxPrice"
     placeholder="Budget"
-    class="border rounded-lg px-3 py-2 w-full text-sm sm:text-base"
+    class="border border-gray-500 rounded-lg px-3 py-2 w-full text-sm sm:text-base"
   />
 
   <!-- Category -->
   <select
     v-model="category"
-    class="border rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
+    class="border border-gray-500 rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
   >
     <option value="">All Categories</option>
     <option value="Music">Music</option>
@@ -102,7 +99,7 @@ watch(searchQuery, () => {
   <!-- Crowd Level -->
   <select
     v-model="crowdLevel"
-    class="border rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
+    class="border border-gray-500 rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
   >
     <option value="">Any Crowd</option>
     <option value="High">High</option>
@@ -113,7 +110,7 @@ watch(searchQuery, () => {
   <!-- Sort By -->
   <select
     v-model="sortOption"
-    class="border rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
+    class="border border-gray-500 rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
   >
     <option value="">Sort By</option>
     <option value="distance">Nearest</option>
@@ -122,25 +119,25 @@ watch(searchQuery, () => {
     <option value="priceLow">Price (Low → High)</option>
     <option value="priceHigh">Price (High → Low)</option>
   </select>
-</div>
-
-
   <!-- Buttons -->
-  <div class="flex flex-col sm:flex-row gap-3 justify-center w-full col-span-full md:col-span-1">
+  <div class="flex justify-center w-full gap-3 col-span-2 md:col-span-4 lg:col-span-2">
     <button
       @click="applyFilter"
-      class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition w-full sm:w-auto cursor-pointer"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition w-full cursor-pointer"
     >
       Search
     </button>
-
+  
     <button
       @click="resetFilter"
-      class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg font-medium transition w-full sm:w-auto cursor-pointer"
+      class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg font-medium transition w-full cursor-pointer"
     >
       Reset
     </button>
   </div>
+</div>
+
+
 
   </div>
 </template>

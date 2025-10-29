@@ -85,12 +85,12 @@ onMounted(() => {
 
 <template>
     <section
-        class="min-h-[93vh] bg-gradient-to-br from-gray-50 via-white to-blue-50 py-12 px-6 md:px-12 xl:px-20 transition-colors duration-500 pb-32">
+        class="min-h-[93vh] py-12 px-6 md:px-12 xl:px-20 transition-colors duration-500 pb-32 bg-white dark:bg-[#121212]">
 
         <div class="flex gap-2 items-center mb-5 text-gray-500 cursor-pointer hover:text-blue-600 w-fit relative transition xl:ml-15"
             title="Go back" @click="returnBack">
-            <ArrowLeftIcon class="h-7 transform group-hover:-translate-x-1 transition-transform duration-300" />
-            <span class="underline decoration-dotted group-hover:decoration-solid">Back</span>
+            <ArrowLeftIcon class="h-4 transform group-hover:-translate-x-1 transition-transform duration-300 dark:text-white" />
+            <span class="group-hover:decoration-solid dark:text-white">Back</span>
         </div>
 
         <div
@@ -122,7 +122,7 @@ onMounted(() => {
                 <div v-if="parsedSchedule.length" class="w-full">
                     <br>
                     <div v-if="parsedIntro"
-                        class="text-lg text-gray-700 italic mb-4 p-4 rounded-md font-semibold bg-gradient-to-r from-blue-100 to-purple-100">
+                        class="text-lg text-gray-700 italic mb-4 rounded-md font-semibold">
                         {{ parsedIntro }}
                     </div>
 
@@ -152,36 +152,36 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
-        </div>
-
-
-        <div v-if="parsedSchedule.length > 0"
-            class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-20">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div class="flex flex-col sm:flex-row gap-3">
-
-                    <button @click="returnBack"
-                        class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
-                        <ArrowPathIcon class="w-5 h-5" />
-                        <span>Plan Another Day</span>
-                    </button>
-
-                    <div class="flex gap-3">
-                        <button @click="saveSchedule"
-                            class="flex-1 sm:flex-none bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-lg border-2 border-gray-300 transition-colors flex items-center justify-center gap-2">
-                            <ArrowDownTrayIcon class="h-5" />
-                            <span class="hidden sm:inline">Save</span>
+            <div v-if="parsedSchedule.length > 0"
+                class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-20">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <div class="flex flex-col sm:flex-row gap-3">
+    
+                        <button @click="returnBack"
+                            class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            <ArrowPathIcon class="w-5 h-5" />
+                            <span>Plan Another Day</span>
                         </button>
-
-                        <button @click="goMap"
-                            class="flex-1 sm:flex-none bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-lg border-2 border-gray-300 transition-colors flex items-center justify-center gap-2">
-                            <MapPinIcon class="h-5" />
-                            <span>How to get there</span>
-                        </button>
+    
+                        <div class="flex gap-3">
+                            <button @click="saveSchedule"
+                                class="flex-1 sm:flex-none bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-lg border-2 border-gray-300 transition-colors flex items-center justify-center gap-2">
+                                <ArrowDownTrayIcon class="h-5" />
+                                <span class="hidden sm:inline">Save</span>
+                            </button>
+    
+                            <button @click="goMap"
+                                class="flex-1 sm:flex-none bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-lg border-2 border-gray-300 transition-colors flex items-center justify-center gap-2">
+                                <MapPinIcon class="h-5" />
+                                <span>How to get there</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+
     </section>
 </template>
 

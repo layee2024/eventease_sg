@@ -28,7 +28,7 @@ onMounted(fetchAverageRating)
 </script>
 
 <template>
-  <div class="flex flex-col items-start text-[11px] text-gray-600 w-full leading-tight">
+  <div class="flex flex-col items-start text-[11px] text-gray-600 dark:text-gray-800 w-full leading-tight">
     <!-- Star rating -->
     <div class="flex items-center gap-1">
       <div class="flex">
@@ -40,7 +40,7 @@ onMounted(fetchAverageRating)
           {{ i <= Math.round(averageRating) ? '★' : '☆' }}
         </span>
       </div>
-      <span class="ml-1 text-gray-500">
+      <span class="ml-1 text-gray-500 dark:text-gray-800 ">
         {{ averageRating > 0 ? averageRating.toFixed(1) : 'No rating yet' }}
       </span>
     </div>
