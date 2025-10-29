@@ -739,13 +739,13 @@ async function declineInvite(inv) {
             </TableCell>
             <TableCell class="text-center">
               <div class="flex justify-center gap-2">
-                <Button size="sm" variant="secondary" @click="openFriendEvents(f)">
+                <Button size="sm" class="cursor-pointer" variant="secondary" @click="openFriendEvents(f)">
                   View Events
                 </Button>
-                <Button variant="outline" size="sm" @click="openInviteModal(f)">
+                <Button variant="outline" class="cursor-pointer" size="sm" @click="openInviteModal(f)">
                   Invite
                 </Button>
-                <Button size="sm" variant="destructive" @click="confirmRemove(f)">Remove</Button>
+                <Button size="sm" class="cursor-pointer" variant="destructive" @click="confirmRemove(f)">Remove</Button>
               </div>
             </TableCell>
           </TableRow>

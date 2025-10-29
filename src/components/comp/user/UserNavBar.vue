@@ -14,9 +14,23 @@ import {
 const router = useRouter();
 const route = useRoute();
 const user = ref(null);
+const name = ref("");
+const profilePicture = ref("")
 const requestCount = ref(0);
 const isLoggedIn = ref(false);
 const mobileMenuOpen = ref(false);
+
+onMounted(() => {
+  window.addEventListener('profile-picture-updated', (event) => {
+    profilePicture.value = event.detail;
+  });
+});
+
+onUnmounted(() => {
+  window.removeEventListener('profile-picture-updated', (event) => {
+    profilePicture.value = event.detail;
+  });
+});
 
 onMounted(async () => {
   const {
@@ -29,7 +43,7 @@ onMounted(async () => {
 
   if (session?.user) {
     user.value = session.user;
-    await fetchFriendRequests();
+    await fetchProfileData();
   }
 
   const handleResize = () => {
@@ -43,19 +57,41 @@ onMounted(async () => {
 });
 
 // Fetch
-async function fetchFriendRequests() {
-  if (!user.value) return;
+async function fetchProfileData() {
+  if (!user.value) return
   const { data, error } = await supabase
     .from("user_preferences")
-    .select("friend_requests")
+    .select("profile_picture, friend_requests", "name")
     .eq("id", user.value.id)
-    .maybeSingle();
+    .maybeSingle()
+
   if (error) {
-    console.error("Error fetching requests:", error);
-    requestCount.value = 0;
-    return;
+    console.error(error)
+    profilePicture.value = DEFAULT_AVATAR
+    requestCount.value = 0
+    return
   }
-  requestCount.value = data?.friend_requests?.length || 0;
+
+  name.value = data?.name || 'User'
+  profilePicture.value = data?.profile_picture
+  requestCount.value = data?.friend_requests?.length || 0
+
+  if (!subscription) {
+    subscription = supabase
+      .channel("user_updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "user_preferences", filter: `id=eq.${user.value.id}` },
+        (payload) => {
+          const newData = payload.new
+          if (newData) {
+            profilePicture.value = newData.profile_picture || DEFAULT_AVATAR
+            requestCount.value = newData.friend_requests?.length || 0
+          }
+        }
+      )
+      .subscribe()
+  }
 }
 
 onMounted(async () => {
@@ -65,7 +101,7 @@ onMounted(async () => {
   isLoggedIn.value = !!session;
   if (session?.user) {
     user.value = session.user;
-    await fetchFriendRequests();
+    await fetchProfileData();
 
     const channel = supabase
       .channel("friend-requests")
@@ -237,10 +273,10 @@ async function logout() {
           <Button
             variant="outline bg-inherit"
             @click="router.push('/register')"
-            class="font-medium border-1 border-gray-300"
+            class="font-medium border-1 border-gray-300 cursor-pointer"
             >Register</Button
           >
-          <Button @click="router.push('/login')" class="font-medium border border-white"
+          <Button @click="router.push('/login')" class="font-medium border border-white cursor-pointer"
             >Login</Button
           >
         </template>
@@ -249,23 +285,17 @@ async function logout() {
           <DropdownMenu>
             <DropdownMenuTrigger as-child class="cursor-pointer">
               <Button
-                variant="outline"
-                class="font-medium flex items-center gap-1"
+                variant="ghost"
+                class="font-medium flex items-center gap-1 rounded-full"
                 :class="[isActive('/') ? 'bg-black text-white' : 'bg-white']"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  class="size-4"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-                Account
+                
+              <img
+                :key="profilePicture"
+                :src="profilePicture"
+                alt="Profile"
+                class="size-8"
+              />
               </Button>
             </DropdownMenuTrigger>
 

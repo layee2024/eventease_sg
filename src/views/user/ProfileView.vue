@@ -239,6 +239,7 @@ async function chooseAvatar(src) {
   try {
     profilePicture.value = src
     await updatePrefs({ profile_picture: src })
+    window.dispatchEvent(new CustomEvent('profile-picture-updated', { detail: src }));
     toast.success("Profile picture updated")
     avatarOpen.value = false
   } catch {

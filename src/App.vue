@@ -1,65 +1,66 @@
 <script setup>
-import { ref, onMounted, computed } from "vue"
-import { RouterView } from "vue-router"
-import { Toaster } from "@/components/ui/sonner"
-import NavBar from "@/components/comp/user/UserNavBar.vue"
-import Footer from "@/components/comp/Footer.vue"
-import { supabase } from "@/utils/supabase"
+import { ref, computed, onMounted } from "vue";
+import { useRoute, RouterView } from "vue-router";
+import { Toaster } from "@/components/ui/sonner";
+import NavBar from "@/components/comp/user/UserNavBar.vue";
+import Footer from "@/components/comp/Footer.vue";
+import { supabase } from "@/utils/supabase";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   useInviteWatcher,
   newInviteModalOpen,
   newInvites,
   newFriendRequests,
-} from "./utils/inviteWatcher"
+} from "./utils/inviteWatcher";
 
-import "vue-sonner/style.css"
+import "vue-sonner/style.css";
 
-const user = ref(null)
-const { start: startWatcher, stop: stopWatcher } = useInviteWatcher()
+const route = useRoute();
+const isHomePage = computed(() => route.path === "/");
+
+const user = ref(null);
+const { start: startWatcher, stop: stopWatcher } = useInviteWatcher();
 
 // Tabs
-const activeTab = ref("invites")
-
+const activeTab = ref("invites");
 // Pagination
-const invitePage = ref(1)
-const friendPage = ref(1)
-const perPage = 4
+const invitePage = ref(1);
+const friendPage = ref(1);
+const perPage = 4;
 
-const totalInvitePages = computed(() => Math.ceil(newInvites.value.length / perPage) || 1)
-const totalFriendPages = computed(() => Math.ceil(newFriendRequests.value.length / perPage) || 1)
+const totalInvitePages = computed(() => Math.ceil(newInvites.value.length / perPage) || 1);
+const totalFriendPages = computed(() => Math.ceil(newFriendRequests.value.length / perPage) || 1);
 const currentInvite = computed(() =>
   newInvites.value.slice((invitePage.value - 1) * perPage, invitePage.value * perPage)
-)
+);
 const currentFriend = computed(() =>
   newFriendRequests.value.slice((friendPage.value - 1) * perPage, friendPage.value * perPage)
-)
+);
 
 const fallbackAvatar = (name) =>
-  `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "User")}&background=E5E7EB&color=111827`
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "User")}&background=E5E7EB&color=111827`;
 
 onMounted(async () => {
-  const { data } = await supabase.auth.getUser()
+  const { data } = await supabase.auth.getUser();
   if (data?.user) {
-    user.value = data.user
-    startWatcher(user.value.id)
+    user.value = data.user;
+    startWatcher(user.value.id);
   }
   supabase.auth.onAuthStateChange((_e, session) => {
     if (session?.user) {
-      user.value = session.user
-      startWatcher(user.value.id)
+      user.value = session.user;
+      startWatcher(user.value.id);
     } else {
-      user.value = null
-      stopWatcher()
+      user.value = null;
+      stopWatcher();
     }
-  })
-})
-
+  });
+});
 </script>
 
 <template>
@@ -69,11 +70,18 @@ onMounted(async () => {
       <Toaster position="top-right" closeButton />
     </div>
 
-    <main class="">
-      <RouterView v-slot="{ Component }" >
-        <Transition name="fade-slide" mode="out-in">
+    <main>
+      <RouterView v-slot="{ Component }">
+        <template v-if="isHomePage">
+          <!-- No transition on home page -->
           <component :is="Component" />
-        </Transition>
+        </template>
+        <template v-else>
+          <!-- Fade-slide transition on other pages -->
+          <Transition name="fade-slide" mode="out-in">
+            <component :is="Component" />
+          </Transition>
+        </template>
       </RouterView>
     </main>
 
@@ -190,9 +198,17 @@ onMounted(async () => {
   </div>
 </template>
 
-<style>
-.fade-slide-enter-active,
-.fade-slide-leave-active { transition: all 0.4s ease; }
-.fade-slide-enter-from { opacity: 0; transform: translateY(30px); }
-.fade-slide-leave-to   { opacity: 0; transform: translateY(-30px); }
+<style scoped>
+  .fade-slide-enter-active,
+  .fade-slide-leave-active {
+    transition: all 0.4s ease;
+  }
+  .fade-slide-enter-from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .fade-slide-leave-to {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
 </style>
