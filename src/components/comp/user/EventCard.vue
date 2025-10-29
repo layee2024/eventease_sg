@@ -316,13 +316,13 @@ const friendHoverText = computed(() => {
       >
         <ReviewPreview :eventId="id" />
         <div
-          v-if="distance !== undefined && distance !== Infinity && !isNaN(distance)"
+          v-if="distance !== undefined && distance !== Infinity && !isNaN(distance) && distance !== null"
           class="flex items-center gap-1 text-gray-500"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7zM12 11a2 2 0 110-4 2 2 0 010 4z"/>
           </svg>
-          <span class="font-semibold whitespace-nowrap">{{ distance.toFixed(1) }} km</span>
+          <span class="font-semibold whitespace-nowrap">{{ distance.toFixed(1) ?? "-" }} km</span>
         </div>
       </div>
     </CardContent>

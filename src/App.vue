@@ -70,7 +70,7 @@ onMounted(async () => {
     </div>
 
     <main class="">
-      <RouterView v-slot="{ Component }">
+      <RouterView v-slot="{ Component }" >
         <Transition name="fade-slide" mode="out-in">
           <component :is="Component" />
         </Transition>
@@ -195,5 +195,4 @@ onMounted(async () => {
 .fade-slide-leave-active { transition: all 0.4s ease; }
 .fade-slide-enter-from { opacity: 0; transform: translateY(30px); }
 .fade-slide-leave-to   { opacity: 0; transform: translateY(-30px); }
-main { padding-bottom: 5rem; }
 </style>

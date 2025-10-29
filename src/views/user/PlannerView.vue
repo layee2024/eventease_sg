@@ -153,7 +153,7 @@ onMounted(() => getCat());
 </script>
 
 <template>
-  <section class="min-h-[93vh] bg-white py-12 px-6 md:px-12 xl:px-20">
+  <section class="h-[93vh] min-h-fit mb-24 bg-white py-12 px-6 md:px-12 xl:px-20">
     <!-- Header -->
     <div class="text-center mb-10">
       <div class="flex justify-center items-center gap-2">
@@ -221,7 +221,6 @@ onMounted(() => getCat());
           </div>
         </form>
       </div>
-
     </div>
   </section>
 </template>

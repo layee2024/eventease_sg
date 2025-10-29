@@ -7,6 +7,9 @@ import { supabase } from "@/utils/supabase";
 import { toast } from "vue-sonner";
 import Hyper from "@/components/bits/Hyper.vue";
 import TypeWriter from "@/components/bits/TypeWriter.vue";
+import SpecialCard from "../../components/bits/SpecialCard.vue";
+import Particles from "../../components/bits/Particles.vue";
+import Popup from "../../components/bits/Popup.vue";
 
 const router = useRouter();
 const problem = ref(null);
@@ -279,17 +282,17 @@ function initStarAnimation() {
 </script>
 
 <template>
-  <main class="relative w-full">
+  <div class="relative w-full">
     <section class="p-0 relative w-full h-[93vh] overflow-hidden">
       <Hyper
         :effect-options="customOptions"
         class="absolute top-0 left-0 z-10 bg-black"
       />
-      <div
-        class="absolute top-0 left-0 flex flex-col w-full h-full"
-      >
-      <!-- Main Headline with animation -->
-      <div class="m-0 w-full h-full flex flex-col justify-center items-center z-50">
+      <div class="absolute top-0 left-0 flex flex-col w-full h-full">
+        <!-- Main Headline with animation -->
+        <div
+          class="m-0 w-full h-full flex flex-col justify-center items-center z-50"
+        >
           <h1
             class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight transition-all duration-700 ease-out"
             :class="
@@ -298,14 +301,18 @@ function initStarAnimation() {
                 : 'opacity-0 translate-y-4'
             "
           >
-          <TypeWriter 
-            class="text-white"
-            :text="['Discover Events', 'Share Experiences', 'Join Moments']"
-            :typingSpeed="75"
-            :pauseDuration="1500"
-            :showCursor="true"
-            cursorCharacter="|"
-          />
+            <TypeWriter
+              class="text-white"
+              :text="[
+                'Discover Events',
+                'Share Experiences',
+                'Join Fun Moments',
+              ]"
+              :typingSpeed="75"
+              :pauseDuration="1500"
+              :showCursor="true"
+              cursorCharacter="|"
+            />
           </h1>
 
           <!-- Subheadline with Stats -->
@@ -369,112 +376,155 @@ function initStarAnimation() {
           </div>
         </div>
       </div>
+      <!-- Scroll Arrow -->
+      <div
+        class="z-100 absolute bottom-10 left-1/2 transform -translate-x-1/2 cursor-pointer animate-bounce text-white hover:text-blue-800 transition-colors duration-300"
+        @click="scrollToNext1"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2.5"
+          stroke="currentColor"
+          class="w-8 h-8"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
     </section>
 
     <!-- Solutions Section -->
     <section
       ref="problem"
-      class="h-[93vh] min-h-min lg:min-h-screen flex items-center justify-center relative w-full bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20 px-6 md:px-16 lg:px-24"
+      class="h-[93vh] min-h-min lg:min-h-screen flex items-center justify-center relative w-full bg-black py-20 px-6 md:px-16 lg:px-24 overflow-hidden"
     >
-      <div
-        class="z-10 max-w-7xl mx-auto flex flex-col gap-6 justify-center items-center xl:items-start transition-all duration-700 ease-out transform"
-        :class="
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        "
+      <Particles
+        :particle-count="200"
+        :particle-spread="10"
+        :speed="0.1"
+        :particle-colors="['#ffffff']"
+        :move-particles-on-hover="false"
+        :particle-hover-factor="1"
+        :alpha-particles="false"
+        :particle-base-size="100"
+        :size-randomness="1"
+        :camera-distance="20"
+        :disable-rotation="false"
+        class="w-full h-full"
+      />
+      <Popup
+        :distance="100"
+        direction="vertical"
+        :reverse="false"
+        :duration="0.8"
+        ease="power3.out"
+        :initial-opacity="0"
+        :animate-opacity="true"
+        :scale="1"
+        :threshold="0.1"
+        :delay="0"
+        @complete="handleComplete"
       >
-        <!-- Left Side -->
-        <h2
-          class="text-center md:text-start text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4"
-        >
-          We Built EventEase SG to
-          <span class="stars-animation">
-            <span class="stars">
-              <svg viewBox="0 0 512 512">
-                <path
-                  d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z"
-                />
-              </svg>
-            </span>
-            <span class="stars">
-              <svg viewBox="0 0 512 512">
-                <path
-                  d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z"
-                />
-              </svg>
-            </span>
-            <span class="stars">
-              <svg viewBox="0 0 512 512">
-                <path
-                  d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z"
-                />
-              </svg>
-            </span>
-            <span class="stars-animation-text">Solve Real Problems</span>
-          </span>
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4">
+        <div class="your-content">
           <div
-            class="min-w-xs flex flex-col group relative overflow-hidden p-6 rounded-2xl shadow-md transition-all duration-700 ease-out transform border border-white/20 bg-white/80 backdrop-blur-lg hover:-translate-y-2 hover:shadow-2xl hover:border-violet-300 hover:bg-white/90"
-            v-for="(card, i) in [
-              {
-                title: 'Discover Effortlessly',
-                text: 'Browse curated events across categories',
-                icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M21 21l-5.2-5.2m0 0A7.5 7.5 0 105.2 5.2a7.5 7.5 0 0010.6 10.6z' />`,
-              },
-              {
-                title: 'Smart Recommendations',
-                text: 'Get personalized event suggestions powered by your interests',
-                icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M9 12h6m2 9H7a2 2 0 01-2-2V5a2 2 0 012-2h6l6 6v10a2 2 0 01-2 2z' />`,
-              },
-              {
-                title: 'Social Planning Made Easy',
-                text: 'Coordinate with friends seamlessly',
-                icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z' />`,
-              },
-              {
-                title: 'Real-time Updates',
-                text: 'EventEase ensures you\'re always up to date',
-                icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' />`,
-              },
-            ]"
-            :key="i"
-            :style="{ transitionDelay: `${i * 150}ms` }"
-            :class="[
-              'p-6 rounded-2xl shadow-md hover:shadow-lg transition-all duration-700 ease-out transform border border-white/20 bg-white/80 backdrop-blur-lg',
-              isVisible
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-6',
-            ]"
+            class="z-10 max-w-7xl mx-auto flex flex-col gap-6 justify-center items-center xl:items-start transition-all duration-700 ease-out transform"
           >
-            <div class="flex items-center space-x-3">
-              <div
-                class="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-violet-100 to-violet-200 text-violet-600 group-hover:from-violet-200 group-hover:to-violet-300 transition-all duration-300"
+            <!-- Left Side -->
+            <h2
+              class="text-center w-full text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4"
+            >
+              We Built EventEase SG to
+              <span class="stars-animation">
+                <span class="stars">
+                  <svg viewBox="0 0 512 512">
+                    <path
+                      d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z"
+                    />
+                  </svg>
+                </span>
+                <span class="stars">
+                  <svg viewBox="0 0 512 512">
+                    <path
+                      d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z"
+                    />
+                  </svg>
+                </span>
+                <span class="stars">
+                  <svg viewBox="0 0 512 512">
+                    <path
+                      d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z"
+                    />
+                  </svg>
+                </span>
+                <span class="stars-animation-text">Solve Real Problems</span>
+              </span>
+            </h2>
+            <div
+              class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-20 gap-y-4"
+            >
+              <SpecialCard
+                v-for="(card, i) in [
+                  {
+                    title: 'Discover Effortlessly',
+                    text: 'Easily browse curated events',
+                    icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M21 21l-5.2-5.2m0 0A7.5 7.5 0 105.2 5.2a7.5 7.5 0 0010.6 10.6z' />`,
+                  },
+                  {
+                    title: 'Smart Suggestions',
+                    text: 'Get personalized event suggestions',
+                    icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M9 12h6m2 9H7a2 2 0 01-2-2V5a2 2 0 012-2h6l6 6v10a2 2 0 01-2 2z' />`,
+                  },
+                  {
+                    title: 'Social Planning',
+                    text: 'Coordinate with friends seamlessly',
+                    icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z' />`,
+                  },
+                  {
+                    title: 'Real-time Updates',
+                    text: 'You\'re always up to date',
+                    icon: `<path stroke-linecap='round' stroke-linejoin='round' d='M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' />`,
+                  },
+                ]"
+                :key="i"
+                class="custom-spotlight-card w-70 h-56 flex flex-col justify-center items-center"
+                :spotlight-color="'rgba(255, 255, 255, 0.25)'"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2.2"
-                  stroke="currentColor"
-                  v-html="card.icon"
-                  class="w-6 h-6"
-                ></svg>
-              </div>
-              <h3
-                class="font-semibold text-lg text-gray-900 group-hover:text-violet-600"
-              >
-                {{ card.title }}
-              </h3>
+                <template #default>
+                  <div class="flex items-center text-white">
+                    <div
+                      class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="2.2"
+                        stroke="currentColor"
+                        v-html="card.icon"
+                        class="w-6 h-6"
+                      ></svg>
+                    </div>
+                    <h3 class="font-semibold text-lg text-white">
+                      {{ card.title }}
+                    </h3>
+                  </div>
+                  <p class="text-gray-400 text-sm mt-3 text-center">
+                    {{ card.text }}
+                  </p>
+                </template>
+              </SpecialCard>
             </div>
-            <p class="text-gray-600 text-sm mt-3 group-hover:text-gray-800">
-              {{ card.text }}
-            </p>
           </div>
         </div>
-      </div>
+      </Popup>
       <!-- Scroll Arrow -->
       <div
-        class="absolute bottom-10 left-1/2 transform -translate-x-1/2 cursor-pointer animate-bounce text-gray-700 hover:text-yellow-400 transition-colors duration-300"
+        class="absolute bottom-10 left-1/2 transform -translate-x-1/2 cursor-pointer animate-bounce text-white hover:text-blue-800 transition-colors duration-300"
         @click="scrollToNext2"
       >
         <svg
@@ -651,7 +701,7 @@ function initStarAnimation() {
       </div>
       <!-- Scroll Arrow -->
       <div
-        class="absolute bottom-10 left-1/2 transform -translate-x-1/2 cursor-pointer animate-bounce text-white hover:text-yellow-400 transition-colors duration-300"
+        class="absolute bottom-10 left-1/2 transform -translate-x-1/2 cursor-pointer animate-bounce text-white hover:text-blue-800 transition-colors duration-300"
         @click="scrollToNext3"
       >
         <svg
@@ -674,13 +724,13 @@ function initStarAnimation() {
     <!-- How It Works Section -->
     <section
       ref="howItWorksSection"
-      class="relative w-full bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20 px-6 md:px-16 lg:px-24"
+      class="relative w-full h-[93vh] min-h-min flex justify-center items-center bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20 px-6 md:px-16 lg:px-24 overflow-hidden"
     >
-      <div class="max-w-7xl mx-auto">
-        <!-- Section Header -->
-        <div
-          class="text-center mb-16 transition-all duration-700 ease-out"
-          :class="
+    <div class="max-w-7xl mx-auto">
+      <!-- Section Header -->
+      <div
+      class="text-center mb-16 transition-all duration-700 ease-out"
+      :class="
             howItWorksVisible
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 translate-y-10'
@@ -877,7 +927,7 @@ function initStarAnimation() {
           >
             <!-- Gradient Background -->
             <span
-              class="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-size-200 bg-pos-0 group-hover:bg-pos-100 transition-all duration-500"
+              class="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 transition-all duration-500"
             ></span>
 
             <!-- Button Content -->
@@ -907,7 +957,7 @@ function initStarAnimation() {
         </div>
       </div>
     </section>
-  </main>
+  </div>
 </template>
 
 <style scoped>
@@ -1036,33 +1086,6 @@ input:-webkit-autofill:focus {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   white-space: nowrap;
-}
-
-/* Stats Card Styling */
-.stat-card {
-  background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-}
-
-.stat-card:hover {
-  border-color: rgba(139, 92, 246, 0.3);
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2),
-    0 10px 20px rgba(244, 143, 177, 0.15);
-}
-
-/* Gradient text for stat numbers */
-.stat-number {
-  background: linear-gradient(
-    135deg,
-    rgb(123, 31, 162),
-    rgb(103, 58, 183),
-    rgb(244, 143, 177)
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* How It Works Card Styling */

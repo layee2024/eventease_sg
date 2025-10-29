@@ -84,7 +84,6 @@ onMounted(async () => {
   }
 });
 function isActive(path) {
-  console.log(route.path === path)
   return route.path === path;
 }
 
@@ -98,7 +97,7 @@ async function logout() {
 </script>
 
 <template>
-  <nav class="sticky top-0 z-50 shadow-sm w-full" :class="[isActive('/') ? 'bg-black text-white' : 'bg-white']">
+  <nav class="sticky top-0 z-999 shadow-sm w-full" :class="[isActive('/') ? 'bg-black text-white' : 'bg-white']">
     <div class="flex items-center justify-between py-3 px-6">
       <!-- Logo -->
       <router-link to="/" class="flex items-center space-x-2">
@@ -270,7 +269,7 @@ async function logout() {
               </Button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" class="w-44">
+            <DropdownMenuContent align="end" class="w-44 z-1000">
               <DropdownMenuItem
                 @click="router.push('/profile')"
                 class="cursor-pointer"
