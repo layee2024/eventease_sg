@@ -64,19 +64,19 @@ async function fetchProfileData() {
   if (!user.value) return;
   const { data, error } = await supabase
     .from("user_preferences")
-    .select("profile_picture, friend_requests", "name")
+    .select("profile_picture, friend_requests, name")
     .eq("id", user.value.id)
     .maybeSingle();
 
   if (error) {
     console.error(error);
-    profilePicture.value = DEFAULT_AVATAR;
+    profilePicture.value = "https://cdn.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-symbol-vector.jpg";
     requestCount.value = 0;
     return;
   }
 
   name.value = data?.name || "User";
-  profilePicture.value = data?.profile_picture;
+  profilePicture.value = data.profile_picture || PLACEHOLDER
   requestCount.value = data?.friend_requests?.length || 0;
 }
 
@@ -362,31 +362,31 @@ async function logout() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger as-child>
-              <Button variant="outline" class="cursor-pointer">
-                <Icon
-                  icon="radix-icons:sun"
-                  class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
-                />
-                <Icon
-                  icon="radix-icons:moon"
-                  class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
-                />
-                <span class="sr-only">Toggle theme</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" class="z-1000">
-              <DropdownMenuItem @click="mode = 'light'">
-                Light
-              </DropdownMenuItem>
-              <DropdownMenuItem @click="mode = 'dark'"> Dark </DropdownMenuItem>
-              <DropdownMenuItem @click="mode = 'auto'">
-                System
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </template>
+        <DropdownMenu>
+          <DropdownMenuTrigger as-child>
+            <Button variant="outline" class="cursor-pointer">
+              <Icon
+                icon="radix-icons:sun"
+                class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+              />
+              <Icon
+                icon="radix-icons:moon"
+                class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+              />
+              <span class="sr-only">Toggle theme</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" class="z-1000">
+            <DropdownMenuItem @click="mode = 'light'">
+              Light
+            </DropdownMenuItem>
+            <DropdownMenuItem @click="mode = 'dark'"> Dark </DropdownMenuItem>
+            <DropdownMenuItem @click="mode = 'auto'">
+              System
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <!-- Mobile Hamburger -->
