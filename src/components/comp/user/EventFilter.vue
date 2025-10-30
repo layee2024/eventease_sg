@@ -1,6 +1,7 @@
 <script setup>
-import { ref, defineEmits, defineProps, watch } from "vue"
+import { ref, defineEmits, defineProps, watch, onMounted } from "vue"
 import { Search } from "lucide-vue-next"
+import { supabase } from "@/utils/supabase"
 
 const emits = defineEmits(["update-filter"])
 const props = defineProps({
@@ -15,6 +16,34 @@ const maxPrice = ref("")
 const crowdLevel = ref("")
 const searchQuery = ref(props.initialSearch)
 const sortOption = ref("")
+const eventCat = ref([])
+const crowdLvl = ref([])
+
+const sortBy =ref({
+  'Nearest': 'distance',
+  'Upcoming': 'date',
+  'Title (A-Z)': 'title',
+  'Price (Low → High)': 'priceLow',
+  'Price (High → Low)': 'priceHigh',
+})
+
+
+async function populateFilterFunction(){
+  const { data, error } = await supabase.from('events').select("*");
+
+  if (error){
+    console.log(error)
+  }
+  else{
+    console.log(data)
+    const categories = [...new Set(data.map(event => event.category))]
+    eventCat.value = categories
+
+    const crowdlevel = [...new Set(data.map(event => event.crowd_level))]
+    crowdLvl.value = crowdlevel
+  }
+}
+
 
 function applyFilter() {
   emits("update-filter", {
@@ -38,6 +67,9 @@ function resetFilter() {
 // Automatically apply filter as user types
 watch(searchQuery, () => {
   applyFilter()
+})
+onMounted(() => {
+  populateFilterFunction()
 })
 </script>
 
@@ -83,17 +115,11 @@ watch(searchQuery, () => {
     class="border border-gray-500 rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
   >
     <option value="">All Categories</option>
-    <option value="Music">Music</option>
-    <option value="Food">Food</option>
-    <option value="Arts">Arts</option>
-    <option value="Technology">Technology</option>
-    <option value="Sports">Sports</option>
-    <option value="Education">Education</option>
-    <option value="Business">Business</option>
-    <option value="Culture">Culture</option>
-    <option value="Health">Health</option>
-    <option value="Social">Social</option>
-    <option value="Environment">Environment</option>
+    <option 
+    v-for="cat in eventCat" 
+    :key="cat"
+    :value="cat"
+    > {{ cat }} </option>
   </select>
 
   <!-- Crowd Level -->
@@ -102,9 +128,11 @@ watch(searchQuery, () => {
     class="border border-gray-500 rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
   >
     <option value="">Any Crowd</option>
-    <option value="High">High</option>
-    <option value="Moderate">Moderate</option>
-    <option value="Low">Low</option>
+    <option 
+    v-for="lvl in crowdLvl"
+    :key="lvl"
+    :value="lvl"
+    > {{ lvl }} </option>
   </select>
 
   <!-- Sort By -->
@@ -113,11 +141,9 @@ watch(searchQuery, () => {
     class="border border-gray-500 rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
   >
     <option value="">Sort By</option>
-    <option value="distance">Nearest</option>
-    <option value="date">Upcoming (Soonest)</option>
-    <option value="title">Title (A-Z)</option>
-    <option value="priceLow">Price (Low → High)</option>
-    <option value="priceHigh">Price (High → Low)</option>
+    <option v-for="(value, label) in sortBy"
+    :key="label"
+    :value="value"> {{ label }}</option>
   </select>
   <!-- Buttons -->
   <div class="flex justify-center w-full gap-3 col-span-2 md:col-span-4 lg:col-span-2">
