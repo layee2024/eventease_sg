@@ -100,6 +100,21 @@ async function fetchGoingStats(eventId) {
   }
 }
 
+const categoryColor = (cat) =>
+  ({
+    Music: "bg-purple-600",
+    Food: "bg-orange-500",
+    Arts: "bg-pink-500",
+    Technology: "bg-blue-600",
+    Sports: "bg-green-500",
+    Education: "bg-indigo-600",
+    Business: "bg-gray-600",
+    Culture: "bg-red-500",
+    Health: "bg-teal-500",
+    Social: "bg-yellow-500",
+    Environment: "bg-green-600",
+  }[cat] || "bg-gray-500")
+
 onMounted(() => {
   fetchGoingStats(props.id)
 })
@@ -218,7 +233,7 @@ const friendHoverText = computed(() => {
       <!-- Category -->
       <span
         class="absolute top-3 left-3 text-xs font-medium text-white px-3 py-1 rounded-full"
-        :class="categoryColor"
+        :class="categoryColor(category)"
       >
         {{ category }}
       </span>
