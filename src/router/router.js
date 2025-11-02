@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { supabase } from '@/utils/supabase'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import { toast } from 'vue-sonner'
 
 // User
 import VerifyView from '../views/user/VerifyView.vue'
@@ -120,14 +121,13 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  if (to.path === '/onboarding') {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-    if (!user) {
-      return next('/login')
-    }
+  // Only logged in users
+  if (to.path === '/onboarding') {
+    if (!user) return next('/login')
 
     const { data: prefs, error } = await supabase
       .from('user_preferences')
@@ -140,13 +140,17 @@ router.beforeEach(async (to, from, next) => {
       return next('/')
     }
 
-    // If onboarding already done, redirect home
-    if (prefs?.onboarding === true) {
-      return next('/')
-    }
+    if (prefs?.onboarding === true) return next('/')
   }
 
-  // Allow navigation normally
+  // Guard Profile, Saved, Friends
+  const protectedPaths = ['/profile', '/saved', '/friends']
+  if (protectedPaths.includes(to.path) && !user) {
+    toast.error('Please login first')
+    return next('/login')
+  }
+
+  // Default allow navigation
   next()
 })
 
