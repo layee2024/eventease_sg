@@ -2,7 +2,7 @@
     <div
       ref="magnetRef"
       :class="wrapperClassName"
-      class="border-white w-56 h-32"
+      class="border-white w-50"
       :style="{ position: 'relative' }"
       v-bind="$attrs"
     >

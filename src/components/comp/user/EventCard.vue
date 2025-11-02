@@ -215,7 +215,7 @@ const friendHoverText = computed(() => {
         class="absolute top-0 left-0 w-full h-full bg-black/40 flex items-center justify-center backdrop-blur-xs"
       >
         <span
-          class="text-white font-semibold text-sm sm:text-base bg-green-400/80 px-4 py-1.5 rounded-full shadow-lg animate-fade-in"
+          class="text-white font-semibold text-sm sm:text-base bg-sky-400/80 px-4 py-1.5 rounded-full shadow-lg animate-fade-in"
         >
           Joined
         </span>
