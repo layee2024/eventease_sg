@@ -198,7 +198,7 @@ const friendHoverText = computed(() => {
   
   <Card
   v-if="!loadingOverall && !parentLoading"
-    class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm dark:shadow-sky-400 transition-all hover:shadow-lg hover:-translate-y-1 duration-300 cursor-pointer bg-white dark:bg-gray-200"
+    class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm dark:shadow-sky-400 transition-all hover:shadow-lg hover:-translate-y-1 duration-300 cursor-pointer bg-white dark:bg-gray-300"
     @click="goToDetails"
   >
     <div class="relative">
@@ -300,7 +300,7 @@ const friendHoverText = computed(() => {
           </TooltipProvider>
 
           </div>
-          <span class="text-gray-500 text-xs">
+          <span class="text-gray-500 text-xs ml-2">
             {{ friendsGoing.length }} friends going
           </span>
         </div>

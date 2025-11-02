@@ -11,6 +11,7 @@ import SpecialCard from "../../components/bits/SpecialCard.vue";
 import Particles from "../../components/bits/Particles.vue";
 import Popup from "../../components/bits/Popup.vue";
 import Cursor from "../../components/bits/Cursor.vue";
+import CoolBackground from "../../components/bits/CoolBackground.vue";
 
 const router = useRouter();
 const problem = ref(null);
@@ -734,8 +735,16 @@ function initStarAnimation() {
     <!-- How It Works Section -->
     <section
       ref="howItWorksSection"
-      class="relative w-full h-[93vh] min-h-min flex justify-center items-center bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20 px-6 md:px-16 lg:px-24 overflow-hidden"
+      class="relative w-full h-[93vh] min-h-min flex justify-center items-center bg-black py-20 px-6 md:px-16 lg:px-24 overflow-hidden"
     >
+    <CoolBackground
+      color="#ff6b35"
+      :speed="0.6"
+      direction="forward"
+      :scale="1.1"
+      :opacity="0.8"
+      :mouseInteractive="true"
+    />
     <div class="max-w-7xl mx-auto">
       <!-- Section Header -->
       <div
@@ -746,10 +755,10 @@ function initStarAnimation() {
               : 'opacity-0 translate-y-10'
           "
         >
-          <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
             How It Works
           </h2>
-          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p class="text-lg text-gray-300 max-w-2xl mx-auto">
             Getting started is simple
           </p>
         </div>
@@ -928,7 +937,7 @@ function initStarAnimation() {
           "
           :style="{ transitionDelay: '450ms' }"
         >
-          <p class="text-xl md:text-2xl text-gray-700 font-semibold mb-6">
+          <p class="text-xl md:text-2xl text-gray-300 font-semibold mb-6">
             Ready to discover amazing events?
           </p>
           <button

@@ -174,12 +174,11 @@ onMounted(() => getCat());
           <div class="flex items-center gap-2">
             <h2 class="text-2xl font-extrabold dark:text-[#E0E0E0]">Tell us about your day</h2>
           </div>
-          <!-- TODO: Add color -->
           <Shiny 
             text="Share your preferences and we'll create the perfect schedule for you" 
             :disabled="false" 
             :speed="2" 
-            class-name="from-blue-500 via-purple-600 to-indigo-500"
+            class=""
           />
         </div>
         <form @submit.prevent="handleSubmit" class="mt-4 flex flex-col gap-6">
@@ -187,11 +186,11 @@ onMounted(() => getCat());
           <div class="flex gap-6">
             <div class="w-1/2">
               <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-[#E0E0E0]"><ClockIcon class="h-6 dark:text-[#E0E0E0]" /> Activity Start Time</label>
-              <input type="time" v-model="timeUp" required class="w-full py-2 px-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]" />
+              <input type="time" v-model="timeUp" value="00:00" required class="w-full py-2 px-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]" />
             </div>
             <div class="w-1/2">
               <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-[#E0E0E0]"><ClockIcon class="h-6 dark:text-[#E0E0E0]" /> Activity End Time</label>
-              <input type="time" v-model="endTime" required class="w-full py-2 px-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]" />
+              <input type="time" v-model="endTime" value="23:59" class="w-full py-2 px-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]" />
             </div>
           </div>
 

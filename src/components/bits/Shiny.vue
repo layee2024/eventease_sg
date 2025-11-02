@@ -20,7 +20,7 @@ const animationDuration = computed(() => `${props.speed}s`);
 
 <template>
   <div
-    :class="`text-[#b5b5b5a4] bg-clip-text inline-block ${!props.disabled ? 'animate-shine' : ''} ${props.className}`"
+    :class="`bg-clip-text inline-block ${!props.disabled ? 'animate-shine' : ''} ${props.className}`"
     :style="{
       backgroundImage:
         'linear-gradient(120deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 60%)',
@@ -29,9 +29,12 @@ const animationDuration = computed(() => `${props.speed}s`);
       animationDuration: animationDuration
     }"
   >
+  <span class="bg-clip-text bg-gradient-to-r from-blue-500/80 via-purple-600/80 to-indigo-500/80 text-transparent">
     {{ props.text }}
+  </span>
   </div>
 </template>
+
 
 <style scoped>
 @keyframes shine {
