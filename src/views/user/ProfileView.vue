@@ -307,7 +307,7 @@ const initials = computed(() =>
           <!-- Budget -->
           <Card class="hover:shadow-md transition">
             <CardContent class="p-6">
-              <p class="text-sm text-gray-500 dark:text-gray-300 mb-2">Preferences</p>
+              <p class="text-sm text-gray-500 dark:text-gray-300 mb-2">Finances</p>
               <h3 class="text-xl font-semibold mb-4">Budget</h3>
               <p class="text-gray-700 dark:text-gray-100 capitalize mb-4">
                 {{ budget === 'all' ? 'All budgets' :
@@ -321,7 +321,7 @@ const initials = computed(() =>
           <!-- Transport -->
           <Card class="hover:shadow-md transition">
             <CardContent class="p-6">
-              <p class="text-sm text-gray-500 dark:text-gray-300 mb-2">Preferences</p>
+              <p class="text-sm text-gray-500 dark:text-gray-300 mb-2">Commute</p>
               <h3 class="text-xl font-semibold mb-4">Transport</h3>
               <div class="flex flex-wrap gap-2 mb-4">
                 <span

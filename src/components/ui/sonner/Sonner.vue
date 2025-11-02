@@ -28,7 +28,7 @@ const props = defineProps({
 
 <template>
   <Sonner
-    class="toaster group"
+    class="toaster group dark:bg-white"
     v-bind="props"
     :style="{
       '--normal-bg': 'var(--popover)',

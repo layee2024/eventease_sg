@@ -138,7 +138,7 @@ onMounted(async () => {
             alt="EventEase Logo"
             class="h-10 w-auto rounded-full"
           />
-          <span class="font-semibold text-sm">EventEase SG</span>
+          <span class="font-semibold">EventEase SG</span>
         </div>
       </router-link>
 

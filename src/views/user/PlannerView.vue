@@ -6,6 +6,7 @@ import { FireIcon, StarIcon, BoltIcon, SparklesIcon } from '@heroicons/vue/24/so
 import { GoogleGenAI } from "@google/genai";
 import { supabase } from "@/utils/supabase";
 import { toast } from 'vue-sonner';
+import Shiny from '../../components/bits/Shiny.vue';
 
 const router = useRouter();
 const timeUp = ref('');
@@ -173,9 +174,13 @@ onMounted(() => getCat());
           <div class="flex items-center gap-2">
             <h2 class="text-2xl font-extrabold dark:text-[#E0E0E0]">Tell us about your day</h2>
           </div>
-          <p class="font-bold italic bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-500 bg-clip-text text-transparent">
-            Share your preferences and we'll create the perfect schedule for you
-          </p>
+          <!-- TODO: Add color -->
+          <Shiny 
+            text="Share your preferences and we'll create the perfect schedule for you" 
+            :disabled="false" 
+            :speed="2" 
+            class-name="from-blue-500 via-purple-600 to-indigo-500"
+          />
         </div>
         <form @submit.prevent="handleSubmit" class="mt-4 flex flex-col gap-6">
           <!-- Start & End Time -->

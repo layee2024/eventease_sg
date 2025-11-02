@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import NavBar from "@/components/comp/user/UserNavBar.vue";
 import Footer from "@/components/comp/Footer.vue";
 import { supabase } from "@/utils/supabase";
+import { useColorMode } from "@vueuse/core";
 
 import {
   Dialog,
@@ -20,7 +21,9 @@ import {
 } from "./utils/inviteWatcher";
 
 import "vue-sonner/style.css";
+import { useLocalStorage } from "@vueuse/core";
 
+const mode = useColorMode({ disableTransition: false });
 const route = useRoute();
 const isHomePage = computed(() => route.path === "/");
 
@@ -68,7 +71,7 @@ onMounted(async () => {
   <div id="app" class="flex flex-col min-h-screen bg-white dark:bg-[#121212] text-gray-900">
     <NavBar />
     <div class="fixed top-[10%] right-0 z-[100] flex max-h-screen w-full translate-y-[-5%] p-4 sm:right-0 sm:flex-col md:max-w-[420px]">
-      <Toaster position="top-right" closeButton class="text-black z-1000" />
+      <Toaster position="top-right" closeButton :theme="mode" class="z-1000" />
     </div>
     <main>
       <RouterView v-slot="{ Component }">
