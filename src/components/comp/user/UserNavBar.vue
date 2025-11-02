@@ -13,53 +13,19 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
-const mode = useColorMode({disableTransition: false });
 const router = useRouter();
 const route = useRoute();
+const mode = useColorMode({ disableTransition: false });
+
 const user = ref(null);
 const name = ref("");
-const profilePicture = ref("");
+const profilePicture = ref("https://cdn.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-symbol-vector.jpg");
 const requestCount = ref(0);
 const isLoggedIn = ref(false);
 const mobileMenuOpen = ref(false);
 
-onMounted(() => {
-  window.addEventListener("profile-picture-updated", (event) => {
-    profilePicture.value = event.detail;
-  });
-});
+const PLACEHOLDER = "https://cdn.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-symbol-vector.jpg";
 
-onUnmounted(() => {
-  window.removeEventListener("profile-picture-updated", (event) => {
-    profilePicture.value = event.detail;
-  });
-});
-
-onMounted(async () => {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  isLoggedIn.value = !!session;
-  supabase.auth.onAuthStateChange((_event, session) => {
-    isLoggedIn.value = !!session;
-  });
-
-  if (session?.user) {
-    user.value = session.user;
-    await fetchProfileData();
-  }
-
-  const handleResize = () => {
-    if (window.innerWidth >= 768) {
-      mobileMenuOpen.value = false;
-    }
-  };
-
-  window.addEventListener("resize", handleResize);
-  onUnmounted(() => window.removeEventListener("resize", handleResize));
-});
-
-// Fetch
 async function fetchProfileData() {
   if (!user.value) return;
   const { data, error } = await supabase
@@ -69,27 +35,59 @@ async function fetchProfileData() {
     .maybeSingle();
 
   if (error) {
-    console.error(error);
-    profilePicture.value = "https://cdn.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-symbol-vector.jpg";
+    console.error("Error fetching profile:", error);
+    profilePicture.value = PLACEHOLDER;
     requestCount.value = 0;
     return;
   }
 
   name.value = data?.name || "User";
-  profilePicture.value = data.profile_picture || PLACEHOLDER
+  profilePicture.value = data?.profile_picture || PLACEHOLDER;
   requestCount.value = data?.friend_requests?.length || 0;
 }
 
+async function logout() {
+  await supabase.auth.signOut();
+  isLoggedIn.value = false;
+  user.value = null;
+  requestCount.value = 0;
+  profilePicture.value = PLACEHOLDER;
+  router.push("/login");
+}
+
+function isActive(path) {
+  return route.path === path;
+}
+
 onMounted(async () => {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const handleProfileUpdate = (event) => {
+    profilePicture.value = event.detail || PLACEHOLDER;
+  };
+  window.addEventListener("profile-picture-updated", handleProfileUpdate);
+
+  // Handle auth state
+  const { data: { session } } = await supabase.auth.getSession();
   isLoggedIn.value = !!session;
+
   if (session?.user) {
     user.value = session.user;
     await fetchProfileData();
+  }
 
-    const channel = supabase
+  const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    isLoggedIn.value = !!session;
+    if (session?.user) {
+      user.value = session.user;
+      fetchProfileData();
+    } else {
+      user.value = null;
+      profilePicture.value = PLACEHOLDER;
+    }
+  });
+
+  let channel;
+  if (session?.user) {
+    channel = supabase
       .channel("friend-requests")
       .on(
         "postgres_changes",
@@ -101,20 +99,23 @@ onMounted(async () => {
         }
       )
       .subscribe();
-
-    onUnmounted(() => supabase.removeChannel(channel));
   }
-});
-function isActive(path) {
-  return route.path === path;
-}
 
-async function logout() {
-  await supabase.auth.signOut();
-  isLoggedIn.value = false;
-  requestCount.value = 0;
-  router.push("/login");
-}
+  // Handle screen resize
+  const handleResize = () => {
+    if (window.innerWidth >= 768) {
+      mobileMenuOpen.value = false;
+    }
+  };
+  window.addEventListener("resize", handleResize);
+
+  onUnmounted(() => {
+    window.removeEventListener("profile-picture-updated", handleProfileUpdate);
+    window.removeEventListener("resize", handleResize);
+    if (channel) supabase.removeChannel(channel);
+    if (listener?.subscription) listener.subscription.unsubscribe();
+  });
+});
 </script>
 
 <template>
