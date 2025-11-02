@@ -65,7 +65,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div id="app" class="flex flex-col min-h-screen bg-white dark:bg-black text-gray-900">
+  <div id="app" class="flex flex-col min-h-screen bg-white dark:bg-[#121212] text-gray-900">
     <NavBar />
     <div class="fixed top-[10%] right-0 z-[100] flex max-h-screen w-full translate-y-[-5%] p-4 sm:right-0 sm:flex-col md:max-w-[420px]">
       <Toaster position="top-right" closeButton class="text-black z-1000" />

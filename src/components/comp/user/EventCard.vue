@@ -43,15 +43,24 @@ async function fetchGoingStats(eventId) {
   loadingOverall.value = true
 
   try {
+    const { count, error: countErr } = await supabase
+      .from("user_preferences")
+      .select("id", { count: "exact", head: true })
+      .contains("going", [eventId])
+    if (countErr) throw countErr
+    goingCount.value = count ?? 0
+
     const { data: { user } } = await supabase.auth.getUser()
+
+    // If not logged in → skip friend logic
     if (!user) {
       isJoined.value = false
-      goingCount.value = 0
       friendsGoing.value = []
       loadingOverall.value = false
       return
     }
 
+    // Check if current user joined
     const { data: pref, error: prefErr } = await supabase
       .from("user_preferences")
       .select("going")
@@ -60,13 +69,7 @@ async function fetchGoingStats(eventId) {
     if (prefErr) throw prefErr
     isJoined.value = pref?.going?.includes(eventId)
 
-    const { count, error: countErr } = await supabase
-      .from("user_preferences")
-      .select("id", { count: "exact", head: true })
-      .contains("going", [eventId])
-    if (countErr) throw countErr
-    goingCount.value = count ?? 0
-
+    // Fetch friends
     const { data: me, error: meErr } = await supabase
       .from("user_preferences")
       .select("friends")
@@ -195,7 +198,7 @@ const friendHoverText = computed(() => {
   
   <Card
   v-if="!loadingOverall && !parentLoading"
-    class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 duration-300 cursor-pointer bg-white dark:bg-gray-200"
+    class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm dark:shadow-sky-400 transition-all hover:shadow-lg hover:-translate-y-1 duration-300 cursor-pointer bg-white dark:bg-gray-200"
     @click="goToDetails"
   >
     <div class="relative">
@@ -262,12 +265,12 @@ const friendHoverText = computed(() => {
             {{ goingCount }} {{ goingCount === 1 ? 'person' : 'people' }} going
           </span>
         </p>
-        <span class="dark:text-black">
+        <span v-if="friendsGoing.length > 0" class="dark:text-black">
           •
         </span>
         
         <!-- Friends going -->
-         <div class="flex justify-center items-center">
+         <div v-if="friendsGoing.length > 0" class="flex justify-center items-center">
            <div
            v-if="!loadingGoing && friendsGoing.length"
            class="flex -space-x-2 items-center"
@@ -333,32 +336,25 @@ const friendHoverText = computed(() => {
     v-else
     class="pt-0 relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm animate-pulse bg-white dark:bg-[#f5f5f5]"
   >
-    <Skeleton class="w-full h-52 rounded-t-2xl" />
+    <Skeleton class="w-full h-52 rounded-t-2xl dark:bg-gray-500" />
 
     <CardContent class="px-4 mt-2 space-y-2">
-      <Skeleton class="h-4 w-3/4" />
-      <Skeleton class="h-3 w-1/2" />
-
-      <div class="mt-2 flex items-center gap-2">
-        <Skeleton class="h-3 w-20" />
-        <Skeleton class="h-3 w-16" />
-      </div>
+      <Skeleton class="h-4 w-3/4 dark:bg-gray-500" />
+      <Skeleton class="h-3 w-1/2 dark:bg-gray-500" />
 
       <div class="flex items-center gap-2 mt-2">
-        <Skeleton class="w-6 h-6 rounded-full" />
-        <Skeleton class="w-6 h-6 rounded-full" />
-        <Skeleton class="w-6 h-6 rounded-full" />
-        <Skeleton class="h-3 w-20" />
+        <Skeleton class="w-2/5 h-3 dark:bg-gray-500" />
+        <Skeleton class="w-2/5 h-3 dark:bg-gray-500" />
       </div>
-
+ 
       <div class="flex justify-between items-center mt-3">
-        <Skeleton class="h-3 w-16" />
-        <Skeleton class="h-3 w-12" />
+        <Skeleton class="h-3 w-16 dark:bg-gray-500" />
+        <Skeleton class="h-3 w-12 dark:bg-gray-500" />
       </div>
 
       <div class="mt-2 pt-2 flex items-center justify-between border-t border-gray-100">
-        <Skeleton class="h-3 w-24" />
-        <Skeleton class="h-3 w-10" />
+        <Skeleton class="h-3 w-24 dark:bg-gray-500" />
+        <Skeleton class="h-3 w-10 dark:bg-gray-500" />
       </div>
     </CardContent>
   </Card>

@@ -3,6 +3,7 @@ import { ref, computed } from "vue"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sparkles, RotateCw, Shuffle } from "lucide-vue-next"
+import MagnetButton from "../../bits/MagnetButton.vue"
 
 const props = defineProps({
   events: {
@@ -232,17 +233,28 @@ function getCategoryColor(category) {
 
     <!-- Controls -->
     <div class="flex gap-4">
-      <Button
+      <MagnetButton
+        :padding="120"
+        :disabled="isShuffling"
+        :magnet-strength="3"
+        active-transition="transform 0.2s ease-out"
+        inactive-transition="transform 0.6s ease-in-out"
+        wrapper-class-name="custom-wrapper"
+        inner-class-name="custom-inner"
         @click="shuffleCards"
-        :disabled="isShuffling || props.events.length === 0"
         size="lg"
-        class="gap-2 px-8 py-6 text-lg font-bold cursor-pointer"
+        class="gap-2 text-lg font-bold cursor-pointer dark:bg-[#121212] border-white"
         :class="isShuffling ? 'animate-pulse' : ''"
       >
-        <Sparkles v-if="!isShuffling" class="w-6 h-6" />
-        <Shuffle v-else class="w-6 h-6 animate-spin cursor-pointer" />
-        {{ isShuffling ? "Shuffling..." : "Shuffle Cards!" }}
-      </Button>
+        <div class="magnet-element flex justify-center items-center gap-2 border-black p-4">
+          <svg v-if="!isShuffling" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
+          </svg>
+  
+          <Shuffle v-else class="w-6 h-6 animate-spin cursor-pointer" />
+          {{ isShuffling ? "Shuffling..." : "Shuffle Cards!" }}
+        </div>
+      </MagnetButton>
 
       <Button
         v-if="selectedEvent && !isShuffling"
@@ -286,4 +298,12 @@ function getCategoryColor(category) {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.magnet-element {
+  background: #38bdf8;
+  border-radius: 12px;
+  color: white;
+  text-align: center;
+}
+
 </style>

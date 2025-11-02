@@ -193,13 +193,13 @@ onMounted(() => getCat());
           <!-- Interest -->
           <div>
             <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-[#E0E0E0]"><FireIcon class="h-5 text-orange-600" /> Interest & Hobbies</label>
-            <textarea v-model="interest" rows="4" required placeholder="Enter your interests..." class="w-full p-2 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]"></textarea>
+            <textarea v-model="interest" rows="4" required placeholder="Enter your interests..." class="min-h-24 w-full p-2 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]"></textarea>
           </div>
 
           <!-- Goals -->
           <div>
             <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-[#E0E0E0]"><StarIcon class="h-5 text-yellow-400" /> Goals</label>
-            <textarea v-model="goal" rows="4" required placeholder="Enter your goals..." class="w-full p-2 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]"></textarea>
+            <textarea v-model="goal" rows="4" required placeholder="Enter your goals..." class="min-h-24 w-full p-2 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]"></textarea>
           </div>
 
           <!-- Energy -->

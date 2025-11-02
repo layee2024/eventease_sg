@@ -253,8 +253,8 @@ function handleSavedUpdate({ id, liked }) {
 
       <!-- Result Card -->
       <div v-if="showResult && selectedEvent" class="max-w-4xl mx-auto">
-        <Card class="p-0 border-4 border-yellow-400 shadow-2xl bg-white">
-          <CardHeader class="bg-yellow-400 text-white p-2">
+        <Card class="p-0 border-4 border-sky-400 shadow-2xl bg-white">
+          <CardHeader class="bg-sky-400 text-white p-2">
             <CardTitle class="text-3xl text-center flex items-center justify-center gap-3">
               <Sparkles class="w-8 h-8" />
               Your Perfect Event!
