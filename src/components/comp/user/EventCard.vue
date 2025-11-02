@@ -247,7 +247,7 @@ const friendHoverText = computed(() => {
             {{ goingCount }} {{ goingCount === 1 ? 'person' : 'people' }} going
           </span>
         </p>
-        <span>
+        <span class="dark:text-black">
           •
         </span>
         
@@ -275,7 +275,7 @@ const friendHoverText = computed(() => {
                   />
                 </div>
               </TooltipTrigger>
-              <TooltipContent class="bg-gray-900 text-white text-xs px-2 py-1 rounded">
+              <TooltipContent class="bg-gray-900 text-white dark:bg-white dark:text-black  text-xs px-2 py-1 rounded">
                 {{ friendHoverText }}
               </TooltipContent>
             </Tooltip>

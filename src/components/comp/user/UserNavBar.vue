@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { supabase } from "../../../utils/supabase";
 import { Button } from "@/components/ui/button";
@@ -19,12 +19,12 @@ const mode = useColorMode({ disableTransition: false });
 
 const user = ref(null);
 const name = ref("");
-const profilePicture = ref("https://cdn.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-symbol-vector.jpg");
+const profilePicture = ref("/avatars/placeholder.png");
 const requestCount = ref(0);
 const isLoggedIn = ref(false);
 const mobileMenuOpen = ref(false);
 
-const PLACEHOLDER = "https://cdn.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-symbol-vector.jpg";
+const PLACEHOLDER = "/avatars/placeholder.png";
 
 async function fetchProfileData() {
   if (!user.value) return;
@@ -56,8 +56,14 @@ async function logout() {
 }
 
 function isActive(path) {
-  return route.path === path;
+  return computed(() => {
+    if (path === "/") {
+      return route.path === "/";
+    }
+    return route.path.startsWith(path);
+  });
 }
+
 
 onMounted(async () => {
   const handleProfileUpdate = (event) => {
@@ -116,6 +122,7 @@ onMounted(async () => {
     if (listener?.subscription) listener.subscription.unsubscribe();
   });
 });
+
 </script>
 
 <template>
@@ -140,7 +147,7 @@ onMounted(async () => {
         <router-link
           to="/"
           class="flex items-center gap-1 font-medium hover:text-sky-400 transition"
-          :class="{ 'text-sky-400 border-b-2 border-sky-400': isActive('/') }"
+          :class="{ 'text-sky-400 border-b-2 border-sky-400': isActive('/').value }"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -162,7 +169,7 @@ onMounted(async () => {
           to="/events"
           class="flex items-center gap-1 font-medium hover:text-sky-400 transition"
           :class="{
-            'text-sky-400 border-b-2 border-sky-400': isActive('/events'),
+            'text-sky-400 border-b-2 border-sky-400': isActive('/events').value,
           }"
         >
           <svg
@@ -187,7 +194,7 @@ onMounted(async () => {
           to="/map"
           class="flex items-center gap-1 font-medium hover:text-sky-400 transition"
           :class="{
-            'text-sky-400 border-b-2 border-sky-400': isActive('/map'),
+            'text-sky-400 border-b-2 border-sky-400': isActive('/map').value,
           }"
         >
           <svg
@@ -209,7 +216,7 @@ onMounted(async () => {
           to="/planner"
           class="flex items-center gap-1 font-medium hover:text-sky-400 transition"
           :class="{
-            'text-sky-400 border-b-2 border-sky-400': isActive('/planner'),
+            'text-sky-400 border-b-2 border-sky-400': isActive('/planner').value,
           }"
         >
           <svg
@@ -236,7 +243,7 @@ onMounted(async () => {
           to="/shuffle"
           class="flex items-center gap-1 font-medium hover:text-sky-400 transition"
           :class="{
-            'text-sky-400 border-b-2 border-sky-400': isActive('/shuffle'),
+            'text-sky-400 border-b-2 border-sky-400': isActive('/shuffle').value,
           }"
         >
           <svg
@@ -395,9 +402,9 @@ onMounted(async () => {
         @click="mobileMenuOpen = !mobileMenuOpen"
         class="lg:hidden flex flex-col justify-center items-center space-y-1.5"
       >
-        <span class="block w-6 h-0.5 bg-gray-700"></span>
-        <span class="block w-6 h-0.5 bg-gray-700"></span>
-        <span class="block w-6 h-0.5 bg-gray-700"></span>
+        <span class="block w-6 h-0.5 bg-gray-700 dark:bg-white"></span>
+        <span class="block w-6 h-0.5 bg-gray-700 dark:bg-white"></span>
+        <span class="block w-6 h-0.5 bg-gray-700 dark:bg-white"></span>
       </button>
     </div>
 
@@ -407,10 +414,11 @@ onMounted(async () => {
         v-if="mobileMenuOpen"
         class="flex flex-col px-6 py-4 border-t border-gray-200 bg-white space-y-4 lg:hidden"
       >
+      <div class="flex flex-col gap-4">
         <router-link
           to="/"
-          class="flex items-center gap-1 font-medium"
-          :class="{ 'text-sky-400': isActive('/') }"
+          class="flex items-center gap-1 font-medium dark:text-black"
+          :class="{ 'text-sky-400': isActive('/').value }"
           @click="mobileMenuOpen = false"
         >
           <svg
@@ -431,8 +439,8 @@ onMounted(async () => {
 
         <router-link
           to="/events"
-          class="flex items-center gap-1 font-medium"
-          :class="{ 'text-sky-400': isActive('/events') }"
+          class="flex items-center gap-1 font-medium dark:text-black"
+          :class="{ 'text-sky-400': isActive('/events').value }"
           @click="mobileMenuOpen = false"
         >
           <svg
@@ -455,8 +463,8 @@ onMounted(async () => {
 
         <router-link
           to="/map"
-          class="flex items-center gap-1 font-medium"
-          :class="{ 'text-sky-400': isActive('/map') }"
+          class="flex items-center gap-1 font-medium dark:text-black"
+          :class="{ 'text-sky-400': isActive('/map').value }"
           @click="mobileMenuOpen = false"
         >
           <svg
@@ -475,8 +483,8 @@ onMounted(async () => {
         >
         <router-link
           to="/planner"
-          class="flex items-center gap-1 font-medium"
-          :class="{ 'text-sky-400': isActive('/planner') }"
+          class="flex items-center gap-1 font-medium dark:text-black"
+          :class="{ 'text-sky-400': isActive('/planner').value }"
           @click="mobileMenuOpen = false"
         >
           <svg
@@ -500,8 +508,8 @@ onMounted(async () => {
         </router-link>
         <router-link
           to="/shuffle"
-          class="flex items-center gap-1 font-medium"
-          :class="{ 'text-sky-400': isActive('/shuffle') }"
+          class="flex items-center gap-1 font-medium dark:text-black"
+          :class="{ 'text-sky-400': isActive('/shuffle').value }"
           @click="mobileMenuOpen = false"
         >
           <svg
@@ -518,6 +526,7 @@ onMounted(async () => {
           </svg>
           Shuffle
         </router-link>
+      </div>
 
         <div class="border-t border-gray-200 my-2"></div>
 
@@ -621,6 +630,40 @@ onMounted(async () => {
               </svg>
               Logout
             </Button>
+            <!-- Dark Mode Toggle -->
+            <div class="border-t border-gray-200 my-2"></div>
+
+            <div class="flex justify-between items-center px-2 py-2">
+              <span class="text-sm font-medium text-gray-700">
+                Theme
+              </span>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child class="dark:bg-black">
+                  <Button variant="outline" class="cursor-pointer">
+                    <Icon
+                      icon="radix-icons:sun"
+                      class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+                    />
+                    <Icon
+                      icon="radix-icons:moon"
+                      class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+                    />
+                    <span class="sr-only">Toggle theme</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" class="z-1000">
+                  <DropdownMenuItem @click="mode = 'light'">
+                    Light
+                  </DropdownMenuItem>
+                  <DropdownMenuItem @click="mode = 'dark'"> Dark </DropdownMenuItem>
+                  <DropdownMenuItem @click="mode = 'auto'">
+                    System
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
           </template>
         </div>
       </div>

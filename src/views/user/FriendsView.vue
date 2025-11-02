@@ -610,7 +610,7 @@ async function declineInvite(inv) {
     <!-- Loading Spinner -->
     <div
       v-if="pageLoading"
-      class="absolute inset-0 flex flex-col items-center justify-center bg-white/80 z-50"
+      class="absolute inset-0 flex flex-col items-center justify-center z-50"
     >
       <Loader2 class="h-10 w-10 text-blue-600 animate-spin mb-3" />
       <p class="text-gray-600 dark:text-white">Loading your friends...</p>

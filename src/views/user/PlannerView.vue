@@ -153,11 +153,11 @@ onMounted(() => getCat());
 </script>
 
 <template>
-  <section class="h-[93vh] min-h-fit mb-24 bg-white dark:bg-[#121212] py-12 px-6 md:px-12 xl:px-20">
+  <section class="h-[93vh] min-h-max mb-48 xl:mb-24 bg-white dark:bg-[#121212] py-12 px-6 md:px-12 xl:px-20">
     <!-- Header -->
     <div class="text-center mb-10">
       <div class="flex justify-center items-center gap-2">
-        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Plan your perfect day</h1>
+        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Planner</h1>
         <SparklesIcon class="h-7 text-blue-600" />
       </div>
       <p class="text-lg text-gray-400 mt-2">
@@ -171,7 +171,6 @@ onMounted(() => getCat());
       <div class="shadow-xl border rounded-md xl:w-[70%] xl:justify-self-center p-5 xl:h-[80vh] mx-auto w-[100%] h-[80vh]">
         <div class="flex flex-col gap-2">
           <div class="flex items-center gap-2">
-            <SparklesIcon class="h-7 text-blue-600" />
             <h2 class="text-2xl font-extrabold dark:text-[#E0E0E0]">Tell us about your day</h2>
           </div>
           <p class="font-bold italic bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-500 bg-clip-text text-transparent">

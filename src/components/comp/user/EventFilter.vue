@@ -91,12 +91,12 @@ onMounted(() => {
              focus-within:ring-2 focus-within:ring-blue-500 
              transition w-full"
     >
-      <Search class="w-5 h-5 text-gray-400 border-gray-500 mr-2" />
+      <Search class="w-5 h-5 text-gray-400 border-gray-200 dark:border-black mr-2" />
       <input
         type="text"
         v-model="searchQuery"
         placeholder="Search events by title or venue..."
-        class="w-full outline-none text-gray-700 border-gray-500 text-sm sm:text-base"
+        class="w-full outline-none text-gray-700 border-gray-200 dark:border-black text-sm sm:text-base"
       />
     </div>
   </div>
@@ -106,13 +106,13 @@ onMounted(() => {
     type="number"
     v-model="maxPrice"
     placeholder="Budget"
-    class="border border-gray-500 rounded-lg px-3 py-2 w-full text-sm sm:text-base"
+    class="border border-gray-200 dark:border-black rounded-lg px-3 py-2 w-full text-sm sm:text-base"
   />
 
   <!-- Category -->
   <select
     v-model="category"
-    class="border border-gray-500 rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
+    class="border border-gray-200 dark:border-black rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
   >
     <option value="">All Categories</option>
     <option 
@@ -125,7 +125,7 @@ onMounted(() => {
   <!-- Crowd Level -->
   <select
     v-model="crowdLevel"
-    class="border border-gray-500 rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
+    class="border border-gray-200 dark:border-black rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
   >
     <option value="">Any Crowd</option>
     <option 
@@ -138,7 +138,7 @@ onMounted(() => {
   <!-- Sort By -->
   <select
     v-model="sortOption"
-    class="border border-gray-500 rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
+    class="border border-gray-200 dark:border-black rounded-lg px-3 py-2 w-full text-sm sm:text-base cursor-pointer"
   >
     <option value="">Sort By</option>
     <option v-for="(value, label) in sortBy"

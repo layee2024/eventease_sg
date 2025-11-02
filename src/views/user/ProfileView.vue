@@ -82,8 +82,7 @@ const AVATARS = Array.from({ length: 10 }, (_, i) => {
   return `/avatars/${ids[i]}.png`
 })
 
-const PLACEHOLDER =
-  "https://cdn.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-symbol-vector.jpg"
+const PLACEHOLDER = "/avatars/placeholder.png"
 
 const categories = [
   "Music","Food","Arts","Technology","Sports",
