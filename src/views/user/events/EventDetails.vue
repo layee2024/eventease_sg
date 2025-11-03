@@ -529,7 +529,7 @@ onMounted(async () => {
 
           <!-- Save & Join & Invite Buttons -->
           <div class="flex gap-3">
-            <Button @click="toggleSave" :variant="isSaved ? 'secondary' : 'outline'" class="cursor-pointer flex items-center gap-2">
+            <Button @click="toggleSave" :variant="isSaved ? 'secondary' : 'light:outline'" class="cursor-pointer flex items-center gap-2">
               <Heart
                 :class="[
                   'w-4 h-4',
