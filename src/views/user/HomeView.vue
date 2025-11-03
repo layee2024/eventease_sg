@@ -448,6 +448,7 @@ function initStarAnimation() {
             <!-- Left Side -->
             <h2
               class="text-center w-full text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4"
+              id="about-us-section"
             >
               We Built EventEase SG to
               <span class="stars-animation">
@@ -755,7 +756,8 @@ function initStarAnimation() {
               : 'opacity-0 translate-y-10'
           "
         >
-          <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h2 class="text-4xl md:text-5xl font-bold text-white mb-4"
+          id="how-it-works-section">
             How It Works
           </h2>
           <p class="text-lg text-gray-300 max-w-2xl mx-auto">
