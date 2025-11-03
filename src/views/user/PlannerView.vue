@@ -185,7 +185,7 @@ onMounted(() => getCat());
           <!-- Start & End Time -->
           <div class="flex gap-6">
             <div class="w-1/2">
-              <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-[#E0E0E0]"><ClockIcon class="h-6 dark:text-[#E0E0E0]" /> Activity Start Time</label>
+              <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-white"><ClockIcon class="h-6 dark:text-white" /> Activity Start Time</label>
               <input type="time" v-model="timeUp" value="00:00" required class="w-full py-2 px-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]" />
             </div>
             <div class="w-1/2">
@@ -229,6 +229,11 @@ onMounted(() => getCat());
 </template>
 
 <style scoped>
+
+.dark input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(100%) brightness(100%) !important; 
+}
+
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
