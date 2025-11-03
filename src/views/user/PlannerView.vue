@@ -154,7 +154,7 @@ onMounted(() => getCat());
 </script>
 
 <template>
-  <section class="h-[93vh] min-h-max mb-48 xl:mb-24 bg-white dark:bg-[#121212] py-12 px-6 md:px-12 xl:px-20">
+  <section class="h-[93vh] min-h-max mb-48 xl:mb-6 bg-white dark:bg-[#121212] py-12 px-6 md:px-12 xl:px-20">
     <!-- Header -->
     <div class="text-center mb-10">
       <div class="flex justify-center items-center gap-2">
@@ -169,7 +169,7 @@ onMounted(() => getCat());
   
     <div class="flex flex-col xl:flex-row gap-6">
    
-      <div class="shadow-xl border rounded-md xl:w-[70%] xl:justify-self-center p-5 xl:h-[80vh] mx-auto w-[100%] h-[80vh]">
+      <div class="shadow-xl border rounded-md xl:w-[70%] xl:justify-self-center p-5 h-min mx-auto w-[100%]">
         <div class="flex flex-col gap-2">
           <div class="flex items-center gap-2">
             <h2 class="text-2xl font-extrabold dark:text-[#E0E0E0]">Tell us about your day</h2>
@@ -183,12 +183,12 @@ onMounted(() => getCat());
         </div>
         <form @submit.prevent="handleSubmit" class="mt-4 flex flex-col gap-6">
           <!-- Start & End Time -->
-          <div class="flex gap-6">
-            <div class="w-1/2">
+          <div class="flex-col md:flex-row flex gap-6">
+            <div class="w-full md:w-1/2">
               <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-white"><ClockIcon class="h-6 dark:text-white" /> Activity Start Time</label>
               <input type="time" v-model="timeUp" value="00:00" required class="w-full py-2 px-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]" />
             </div>
-            <div class="w-1/2">
+            <div class="w-full md:w-1/2">
               <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-[#E0E0E0]"><ClockIcon class="h-6 dark:text-[#E0E0E0]" /> Activity End Time</label>
               <input type="time" v-model="endTime" value="23:59" class="w-full py-2 px-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]" />
             </div>
