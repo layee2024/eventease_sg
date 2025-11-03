@@ -573,9 +573,9 @@ function initStarAnimation() {
         <div
           class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center"
         >
-          <!-- Left Side: Singapore Map Illustration -->
+          <!-- Left Side: Globe -->
           <div
-            class="map-wrapper relative transition-all duration-1000 ease-out flex items-center justify-center order-2 lg:order-1"
+            class="globe-wrapper relative transition-all duration-1000 ease-out flex items-center justify-center order-2 lg:order-1"
             :class="
               globeVisible
                 ? 'opacity-100 translate-x-0'
@@ -583,101 +583,11 @@ function initStarAnimation() {
             "
             style="height: 600px"
           >
-            <!-- Singapore Map SVG Illustration -->
-            <div class="relative w-full h-full flex items-center justify-center">
-              <svg viewBox="0 0 500 400" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <!-- Gradient Background -->
-                <defs>
-                  <linearGradient id="mapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#9333ea;stop-opacity:0.4" />
-                    <stop offset="50%" style="stop-color:#ec4899;stop-opacity:0.4" />
-                    <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.4" />
-                  </linearGradient>
-                  <filter id="glow">
-                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                    <feMerge>
-                      <feMergeNode in="coloredBlur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                </defs>
-                
-                <!-- Singapore Main Island Shape (more accurate diamond/rhombus with irregular edges) -->
-                <!-- Main Island -->
-                <path d="M 150 180 
-                         L 190 165 
-                         L 240 160 
-                         L 290 165
-                         L 340 175
-                         L 370 190
-                         L 380 210
-                         L 375 235
-                         L 360 255
-                         L 330 270
-                         L 280 280
-                         L 230 282
-                         L 180 278
-                         L 140 265
-                         L 120 245
-                         L 115 220
-                         L 125 195
-                         Z" 
-                      fill="url(#mapGradient)" 
-                      stroke="#9333ea" 
-                      stroke-width="2.5" 
-                      filter="url(#glow)"
-                      class="animate-pulse"
-                      style="animation-duration: 3s"/>
-                
-                <!-- Sentosa Island (small island at bottom) -->
-                <ellipse cx="240" cy="295" rx="18" ry="8" 
-                         fill="url(#mapGradient)" 
-                         stroke="#9333ea" 
-                         stroke-width="1.5"
-                         opacity="0.8"/>
-                
-                <!-- Pulau Ubin (small island at top right) -->
-                <ellipse cx="365" cy="165" rx="12" ry="7" 
-                         fill="url(#mapGradient)" 
-                         stroke="#9333ea" 
-                         stroke-width="1.5"
-                         opacity="0.8"/>
-                
-                <!-- Event Location Pins with Labels -->
-                <!-- Marina Bay -->
-                <circle cx="270" cy="210" r="7" fill="#ec4899" class="animate-ping" opacity="0.8"/>
-                <circle cx="270" cy="210" r="7" fill="#ec4899"/>
-                <text x="270" y="230" font-size="10" fill="#ec4899" text-anchor="middle" font-weight="600">Marina Bay</text>
-                
-                <!-- Orchard -->
-                <circle cx="230" cy="200" r="7" fill="#3b82f6" class="animate-ping" style="animation-delay: 0.5s" opacity="0.8"/>
-                <circle cx="230" cy="200" r="7" fill="#3b82f6"/>
-                <text x="230" y="190" font-size="10" fill="#3b82f6" text-anchor="middle" font-weight="600">Orchard</text>
-                
-                <!-- CBD -->
-                <circle cx="260" cy="225" r="7" fill="#9333ea" class="animate-ping" style="animation-delay: 1s" opacity="0.8"/>
-                <circle cx="260" cy="225" r="7" fill="#9333ea"/>
-                <text x="260" y="245" font-size="10" fill="#9333ea" text-anchor="middle" font-weight="600">CBD</text>
-                
-                <!-- East Coast -->
-                <circle cx="330" cy="235" r="7" fill="#f59e0b" class="animate-ping" style="animation-delay: 1.5s" opacity="0.8"/>
-                <circle cx="330" cy="235" r="7" fill="#f59e0b"/>
-                <text x="330" y="225" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="600">East Coast</text>
-                
-                <!-- Sentosa -->
-                <circle cx="240" cy="295" r="6" fill="#22c55e" class="animate-ping" style="animation-delay: 2s" opacity="0.8"/>
-                <circle cx="240" cy="295" r="6" fill="#22c55e"/>
-                <text x="240" y="310" font-size="10" fill="#22c55e" text-anchor="middle" font-weight="600">Sentosa</text>
-                
-                <!-- Text -->
-                <text x="250" y="340" font-family="Arial, sans-serif" font-size="28" fill="#fff" text-anchor="middle" font-weight="bold">
-                  Singapore
-                </text>
-                <text x="250" y="365" font-family="Arial, sans-serif" font-size="14" fill="#9ca3af" text-anchor="middle">
-                  Discover Events Near You
-                </text>
-              </svg>
-            </div>
+            <GithubGlobe
+              :globe-config="globeConfig"
+              :data="globeData"
+              class="w-full h-full"
+            />
           </div>
 
           <!-- Right Side: Content -->
@@ -699,7 +609,7 @@ function initStarAnimation() {
                 class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"
               ></div>
               <span class="text-purple-300 text-sm font-medium"
-                >Singapore Student Events</span
+                >Global Event Network</span
               >
             </div>
 
@@ -708,11 +618,11 @@ function initStarAnimation() {
               class="text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight"
               :style="{ transitionDelay: '300ms' }"
             >
-              Discover exciting events
+              Events that connect
               <span
                 class="block mt-2 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent"
               >
-                across Singapore
+                across borders
               </span>
             </h2>
 
@@ -721,8 +631,9 @@ function initStarAnimation() {
               class="text-lg md:text-xl text-gray-300 leading-relaxed max-w-xl"
               :style="{ transitionDelay: '400ms' }"
             >
-              EventEase SG consolidates cultural, recreational, and social events for Singapore students. 
-              Get personalized suggestions, real-time crowd updates, and easy planning tools.
+              From Singapore to the world. EventEase SG brings you local events
+              with global impact, connecting students and communities across
+              Asia-Pacific and beyond.
             </p>
 
             <!-- Stats Grid -->
@@ -731,18 +642,18 @@ function initStarAnimation() {
               :style="{ transitionDelay: '500ms' }"
             >
               <div class="space-y-2">
-                <div class="text-3xl md:text-4xl font-bold text-white">500+</div>
-                <div class="text-sm text-gray-400">Events Listed</div>
+                <div class="text-3xl md:text-4xl font-bold text-white">8+</div>
+                <div class="text-sm text-gray-400">Countries Connected</div>
               </div>
               <div class="space-y-2">
-                <div class="text-3xl md:text-4xl font-bold text-white">10+</div>
-                <div class="text-sm text-gray-400">Categories</div>
+                <div class="text-3xl md:text-4xl font-bold text-white">50+</div>
+                <div class="text-sm text-gray-400">Partner Cities</div>
               </div>
               <div class="space-y-2">
                 <div class="text-3xl md:text-4xl font-bold text-white">
-                  1000+
+                  200+
                 </div>
-                <div class="text-sm text-gray-400">Student Users</div>
+                <div class="text-sm text-gray-400">Global Events</div>
               </div>
               <div class="space-y-2">
                 <div class="text-3xl md:text-4xl font-bold text-white">
@@ -758,7 +669,7 @@ function initStarAnimation() {
                 @click="router.push('/events')"
                 class="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105"
               >
-                Explore Events
+                Explore Global Events
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -795,7 +706,7 @@ function initStarAnimation() {
                   d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59"
                 />
               </svg>
-              Explore events happening across Singapore
+              Drag to rotate the globe and explore connections
             </p>
           </div>
         </div>
