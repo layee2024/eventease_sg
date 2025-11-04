@@ -169,14 +169,16 @@ onMounted(async () => {
       <Button
         :variant="viewMode === 'events' ? 'default' : 'outline'"
         @click="viewMode = 'events'"
-        class="cursor-pointer"
+        class="cursor-pointer dark:text-white"
+        :class="{'dark:text-black': viewMode == 'events'}"
       >
         Events
       </Button>
       <Button
         :variant="viewMode === 'schedules' ? 'default' : 'outline'"
         @click="viewMode = 'schedules'"
-        class="cursor-pointer"
+        class="cursor-pointer dark: text-white"
+        :class="{'dark:text-black': viewMode == 'schedules'}"
       >
         Schedules
       </Button>
@@ -249,7 +251,7 @@ onMounted(async () => {
               <TableRow>
                 <TableHead>#</TableHead>
                 <TableHead>Title</TableHead>
-                <TableHead>Date Created</TableHead>
+                <TableHead>Created at</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -257,7 +259,7 @@ onMounted(async () => {
               <TableRow
                 v-for="(sched, index) in savedSchedules"
                 :key="index"
-                class="hover:bg-gray-50 dark:hover:bg-gray-800"
+                class="hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
               >
                 <TableCell class="font-semibold">{{ index + 1 }}</TableCell>
                 <TableCell>{{ sched.title }}</TableCell>

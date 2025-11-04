@@ -305,7 +305,7 @@ onMounted(async () => {
             <DropdownMenuContent align="end" class="w-44 z-1000">
               <DropdownMenuItem
                 @click="router.push('/profile')"
-                :class="{ 'bg-sky-400': isActive('/profile').value }"
+                :class="{ 'bg-sky-400 text-white': isActive('/profile').value }"
                 class="cursor-pointer"
               >
                 <svg
@@ -339,7 +339,7 @@ onMounted(async () => {
               </DropdownMenuItem>
               <DropdownMenuItem
                 @click="router.push('/saved')"
-                :class="{ 'bg-sky-400': isActive('/saved').value }"
+                :class="{ 'bg-sky-400 text-white': isActive('/saved').value }"
                 class="cursor-pointer"
               >
                 <svg
@@ -358,7 +358,7 @@ onMounted(async () => {
               </DropdownMenuItem>
               <DropdownMenuItem
                 @click="router.push('/friends')"
-                :class="{ 'bg-sky-400': isActive('/friends').value }"
+                :class="{ 'bg-sky-400 text-white': isActive('/friends').value }"
                 class="cursor-pointer flex justify-between items-center relative"
               >
                 <div class="flex gap-2 justify-around items-center">
@@ -603,7 +603,6 @@ onMounted(async () => {
                 calendarDialogOpen = true;
                 mobileMenuOpen = false;
               "
-              variant="outline"
               class="w-full"
             >
               <svg

@@ -155,7 +155,7 @@ onMounted(() => getCat());
 </script>
 
 <template>
-  <section class="h-[93vh] min-h-max xl:mb-6 bg-white dark:bg-[#121212] py-12 px-6">
+  <section class="w-full h-[93vh] min-h-max xl:mb-6 bg-white dark:bg-[#121212] py-12 px-6">
     <!-- Header -->
     <div class="text-center mb-10">
       <div class="flex justify-center items-center gap-2">
@@ -167,7 +167,7 @@ onMounted(() => getCat());
       </p> 
     </div>
 
-    <div class="shadow-xl border rounded-md xl:justify-self-center p-5 min-h-min mx-auto">
+    <div class="shadow-xl border rounded-md xl:justify-self-center p-5 min-h-min mx-auto min-w-3/4">
       <div class="flex flex-col gap-2">
         <div class="flex items-center gap-2">
           <h2 class="text-2xl font-extrabold dark:text-[#E0E0E0]">Tell us about your day</h2>
