@@ -38,6 +38,9 @@ const joinedEvents = ref([])
 const loadingEvents = ref(false)
 const joinedOpen = ref(false)
 
+//filter for the joined events
+const joinedFilter = ref("upcoming")
+
 // Pagination
 const joinedCurrentPage = ref(1)
 const joinedItemsPerPage = 5
@@ -46,10 +49,20 @@ const totalJoinedPages = computed(() =>
   Math.ceil(joinedEvents.value.length / joinedItemsPerPage)
 )
 
+const filteredJoinedEvents = computed(() => {
+  const now = new Date()
+  if (joinedFilter.value === "upcoming") {
+    return joinedEvents.value.filter((e) => new Date(e.start_date) >= now)
+  } else if (joinedFilter.value === "past") {
+    return joinedEvents.value.filter((e) => new Date(e.start_date) < now)
+  }
+  return joinedEvents.value 
+})
+
 const paginatedJoinedEvents = computed(() => {
   const start = (joinedCurrentPage.value - 1) * joinedItemsPerPage
   const end = start + joinedItemsPerPage
-  return joinedEvents.value.slice(start, end)
+  return filteredJoinedEvents.value.slice(start, end)
 })
 
 function nextJoinedPage() {
@@ -175,8 +188,10 @@ async function fetchJoinedEvents(ids) {
     // Filter out past events
     const now = new Date()
     joinedEvents.value = (data || [])
-      .filter((e) => new Date(e.start_date) >= now)
-      .sort((a, b) => new Date(b.start_date) - new Date(a.start_date))
+      //.filter((e) => new Date(e.start_date) >= now)
+      //.sort((a, b) => new Date(b.start_date) - new Date(a.start_date))
+      joinedEvents.value = (data || []).sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+
   } catch (err) {
     console.error("Error fetching joined events:", err?.message || err)
     toast.error("Failed to load joined events.")
@@ -393,9 +408,24 @@ const initials = computed(() =>
     <!-- Joined Events Modal -->
     <Dialog v-model:open="joinedOpen">
       <DialogContent class="max-w-2xl">
+
         <DialogHeader>
           <DialogTitle>Your Joined Events</DialogTitle>
+          <div class="flex justify-end mt-8">
+            <Select v-model="joinedFilter">
+              <SelectTrigger class="w-40">
+                <SelectValue :placeholder="'Filter events'" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="upcoming">Upcoming</SelectItem>
+                <SelectItem value="past">Past</SelectItem>
+                <SelectItem value="all">All</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </DialogHeader>
+
+  
 
         <div
           v-if="loadingEvents"
