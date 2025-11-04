@@ -118,6 +118,7 @@ async function handleSubmit() {
         - Output format: "10am: Activity description".
         - Avoid overlapping with user's scheduled events.
         - Must use events thats from the suggested list of events.
+        - Make sure the response uses the same title as the list of events suggested! IMPORTANT
         - If user's interest and goals do not align with any of the events, suggest the closest activtiy which can help achieve their goal.
         - Include short breaks or meal times.
         - Align with user's energy.
@@ -169,7 +170,7 @@ onMounted(() => getCat());
   
     <div class="flex flex-col xl:flex-row gap-6">
    
-      <div class="shadow-xl border rounded-md xl:w-[70%] xl:justify-self-center p-5 xl:h-[90vh] mx-auto w-[100%] h-[80vh]">
+      <div class="shadow-xl border rounded-md xl:w-[70%] xl:justify-self-center p-5 xl:h-[90vh] mx-auto w-[100%] h-[90vh]">
         <div class="flex flex-col gap-2">
           <div class="flex items-center gap-2">
             <h2 class="text-2xl font-extrabold dark:text-[#E0E0E0]">Tell us about your day</h2>
