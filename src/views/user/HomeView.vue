@@ -1,17 +1,29 @@
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, defineAsyncComponent } from "vue";
 import { useRouter } from "vue-router";
-import GithubGlobe from "../../components/comp/user/GithubGlobe.vue";
+// import GithubGlobe from "../../components/comp/user/GithubGlobe.vue";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/utils/supabase";
 import { toast } from "vue-sonner";
 import Hyper from "@/components/bits/Hyper.vue";
 import TypeWriter from "@/components/bits/TypeWriter.vue";
 import SpecialCard from "../../components/bits/SpecialCard.vue";
-import Particles from "../../components/bits/Particles.vue";
+// import Particles from "../../components/bits/Particles.vue";
 import Popup from "../../components/bits/Popup.vue";
 import Cursor from "../../components/bits/Cursor.vue";
-import CoolBackground from "../../components/bits/CoolBackground.vue";
+// import CoolBackground from "../../components/bits/CoolBackground.vue";
+
+
+const GithubGlobe = defineAsyncComponent(() =>
+  import("../../components/comp/user/GithubGlobe.vue")
+)
+const Particles = defineAsyncComponent(() =>
+  import("@/components/bits/Particles.vue")
+)
+
+const CoolBackground = defineAsyncComponent(() =>
+  import("@/components/bits/CoolBackground.vue")
+)
 
 const router = useRouter();
 const problem = ref(null);
