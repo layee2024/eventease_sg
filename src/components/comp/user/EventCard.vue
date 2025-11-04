@@ -261,7 +261,7 @@ const friendHoverText = computed(() => {
             <span class="h-3 w-3 border-2 border-gray-300 border-t-transparent rounded-full animate-spin"></span>
             Loading…
           </span>
-          <span v-else>
+          <span v-else class="text-[12px]">
             {{ goingCount }} {{ goingCount === 1 ? 'person' : 'people' }} going
           </span>
         </p>
@@ -293,14 +293,14 @@ const friendHoverText = computed(() => {
                   />
                 </div>
               </TooltipTrigger>
-              <TooltipContent class="bg-gray-900 text-white dark:bg-white dark:text-black  text-xs px-2 py-1 rounded">
+              <TooltipContent class="bg-gray-900 text-white dark:bg-white dark:text-black text-[12px] px-2 py-1 rounded">
                 {{ friendHoverText }}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
 
           </div>
-          <span class="text-gray-500 text-xs ml-2">
+          <span class="text-gray-500 text-[12px] ml-2">
             {{ friendsGoing.length }} friends going
           </span>
         </div>
