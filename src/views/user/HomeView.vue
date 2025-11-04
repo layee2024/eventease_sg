@@ -618,11 +618,11 @@ function initStarAnimation() {
               class="text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight"
               :style="{ transitionDelay: '300ms' }"
             >
-              Events that connect
+              Discovering exciting events
               <span
                 class="block mt-2 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent"
               >
-                across borders
+                across Singapore
               </span>
             </h2>
 
@@ -631,9 +631,7 @@ function initStarAnimation() {
               class="text-lg md:text-xl text-gray-300 leading-relaxed max-w-xl"
               :style="{ transitionDelay: '400ms' }"
             >
-              From Singapore to the world. EventEase SG brings you local events
-              with global impact, connecting students and communities across
-              Asia-Pacific and beyond.
+              EventEaste SG consolidates cultural, recreational and social events for Singapore students. Get personalised suggestions, real-time crowd updates, and easy planning tools.
             </p>
 
             <!-- Stats Grid -->
@@ -642,18 +640,18 @@ function initStarAnimation() {
               :style="{ transitionDelay: '500ms' }"
             >
               <div class="space-y-2">
-                <div class="text-3xl md:text-4xl font-bold text-white">8+</div>
-                <div class="text-sm text-gray-400">Countries Connected</div>
+                <div class="text-3xl md:text-4xl font-bold text-white">500+</div>
+                <div class="text-sm text-gray-400">Events Listed</div>
               </div>
               <div class="space-y-2">
-                <div class="text-3xl md:text-4xl font-bold text-white">50+</div>
-                <div class="text-sm text-gray-400">Partner Cities</div>
+                <div class="text-3xl md:text-4xl font-bold text-white">10+</div>
+                <div class="text-sm text-gray-400">Categories</div>
               </div>
               <div class="space-y-2">
                 <div class="text-3xl md:text-4xl font-bold text-white">
-                  200+
+                  1000+
                 </div>
-                <div class="text-sm text-gray-400">Global Events</div>
+                <div class="text-sm text-gray-400">Student Users</div>
               </div>
               <div class="space-y-2">
                 <div class="text-3xl md:text-4xl font-bold text-white">
