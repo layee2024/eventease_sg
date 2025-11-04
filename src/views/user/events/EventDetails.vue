@@ -76,6 +76,25 @@ async function fetchReviews() {
 
 // Add or update review
 async function submitReview() {
+
+    // Check if user joined before allowing review
+    const { data: joinedData, error: joinedError } = await supabase
+    .from("user_preferences")
+    .select("going")
+    .eq("id", user.value.id)
+    .single()
+
+  if (joinedError) {
+    toast.error("Unable to verify event participation.")
+    return
+  }
+
+  const joinedEvents = joinedData?.going || []
+  if (!joinedEvents.includes(eventId)) {
+    toast.error("You must join this event before leaving a review.")
+    return
+  }
+
   if (reviewText.value.trim().length < 10) {
     toast.error("Comment must be at least 10 characters.")
     return

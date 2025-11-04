@@ -8,6 +8,8 @@ const props = defineProps({
 })
 
 const averageRating = ref(0)
+const canReview = ref(false)
+const user = ref(null)
 const router = useRouter()
 
 async function fetchAverageRating() {
@@ -24,7 +26,29 @@ async function fetchAverageRating() {
   }
 }
 
-onMounted(fetchAverageRating)
+async function checkUserJoined() {
+  if (!user.value) return
+  const { data, error } = await supabase
+    .from("events")
+    .select("participants")
+    .eq("id", props.eventId)
+    .single()
+
+  if (error || !data) {
+    canReview.value = false
+    return
+  }
+
+  const joined = data.participants && data.participants.includes(user.value.id)
+  canReview.value = joined
+}
+
+onMounted(async () => {
+  const { data: { user: currentUser } } = await supabase.auth.getUser()
+  user.value = currentUser
+  await fetchAverageRating()
+  await checkUserJoined()
+})
 </script>
 
 <template>
@@ -44,5 +68,13 @@ onMounted(fetchAverageRating)
         {{ averageRating > 0 ? averageRating.toFixed(1) : 'No rating yet' }}
       </span>
     </div>
+
+    <button
+      v-if="canReview"
+      class="mt-2 text-blue-500 hover:underline text-[11px]"
+      @click="router.push(`/event/${props.eventId}/review`)"
+    >
+      Add Review
+    </button>
   </div>
 </template>
