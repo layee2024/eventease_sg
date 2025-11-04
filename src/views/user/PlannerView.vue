@@ -155,7 +155,7 @@ onMounted(() => getCat());
 </script>
 
 <template>
-  <section class="h-[93vh] min-h-max mb-48 xl:mb-6 bg-white dark:bg-[#121212] py-12 px-6 md:px-12 xl:px-20">
+  <section class="h-[93vh] min-h-max xl:mb-6 bg-white dark:bg-[#121212] py-12 px-6">
     <!-- Header -->
     <div class="text-center mb-10">
       <div class="flex justify-center items-center gap-2">
@@ -167,64 +167,60 @@ onMounted(() => getCat());
       </p> 
     </div>
 
-  
-    <div class="flex flex-col xl:flex-row gap-6">
-   
-      <div class="shadow-xl border rounded-md xl:w-[70%] xl:justify-self-center p-5 xl:h-[90vh] mx-auto w-[100%] h-[90vh]">
-        <div class="flex flex-col gap-2">
-          <div class="flex items-center gap-2">
-            <h2 class="text-2xl font-extrabold dark:text-[#E0E0E0]">Tell us about your day</h2>
-          </div>
-          <Shiny 
-            text="Share your preferences and we'll create the perfect schedule for you" 
-            :disabled="false" 
-            :speed="2" 
-            class=""
-          />
+    <div class="shadow-xl border rounded-md xl:justify-self-center p-5 min-h-min mx-auto">
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-2">
+          <h2 class="text-2xl font-extrabold dark:text-[#E0E0E0]">Tell us about your day</h2>
         </div>
-        <form @submit.prevent="handleSubmit" class="mt-4 flex flex-col gap-6">
-          <!-- Start & End Time -->
-          <div class="flex-col md:flex-row flex gap-6">
-            <div class="w-full md:w-1/2">
-              <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-white"><ClockIcon class="h-6 dark:text-white" /> Activity Start Time</label>
-              <input type="time" v-model="timeUp" value="00:00" required class="w-full py-2 px-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]" />
-            </div>
-            <div class="w-full md:w-1/2">
-              <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-[#E0E0E0]"><ClockIcon class="h-6 dark:text-[#E0E0E0]" /> Activity End Time</label>
-              <input type="time" v-model="endTime" value="23:59" class="w-full py-2 px-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]" />
-            </div>
-          </div>
-
-          <!-- Interest -->
-          <div>
-            <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-[#E0E0E0]"><FireIcon class="h-5 text-orange-600" /> Interest & Hobbies</label>
-            <textarea v-model="interest" rows="4" required placeholder="Enter your interests..." class="min-h-24 w-full p-2 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]"></textarea>
-          </div>
-
-          <!-- Goals -->
-          <div>
-            <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-[#E0E0E0]"><StarIcon class="h-5 text-yellow-400" /> Goals</label>
-            <textarea v-model="goal" rows="4" required placeholder="Enter your goals..." class="min-h-24 w-full p-2 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]"></textarea>
-          </div>
-
-          <!-- Energy -->
-          <div>
-            <label class="flex items-center gap-2 text-xl font-bold mb-1 dark:text-[#E0E0E0]"><BoltIcon class="h-5 text-yellow-400" /> Energy Level</label>
-            <select v-model="energy" class="w-full p-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]">
-              <option value="low">Low - slow, relaxing day to unwind and recharge</option>
-              <option value="medium">Medium - balanced day with work & leisure</option>
-              <option value="high">High - high-energy day to conquer goals!</option>
-            </select>
-          </div>
-
-          <div class="flex flex-col items-center gap-3">
-            <button type="submit" :disabled="isLoading" class="w-full h-12 bg-black dark:bg-[#E0E0E0] text-white dark:text-black rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer">
-              <SparklesIcon class="h-6 w-6" /> {{ isLoading ? 'Generating...' : 'Plan my day!' }}
-            </button>
-            <button type="button" @click="resetForm" class="underline text-gray-400 hover:text-gray-600">Reset</button>
-          </div>
-        </form>
+        <Shiny 
+          text="Share your preferences and we'll create the perfect schedule for you" 
+          :disabled="false" 
+          :speed="2" 
+          class=""
+        />
       </div>
+      <form @submit.prevent="handleSubmit" class="mt-4 flex flex-col gap-6">
+        <!-- Start & End Time -->
+        <div class="flex-col md:flex-row flex gap-6">
+          <div class="w-full md:w-1/2">
+            <label class="flex items-center gap-2 md:text-xl text-md font-bold mb-1 dark:text-white"><ClockIcon class="md:h-6 h-5 dark:text-white" /> Activity Start Time</label>
+            <input type="time" v-model="timeUp" value="00:00" required class="w-full py-2 px-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]" />
+          </div>
+          <div class="w-full md:w-1/2">
+            <label class="flex items-center gap-2 md:text-xl text-md font-bold mb-1 dark:text-[#E0E0E0]"><ClockIcon class="md:h-6 h-5 dark:text-[#E0E0E0]" /> Activity End Time</label>
+            <input type="time" v-model="endTime" value="23:59" class="w-full py-2 px-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]" />
+          </div>
+        </div>
+
+        <!-- Interest -->
+        <div>
+          <label class="flex items-center gap-2 md:text-xl text-md font-bold mb-1 dark:text-[#E0E0E0]"><FireIcon class="h-5 text-orange-600" /> Interest & Hobbies</label>
+          <textarea v-model="interest" rows="4" required placeholder="Enter your interests..." class="min-h-24 w-full p-2 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]"></textarea>
+        </div>
+
+        <!-- Goals -->
+        <div>
+          <label class="flex items-center gap-2 md:text-xl text-md font-bold mb-1 dark:text-[#E0E0E0]"><StarIcon class="h-5 text-yellow-400" /> Goals</label>
+          <textarea v-model="goal" rows="4" required placeholder="Enter your goals..." class="min-h-24 w-full p-2 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]"></textarea>
+        </div>
+
+        <!-- Energy -->
+        <div>
+          <label class="flex items-center gap-2 md:text-xl text-md font-bold mb-1 dark:text-[#E0E0E0]"><BoltIcon class="h-5 text-yellow-400" /> Energy Level</label>
+          <select v-model="energy" class="w-full p-3 border rounded shadow focus:ring-2 focus:ring-blue-500 dark:text-[#E0E0E0]">
+            <option value="low">Low - slow, relaxing day to unwind and recharge</option>
+            <option value="medium">Medium - balanced day with work & leisure</option>
+            <option value="high">High - high-energy day to conquer goals!</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col items-center gap-3">
+          <button type="submit" :disabled="isLoading" class="w-full h-12 bg-black dark:bg-[#E0E0E0] text-white dark:text-black rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer">
+            <SparklesIcon class="md:h-6 h-5 w-6" /> {{ isLoading ? 'Generating...' : 'Plan my day!' }}
+          </button>
+          <button type="button" @click="resetForm" class="underline text-gray-400 hover:text-gray-600">Reset</button>
+        </div>
+      </form>
     </div>
   </section>
 </template>
