@@ -291,6 +291,15 @@ async function showRouteToDestination(destCoords) {
   }
 }
 
+// ✅ Clear directions when modal clicked
+function clearDirections() {
+  if (directionsRenderer) {
+    directionsRenderer.setDirections({ routes: [] })
+  }
+  routeDetails.value = null
+  showSteps.value = false
+}
+
 async function changeTravelMode(mode) {
   travelMode.value = mode
   if (!routeDetails.value) return
@@ -335,7 +344,8 @@ watch([searchVal, eventCat], filterBySearch)
       <transition name="fade" mode="out-in">
       <div
         v-if="routeDetails"
-        class="fixed bottom-5 right-5 bg-white shadow-xl rounded-2xl border border-gray-200 w-[350px] overflow-hidden transition-all duration-300"
+        @click="clearDirections"
+        class="fixed bottom-5 right-5 bg-white shadow-xl rounded-2xl border border-gray-200 w-[350px] overflow-hidden transition-all duration-300 cursor-pointer"
       >
         <Card class="pt-0">
           <CardHeader class="py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white flex justify-between items-center">
@@ -343,7 +353,7 @@ watch([searchVal, eventCat], filterBySearch)
               Route Summary
             </CardTitle>
             <button
-              @click="routeDetails = null"
+              @click.stop="clearDirections"
               class="text-white hover:text-gray-200 text-xl font-bold transition cursor-pointer"
               title="Close"
             >
@@ -358,11 +368,11 @@ watch([searchVal, eventCat], filterBySearch)
             <button
               v-for="mode in ['DRIVING','TRANSIT','BICYCLING','WALKING']"
               :key="mode"
-              @click="changeTravelMode(mode)"
+              @click.stop="changeTravelMode(mode)"
               class="cursor-pointer"
               :class="[
                 'px-3 py-1.5 rounded-md text-sm font-medium transition',
-                travelMode === mode ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
+                travelMode === mode ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-400 dark:hover:bg-gray-500'
               ]"
             >
               {{ mode === 'DRIVING' ? 'Car' :
@@ -371,12 +381,12 @@ watch([searchVal, eventCat], filterBySearch)
             </button>
           </div>
 
-          <CardContent class="pb-2 text-sm text-gray-700 space-y-2">
+          <CardContent class="pb-2 text-sm text-gray-700 dark:text-gray-100 space-y-2">
             <div>
               <p><span class="font-semibold">From:</span> {{ routeDetails.start_address }}</p>
               <p><span class="font-semibold">To:</span> {{ routeDetails.end_address }}</p>
             </div>
-            <div class="flex justify-between text-indigo-600 font-semibold mt-3">
+            <div class="flex justify-between text-indigo-600 dark:text-indigo-300 font-semibold mt-3">
               <span>Distance: {{ routeDetails.distance.text }}</span>
               <span>Duration: {{ routeDetails.duration.text }}</span>
             </div>
@@ -397,53 +407,48 @@ watch([searchVal, eventCat], filterBySearch)
       </div>
       </transition>
     </div>
+
     <!-- Map Legend -->
-<div
-  id="map-legend"
-  class="fixed bottom-6 left-6 bg-white border border-gray-300 shadow-md rounded-lg px-4 py-3 text-sm text-gray-700 space-y-3 z-40"
->
-  <div class="font-semibold text-gray-800 mb-1">Legend</div>
+    <div
+      id="map-legend"
+      class="fixed bottom-6 left-6 bg-white border border-gray-300 shadow-md rounded-lg px-4 py-3 text-sm text-gray-700 space-y-3 z-40"
+    >
+      <div class="font-semibold text-gray-800 mb-1">Legend</div>
 
-  <!-- Joined Events -->
-  <div class="flex items-center gap-2">
-    <div class="w-4 h-5">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full text-[#16A34A]">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-      </svg>
+      <div class="flex items-center gap-2">
+        <div class="w-4 h-5">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full text-[#16A34A]">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+          </svg>
+        </div>
+        <span>Joined Events</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div class="w-4 h-5">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full text-[#EA4335]">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+          </svg>
+        </div>
+        <span>Available Events</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div class="w-4 h-5">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+        </div>
+        <span>Your Location</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div class="w-4 h-[3px] bg-indigo-500 rounded"></div>
+        <span>Route Path</span>
+      </div>
     </div>
-    <span>Joined Events</span>
-  </div>
-
-  <!-- Available Events -->
-  <div class="flex items-center gap-2">
-    <div class="w-4 h-5">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full text-[#EA4335]">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-      </svg>
-    </div>
-    <span>Available Events</span>
-  </div>
-
-  <!-- Your Current Location -->
-  <div class="flex items-center gap-2">
-    <div class="w-4 h-5">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-      </svg>
-    </div>
-    <span>Your Location</span>
-  </div>
-
-  <!-- Route Line -->
-  <div class="flex items-center gap-2">
-    <div class="w-4 h-[3px] bg-indigo-500 rounded"></div>
-    <span>Route Path</span>
-  </div>
-</div>
-
-
   </section>
 </template>
 
