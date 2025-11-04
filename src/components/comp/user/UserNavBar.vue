@@ -169,7 +169,7 @@ onMounted(async () => {
           to="/events"
           class="flex items-center gap-1 font-medium hover:text-sky-400 transition"
           :class="{
-            'text-sky-400 border-b-2 border-sky-400': isActive('/events').value,
+            'text-sky-400 border-b-2 border-sky-400': isActive('/event').value,
           }"
         >
           <svg
@@ -443,7 +443,7 @@ onMounted(async () => {
         <router-link
           to="/events"
           class="flex items-center gap-1 font-medium dark:text-black"
-          :class="{ 'text-sky-400': isActive('/events').value }"
+          :class="{ 'text-sky-400': isActive('/event').value }"
           @click="mobileMenuOpen = false"
         >
           <svg
