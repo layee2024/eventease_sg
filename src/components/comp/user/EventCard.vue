@@ -26,7 +26,9 @@ const props = defineProps({
   image: String,
   liked: { type: Boolean, default: false },
   distance: Number,
-  parentLoading: { type: Boolean, default: false }
+  parentLoading: { type: Boolean, default: false },
+  maxCapacity: Number,
+  currentAttendance: Number
 })
 
 const emit = defineEmits(["update-saved"])
@@ -247,6 +249,20 @@ const friendHoverText = computed(() => {
       >
         <span :class="['w-2 h-2 rounded-full', crowdColor]" />
         {{ crowd }}
+      </span>
+
+      <!-- Capacity Badge (for full or almost full events) -->
+      <span
+        v-if="maxCapacity !== null && maxCapacity !== undefined && currentAttendance >= maxCapacity"
+        class="absolute top-3 right-3 left-3 text-center text-xs font-bold text-white bg-red-600/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg animate-pulse"
+      >
+        🔒 EVENT FULL ({{ currentAttendance }}/{{ maxCapacity }})
+      </span>
+      <span
+        v-else-if="maxCapacity !== null && maxCapacity !== undefined && currentAttendance / maxCapacity >= 0.9"
+        class="absolute bottom-3 left-3 text-xs font-semibold text-white bg-orange-600/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-md"
+      >
+        ⚠️ Almost Full ({{ currentAttendance }}/{{ maxCapacity }})
       </span>
     </div>
 

@@ -423,11 +423,51 @@ async function toggleJoinEvent() {
     .single()
 
   let updated = pref?.going || []
+  
   if (isGoing.value) {
+    // Leaving event - decrement attendance
     updated = updated.filter((id) => id !== eventId)
+    
+    // Decrement current_attendance
+    const { error: updateError } = await supabase
+      .from("events")
+      .update({ current_attendance: (event.value.current_attendance || 1) - 1 })
+      .eq("id", eventId)
+    
+    if (updateError) {
+      console.error("Error updating attendance:", updateError)
+    } else {
+      event.value.current_attendance = Math.max(0, (event.value.current_attendance || 1) - 1)
+    }
+    
     toast.info(`You left ${event.value.title}`)
   } else {
+    // Joining event - check capacity first
+    const maxCapacity = event.value.max_capacity
+    const currentAttendance = event.value.current_attendance || 0
+    
+    // Check if event is full (only if max_capacity is set)
+    if (maxCapacity !== null && currentAttendance >= maxCapacity) {
+      toast.error(`Sorry, ${event.value.title} is at full capacity (${maxCapacity}/${maxCapacity})`)
+      return
+    }
+    
     if (!updated.includes(eventId)) updated.push(eventId)
+    
+    // Increment current_attendance
+    const { error: updateError } = await supabase
+      .from("events")
+      .update({ current_attendance: currentAttendance + 1 })
+      .eq("id", eventId)
+    
+    if (updateError) {
+      console.error("Error updating attendance:", updateError)
+      toast.error("Failed to join event. Please try again.")
+      return
+    } else {
+      event.value.current_attendance = currentAttendance + 1
+    }
+    
     toast.success(`You joined ${event.value.title}!`)
   }
 
@@ -528,6 +568,30 @@ onMounted(async () => {
               {{ goingCount }} {{ goingCount === 1 ? "person is" : "people are" }} going
             </p>
 
+            <!-- Capacity indicator -->
+            <div v-if="event.max_capacity !== null" class="flex items-center gap-2">
+              <span class="text-gray-500 text-xs"> • </span>
+              <div class="flex items-center gap-2">
+                <span 
+                  :class="[
+                    'text-xs font-semibold px-2 py-1 rounded-full',
+                    (event.current_attendance || 0) >= event.max_capacity 
+                      ? 'bg-red-100 text-red-700'
+                      : (event.current_attendance || 0) / event.max_capacity >= 0.8
+                      ? 'bg-orange-100 text-orange-700'
+                      : 'bg-green-100 text-green-700'
+                  ]"
+                >
+                  {{ event.current_attendance || 0 }} / {{ event.max_capacity }} capacity
+                </span>
+                <span 
+                  v-if="(event.current_attendance || 0) >= event.max_capacity"
+                  class="text-xs font-semibold text-red-600 animate-pulse"
+                >
+                  FULL
+                </span>
+              </div>
+            </div>
             
             <!-- Friends going avatars -->
             <div v-if="!loadingFriends && friendsGoing.length" class="flex items-center gap-2">
@@ -558,8 +622,24 @@ onMounted(async () => {
               {{ isSaved ? "Saved" : "Save" }}
             </Button>
 
-            <Button :variant="isGoing ? 'secondary' : 'default'" class="cursor-pointer" @click="toggleJoinEvent">
-              {{ isGoing ? "Leave Event" : "Join Event" }}
+            <Button 
+              :variant="isGoing ? 'secondary' : 'default'" 
+              :class="[
+                'cursor-pointer',
+                !isGoing && event.max_capacity !== null && (event.current_attendance || 0) >= event.max_capacity 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : ''
+              ]"
+              :disabled="!isGoing && event.max_capacity !== null && (event.current_attendance || 0) >= event.max_capacity"
+              @click="toggleJoinEvent"
+            >
+              {{ 
+                isGoing 
+                  ? "Leave Event" 
+                  : event.max_capacity !== null && (event.current_attendance || 0) >= event.max_capacity
+                  ? "Event Full"
+                  : "Join Event" 
+              }}
             </Button>
 
             <Button
