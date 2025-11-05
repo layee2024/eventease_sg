@@ -4,12 +4,14 @@ import { supabase } from "@/utils/supabase"
 import { format, parseISO } from 'date-fns'
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { userLocation } from './events/location.js'
+import { useColorMode } from '@vueuse/core'
 
 let map
 let infowindow
 let directionsService
 let directionsRenderer
 
+const colorMode = useColorMode()
 const center = { lat: 1.3051299, lng: 103.8317011 }
 const categories = ref([])
 const eventCat = ref("All Events")
@@ -89,6 +91,7 @@ async function initMap() {
     await loadGoogleMapsAPI(apiKey)
     const { Map } = await google.maps.importLibrary('maps')
     const { AdvancedMarkerElement } = await google.maps.importLibrary('marker')
+    const {ColorScheme} = await google.maps.importLibrary("core")
 
     infowindow = new google.maps.InfoWindow()
     directionsService = new google.maps.DirectionsService()
@@ -104,8 +107,14 @@ async function initMap() {
     map = new Map(document.getElementById("map"), {
       center,
       zoom: 14,
-      mapId: '6e19782457baaaf583dee02a',
-    })
+      mapId: "6e19782457baaaf583dee02a",
+      colorScheme:
+        colorMode.value === "dark"
+          ? google.maps.ColorScheme.DARK
+          : colorMode.value === "light"
+          ? google.maps.ColorScheme.LIGHT
+          : google.maps.ColorScheme.SYSTEM,
+    });
 
     directionsRenderer.setMap(map)
 
@@ -315,6 +324,7 @@ onMounted(async () => {
   await loadJoinedEvents()
   await initMap()
   getCurrLoc()
+
 })
 
 onUnmounted(() => {
