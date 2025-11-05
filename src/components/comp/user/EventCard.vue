@@ -27,8 +27,7 @@ const props = defineProps({
   liked: { type: Boolean, default: false },
   distance: Number,
   parentLoading: { type: Boolean, default: false },
-  maxCapacity: Number,
-  currentAttendance: Number
+  maxCapacity: Number
 })
 
 const emit = defineEmits(["update-saved"])
@@ -250,20 +249,6 @@ const friendHoverText = computed(() => {
         <span :class="['w-2 h-2 rounded-full', crowdColor]" />
         {{ crowd }}
       </span>
-
-      <!-- Capacity Badge (for full or almost full events) -->
-      <span
-        v-if="maxCapacity !== null && maxCapacity !== undefined && currentAttendance >= maxCapacity"
-        class="absolute top-3 right-3 left-3 text-center text-xs font-bold text-white bg-red-600/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg animate-pulse"
-      >
-        🔒 EVENT FULL ({{ currentAttendance }}/{{ maxCapacity }})
-      </span>
-      <span
-        v-else-if="maxCapacity !== null && maxCapacity !== undefined && currentAttendance / maxCapacity >= 0.9"
-        class="absolute bottom-3 left-3 text-xs font-semibold text-white bg-orange-600/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-md"
-      >
-        ⚠️ Almost Full ({{ currentAttendance }}/{{ maxCapacity }})
-      </span>
     </div>
 
     <CardContent class="px-4">
@@ -271,17 +256,35 @@ const friendHoverText = computed(() => {
       <p class="text-sm text-gray-500 truncate">{{ location }}</p>
 
       <div class="mt-2 flex items-center gap-2">
-        <!-- People going -->
-        <p class="text-blue-600 font-medium text-sm flex items-center gap-1">
-          <span v-if="loadingGoing" class="inline-flex items-center gap-2 text-gray-400">
-            <span class="h-3 w-3 border-2 border-gray-300 border-t-transparent rounded-full animate-spin"></span>
-            Loading…
+        <!-- Capacity Banner -->
+        <div v-if="maxCapacity !== null && maxCapacity !== undefined && !loadingOverall" class="flex items-center gap-2">
+          <span 
+            :class="[
+              'text-[11px] font-semibold px-2 py-0.5 rounded-full',
+              goingCount >= maxCapacity 
+                ? 'bg-red-600 text-white' 
+                : goingCount / maxCapacity >= 0.9
+                ? 'bg-orange-600 text-white'
+                : goingCount / maxCapacity >= 0.7
+                ? 'bg-yellow-600 text-white'
+                : 'bg-green-600 text-white'
+            ]"
+          >
+            <span v-if="goingCount >= maxCapacity">🔒 Full</span>
+            <span v-else-if="goingCount / maxCapacity >= 0.9">⚠️ Almost Full</span>
+            <span v-else>✓ Available</span>
+            ({{ goingCount }}/{{ maxCapacity }})
           </span>
-          <span v-else class="text-[12px]">
+        </div>
+
+        <!-- Fallback for events without capacity -->
+        <p v-else-if="!loadingOverall" class="text-blue-600 font-medium text-sm flex items-center gap-1">
+          <span class="text-[12px]">
             {{ goingCount }} {{ goingCount === 1 ? 'person' : 'people' }} going
           </span>
         </p>
-        <span v-if="friendsGoing.length > 0" class="dark:text-black">
+
+        <span v-if="friendsGoing.length > 0 && !loadingOverall" class="dark:text-black">
           •
         </span>
         

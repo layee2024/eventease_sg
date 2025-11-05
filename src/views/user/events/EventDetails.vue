@@ -425,55 +425,70 @@ async function toggleJoinEvent() {
   let updated = pref?.going || []
   
   if (isGoing.value) {
-    // Leaving event - decrement attendance
+    // Leaving event
     updated = updated.filter((id) => id !== eventId)
-    
-    // Decrement current_attendance
-    const { error: updateError } = await supabase
-      .from("events")
-      .update({ current_attendance: (event.value.current_attendance || 1) - 1 })
-      .eq("id", eventId)
-    
-    if (updateError) {
-      console.error("Error updating attendance:", updateError)
-    } else {
-      event.value.current_attendance = Math.max(0, (event.value.current_attendance || 1) - 1)
-    }
-    
     toast.info(`You left ${event.value.title}`)
   } else {
-    // Joining event - check capacity first
+    // Joining event - check capacity first using REAL count from user_preferences
+    const { count: currentCount } = await supabase
+      .from("user_preferences")
+      .select("id", { count: "exact", head: true })
+      .contains("going", [eventId])
+    
     const maxCapacity = event.value.max_capacity
-    const currentAttendance = event.value.current_attendance || 0
+    const currentAttendance = currentCount || 0
     
     // Check if event is full (only if max_capacity is set)
     if (maxCapacity !== null && currentAttendance >= maxCapacity) {
-      toast.error(`Sorry, ${event.value.title} is at full capacity (${maxCapacity}/${maxCapacity})`)
+      toast.error(`Sorry, ${event.value.title} is at full capacity (${currentAttendance}/${maxCapacity})`)
       return
     }
     
     if (!updated.includes(eventId)) updated.push(eventId)
-    
-    // Increment current_attendance
-    const { error: updateError } = await supabase
-      .from("events")
-      .update({ current_attendance: currentAttendance + 1 })
-      .eq("id", eventId)
-    
-    if (updateError) {
-      console.error("Error updating attendance:", updateError)
-      toast.error("Failed to join event. Please try again.")
-      return
-    } else {
-      event.value.current_attendance = currentAttendance + 1
-    }
-    
     toast.success(`You joined ${event.value.title}!`)
   }
 
   await supabase.from("user_preferences").update({ going: updated }).eq("id", user.value.id)
   isGoing.value = !isGoing.value
+  
+  // Update crowd level based on new attendance count
+  await updateCrowdLevel()
   await countGoingUsers()
+}
+
+// Function to update crowd level based on attendance percentage
+async function updateCrowdLevel() {
+  if (!event.value.max_capacity) return // Skip if no capacity set
+  
+  // Get current attendance count
+  const { count: currentCount } = await supabase
+    .from("user_preferences")
+    .select("id", { count: "exact", head: true })
+    .contains("going", [eventId])
+  
+  const attendancePercentage = (currentCount || 0) / event.value.max_capacity
+  
+  // Determine crowd level based on percentage
+  let newCrowdLevel
+  if (attendancePercentage >= 0.8) {
+    newCrowdLevel = "High"
+  } else if (attendancePercentage >= 0.4) {
+    newCrowdLevel = "Moderate"
+  } else {
+    newCrowdLevel = "Low"
+  }
+  
+  // Update crowd level in database if it changed
+  if (newCrowdLevel !== event.value.crowd_level) {
+    const { error } = await supabase
+      .from("events")
+      .update({ crowd_level: newCrowdLevel })
+      .eq("id", eventId)
+    
+    if (!error) {
+      event.value.crowd_level = newCrowdLevel
+    }
+  }
 }
 
 onMounted(async () => {
@@ -564,34 +579,32 @@ onMounted(async () => {
         <!-- Save & Join & Invite -->
         <div class="mt-4 flex flex-col md:flex-row md:justify-between items-center gap-8 md:gap-2">
           <div class="flex items-center gap-3">
-            <p class="text-blue-600 font-medium">
-              {{ goingCount }} {{ goingCount === 1 ? "person is" : "people are" }} going
-            </p>
-
-            <!-- Capacity indicator -->
+            <!-- Capacity Banner -->
             <div v-if="event.max_capacity !== null" class="flex items-center gap-2">
-              <span class="text-gray-500 text-xs"> • </span>
-              <div class="flex items-center gap-2">
-                <span 
-                  :class="[
-                    'text-xs font-semibold px-2 py-1 rounded-full',
-                    (event.current_attendance || 0) >= event.max_capacity 
-                      ? 'bg-red-100 text-red-700'
-                      : (event.current_attendance || 0) / event.max_capacity >= 0.8
-                      ? 'bg-orange-100 text-orange-700'
-                      : 'bg-green-100 text-green-700'
-                  ]"
-                >
-                  {{ event.current_attendance || 0 }} / {{ event.max_capacity }} capacity
-                </span>
-                <span 
-                  v-if="(event.current_attendance || 0) >= event.max_capacity"
-                  class="text-xs font-semibold text-red-600 animate-pulse"
-                >
-                  FULL
-                </span>
-              </div>
+              <span 
+                :class="[
+                  'text-sm font-semibold px-3 py-1.5 rounded-full',
+                  goingCount >= event.max_capacity 
+                    ? 'bg-red-600 text-white animate-pulse' 
+                    : goingCount / event.max_capacity >= 0.9
+                    ? 'bg-orange-600 text-white'
+                    : goingCount / event.max_capacity >= 0.7
+                    ? 'bg-yellow-600 text-white'
+                    : 'bg-green-600 text-white'
+                ]"
+              >
+                <span v-if="goingCount >= event.max_capacity">🔒 Full</span>
+                <span v-else-if="goingCount / event.max_capacity >= 0.9">⚠️ Almost Full</span>
+                <span v-else-if="goingCount / event.max_capacity >= 0.7">⏳ Filling Up</span>
+                <span v-else>✓ Available</span>
+                ({{ goingCount }}/{{ event.max_capacity }})
+              </span>
             </div>
+
+            <!-- Fallback for events without max_capacity -->
+            <p v-else class="text-gray-700 font-medium">
+              {{ goingCount }} {{ goingCount === 1 ? "person" : "people" }} going
+            </p>
             
             <!-- Friends going avatars -->
             <div v-if="!loadingFriends && friendsGoing.length" class="flex items-center gap-2">
@@ -626,17 +639,17 @@ onMounted(async () => {
               :variant="isGoing ? 'secondary' : 'default'" 
               :class="[
                 'cursor-pointer',
-                !isGoing && event.max_capacity !== null && (event.current_attendance || 0) >= event.max_capacity 
+                !isGoing && event.max_capacity !== null && goingCount >= event.max_capacity 
                   ? 'opacity-50 cursor-not-allowed' 
                   : ''
               ]"
-              :disabled="!isGoing && event.max_capacity !== null && (event.current_attendance || 0) >= event.max_capacity"
+              :disabled="!isGoing && event.max_capacity !== null && goingCount >= event.max_capacity"
               @click="toggleJoinEvent"
             >
               {{ 
                 isGoing 
                   ? "Leave Event" 
-                  : event.max_capacity !== null && (event.current_attendance || 0) >= event.max_capacity
+                  : event.max_capacity !== null && goingCount >= event.max_capacity
                   ? "Event Full"
                   : "Join Event" 
               }}
