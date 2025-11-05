@@ -33,59 +33,84 @@ const interests = ref([])
 const budget = ref("all")
 const transportModes = ref([])
 
-// Joined events
+// ===== Joined events state =====
 const joinedEvents = ref([])
 const loadingEvents = ref(false)
 const joinedOpen = ref(false)
 
-//filter for the joined events
+/**
+ * Tabs: "upcoming" | "past" | "all"
+ * Maintain a separate page index for each tab.
+ */
 const joinedFilter = ref("upcoming")
-
-// Pagination
-const joinedCurrentPage = ref(1)
 const joinedItemsPerPage = 5
+const pageByTab = ref({
+  upcoming: 1,
+  past: 1,
+  all: 1,
+})
 
-const totalJoinedPages = computed(() =>
-  Math.ceil(joinedEvents.value.length / joinedItemsPerPage)
+/** Helpers to read/write current tab's page */
+const currentPage = computed({
+  get: () => pageByTab.value[joinedFilter.value],
+  set: (v) => (pageByTab.value[joinedFilter.value] = v),
+})
+
+/** Filtered lists (derived once, reused by pagination) */
+const now = () => new Date()
+const filteredByTab = computed(() => {
+  const n = now()
+  if (joinedFilter.value === "upcoming") {
+    return joinedEvents.value.filter((e) => new Date(e.start_date) >= n)
+  }
+  if (joinedFilter.value === "past") {
+    return joinedEvents.value.filter((e) => new Date(e.start_date) < n)
+  }
+  return joinedEvents.value
+})
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(filteredByTab.value.length / joinedItemsPerPage))
 )
 
-const filteredJoinedEvents = computed(() => {
-  const now = new Date()
-  if (joinedFilter.value === "upcoming") {
-    return joinedEvents.value.filter((e) => new Date(e.start_date) >= now)
-  } else if (joinedFilter.value === "past") {
-    return joinedEvents.value.filter((e) => new Date(e.start_date) < now)
-  }
-  return joinedEvents.value 
-})
-
 const paginatedJoinedEvents = computed(() => {
-  const start = (joinedCurrentPage.value - 1) * joinedItemsPerPage
+  // Clamp current page in case the list shrinks
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value
+  }
+  const start = (currentPage.value - 1) * joinedItemsPerPage
   const end = start + joinedItemsPerPage
-  return filteredJoinedEvents.value.slice(start, end)
+  return filteredByTab.value.slice(start, end)
 })
 
-function nextJoinedPage() {
-  if (joinedCurrentPage.value < totalJoinedPages.value)
-    joinedCurrentPage.value++
+function nextPage() {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+function prevPage() {
+  if (currentPage.value > 1) currentPage.value--
 }
 
-function prevJoinedPage() {
-  if (joinedCurrentPage.value > 1) joinedCurrentPage.value--
-}
-
-// Reset to first page whenever modal opens
+/** Reset ONLY the opened tab’s page to 1 when the modal opens (fresh view) */
 watch(joinedOpen, (open) => {
-  if (open) joinedCurrentPage.value = 1
+  if (open) {
+    pageByTab.value[joinedFilter.value] = 1
+  }
 })
 
-// Modal
+/** When switching tabs, preserve per-tab page but clamp if needed */
+watch(joinedFilter, () => {
+  // ensure page valid for that tab
+  if (currentPage.value > totalPages.value) currentPage.value = totalPages.value
+  if (currentPage.value < 1) currentPage.value = 1
+})
+
+// ===== Modals =====
 const avatarOpen = ref(false)
 const interestsOpen = ref(false)
 const budgetOpen = ref(false)
 const transportOpen = ref(false)
 
-// temporary modal state
+// temp modal state
 const tempInterests = ref([])
 const tempBudget = ref("all")
 const tempTransport = ref([])
@@ -94,7 +119,6 @@ const AVATARS = Array.from({ length: 10 }, (_, i) => {
   const ids = [1, 2, 3, 4, 5, 61, 62, 63, 64, 65]
   return `/avatars/${ids[i]}.png`
 })
-
 const PLACEHOLDER = "/avatars/placeholder.png"
 
 const categories = [
@@ -169,7 +193,7 @@ onMounted(async () => {
   await fetchJoinedEvents(eventIds)
 })
 
-// Fetch joined events
+/** Fetch joined events list and keep it chronologically ascending by start_date */
 async function fetchJoinedEvents(ids) {
   try {
     if (!Array.isArray(ids) || ids.length === 0) {
@@ -185,13 +209,9 @@ async function fetchJoinedEvents(ids) {
 
     if (error) throw error
 
-    // Filter out past events
-    const now = new Date()
     joinedEvents.value = (data || [])
-      //.filter((e) => new Date(e.start_date) >= now)
-      //.sort((a, b) => new Date(b.start_date) - new Date(a.start_date))
-      joinedEvents.value = (data || []).sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
-
+      .filter(e => e?.start_date) // guard
+      .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
   } catch (err) {
     console.error("Error fetching joined events:", err?.message || err)
     toast.error("Failed to load joined events.")
@@ -365,7 +385,7 @@ const initials = computed(() =>
                 <p class="text-gray-700 dark:text-gray-300">
                   {{ joinedEvents.length }} event<span v-if="joinedEvents.length > 1">s</span> joined
                 </p>
-                <p class="text-xs text-gray-500 dark:text-gray-100 mt-1">
+                <p class="text-xs text-gray-500 dark:text-gray-100 mt-1" v-if="joinedEvents[0]?.start_date">
                   Most recent: {{ new Date(joinedEvents[0].start_date).toLocaleDateString() }}
                 </p>
               </div>
@@ -405,10 +425,10 @@ const initials = computed(() =>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
     <!-- Joined Events Modal -->
     <Dialog v-model:open="joinedOpen">
       <DialogContent class="max-w-2xl">
-
         <DialogHeader>
           <DialogTitle>Your Joined Events</DialogTitle>
           <div class="flex justify-end mt-8">
@@ -425,22 +445,14 @@ const initials = computed(() =>
           </div>
         </DialogHeader>
 
-  
-
-        <div
-          v-if="loadingEvents"
-          class="flex items-center justify-center py-10 text-gray-500"
-        >
+        <div v-if="loadingEvents" class="flex items-center justify-center py-10 text-gray-500">
           <Loader2 class="h-6 w-6 animate-spin mr-2 text-blue-600" />
           Loading events...
         </div>
 
         <div v-else>
           <!-- Paginated Events -->
-          <ul
-            v-if="paginatedJoinedEvents.length"
-            class="divide-y divide-gray-200"
-          >
+          <ul v-if="paginatedJoinedEvents.length" class="divide-y divide-gray-200">
             <li
               v-for="e in paginatedJoinedEvents"
               :key="e.id"
@@ -449,8 +461,7 @@ const initials = computed(() =>
               <div>
                 <p class="font-semibold text-gray-900 dark:text-gray-300">{{ e.title }}</p>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                  {{ new Date(e.start_date).toLocaleDateString() }} •
-                  {{ e.venue }}
+                  {{ new Date(e.start_date).toLocaleDateString() }} • {{ e.venue }}
                 </p>
               </div>
               <Button
@@ -465,48 +476,30 @@ const initials = computed(() =>
           </ul>
 
           <p v-else class="text-center text-gray-500 py-6">
-            You haven't joined any events yet.
+            No {{ joinedFilter }} events.
           </p>
 
-          <!-- Pagination Controls -->
-          <div
-            v-if="totalJoinedPages > 1"
-            class="flex flex-col items-center justify-center mt-6"
-          >
+          <!-- Pagination Controls (per-tab index) -->
+          <div v-if="totalPages > 1" class="flex flex-col items-center justify-center mt-6">
             <div class="flex items-center justify-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                :disabled="joinedCurrentPage === 1"
-                @click="prevJoinedPage"
-                class="cursor-pointer"
-              >
+              <Button variant="outline" size="sm" :disabled="currentPage === 1" @click="prevPage" class="cursor-pointer">
                 Previous
               </Button>
 
               <span class="text-gray-700 dark:text-white font-medium text-sm">
-                Page {{ joinedCurrentPage }} of {{ totalJoinedPages }}
+                Page {{ currentPage }} of {{ totalPages }}
               </span>
 
-              <Button
-                variant="outline"
-                size="sm"
-                :disabled="joinedCurrentPage === totalJoinedPages"
-                @click="nextJoinedPage"
-                class="cursor-pointer"
-              >
+              <Button variant="outline" size="sm" :disabled="currentPage === totalPages" @click="nextPage" class="cursor-pointer">
                 Next
               </Button>
             </div>
 
             <div class="text-gray-500 dark:text-white text-xs mt-2">
               Showing
-              {{ (joinedCurrentPage - 1) * joinedItemsPerPage + 1 }} -
-              {{ Math.min(
-                joinedCurrentPage * joinedItemsPerPage,
-                joinedEvents.length
-              ) }}
-              of {{ joinedEvents.length }} joined events
+              {{ (currentPage - 1) * joinedItemsPerPage + 1 }} -
+              {{ Math.min(currentPage * joinedItemsPerPage, filteredByTab.length) }}
+              of {{ filteredByTab.length }} {{ joinedFilter }} events
             </div>
           </div>
         </div>
@@ -541,39 +534,37 @@ const initials = computed(() =>
 
     <!-- Budget modal -->
     <Dialog v-model:open="budgetOpen">
-  <DialogContent class="max-w-md">
-    <DialogHeader>
-      <DialogTitle>Edit budget</DialogTitle>
-    </DialogHeader>
+      <DialogContent class="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit budget</DialogTitle>
+        </DialogHeader>
 
-    <div class="mt-4">
-      <Select v-model="tempBudget">
-        <SelectTrigger class="w-full">
-          <SelectValue :placeholder="tempBudget
-            ? (tempBudget === 'all' ? 'All budgets'
-              : tempBudget === 'low' ? 'Below $20'
-              : tempBudget === 'mid' ? '$20 - $50'
-              : 'Above $50')
-            : 'Select a budget range'"
-          />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All budgets</SelectItem>
-          <SelectItem value="low">Below $20</SelectItem>
-          <SelectItem value="mid">$20 - $50</SelectItem>
-          <SelectItem value="high">Above $50</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+        <div class="mt-4">
+          <Select v-model="tempBudget">
+            <SelectTrigger class="w-full">
+              <SelectValue :placeholder="tempBudget
+                ? (tempBudget === 'all' ? 'All budgets'
+                  : tempBudget === 'low' ? 'Below $20'
+                  : tempBudget === 'mid' ? '$20 - $50'
+                  : 'Above $50')
+                : 'Select a budget range'"
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All budgets</SelectItem>
+              <SelectItem value="low">Below $20</SelectItem>
+              <SelectItem value="mid">$20 - $50</SelectItem>
+              <SelectItem value="high">Above $50</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-    <DialogFooter class="mt-6">
-      <Button variant="outline" @click="budgetOpen = false" class="cursor-pointer">Cancel</Button>
-      <Button @click="saveBudget" class="cursor-pointer">Save</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-
-
+        <DialogFooter class="mt-6">
+          <Button variant="outline" @click="budgetOpen = false" class="cursor-pointer">Cancel</Button>
+          <Button @click="saveBudget" class="cursor-pointer">Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
     <!-- Transport modal -->
     <Dialog v-model:open="transportOpen">
