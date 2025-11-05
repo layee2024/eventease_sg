@@ -53,7 +53,14 @@ function generateSchedulePDF() {
 }
 
 async function getCat() {
-    const { data, error } = await supabase.from("events").select("*");
+    const now = new Date().toISOString(); // Full timestamp with time
+
+    const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .gte("end_date", now) // Filter for events that haven't ended yet
+        .order("start_date", { ascending: true });
+
     if (error) {
         console.error("Error fetching events:", error);
         return [];
@@ -235,7 +242,7 @@ onMounted(async () => {
             </div>
 
             <!-- Schedule List -->
-            <div class="row">
+            <div class="row pb-20">
                 <div v-if="parsedSchedule.length" class="w-full">
                     <br />
                     <div v-if="parsedIntro" class="text-lg text-gray-700 italic mb-4 rounded-md font-semibold">

@@ -25,12 +25,19 @@ const ai = new GoogleGenAI({ apiKey: api });
 
 // Fetch events from Supabase
 async function getCat() {
-  const { data, error } = await supabase.from("events").select("*");
-  if (error) {
-    console.error("Error fetching events:", error);
-    return [];
-  }
-  return data;
+    const now = new Date().toISOString(); // Full timestamp with time
+
+    const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .gte("end_date", now) // Filter for events that haven't ended yet
+        .order("start_date", { ascending: true });
+
+    if (error) {
+        console.error("Error fetching events:", error);
+        return [];
+    }
+    return data;
 }
 
 function formatTimeTo12Hour(time24) {
