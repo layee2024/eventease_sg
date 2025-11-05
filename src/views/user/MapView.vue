@@ -300,7 +300,6 @@ async function showRouteToDestination(destCoords) {
   }
 }
 
-// ✅ Clear directions when modal clicked
 function clearDirections() {
   if (directionsRenderer) {
     directionsRenderer.setDirections({ routes: [] })
