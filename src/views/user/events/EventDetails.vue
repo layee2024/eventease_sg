@@ -425,18 +425,22 @@ async function toggleJoinEvent() {
   let updated = pref?.going || []
   
   if (isGoing.value) {
-    // Leaving event
+    // Leaving event - decrement attendance
     updated = updated.filter((id) => id !== eventId)
+    
+    // Decrement current_attendance in database
+    const newAttendance = Math.max(0, (event.value.current_attendance || 0) - 1)
+    await supabase
+      .from("events")
+      .update({ current_attendance: newAttendance })
+      .eq("id", eventId)
+    
+    event.value.current_attendance = newAttendance
     toast.info(`You left ${event.value.title}`)
   } else {
-    // Joining event - check capacity first using REAL count from user_preferences
-    const { count: currentCount } = await supabase
-      .from("user_preferences")
-      .select("id", { count: "exact", head: true })
-      .contains("going", [eventId])
-    
+    // Joining event - check capacity first
     const maxCapacity = event.value.max_capacity
-    const currentAttendance = currentCount || 0
+    const currentAttendance = event.value.current_attendance || 0
     
     // Check if event is full (only if max_capacity is set)
     if (maxCapacity !== null && currentAttendance >= maxCapacity) {
@@ -445,6 +449,15 @@ async function toggleJoinEvent() {
     }
     
     if (!updated.includes(eventId)) updated.push(eventId)
+    
+    // Increment current_attendance in database
+    const newAttendance = currentAttendance + 1
+    await supabase
+      .from("events")
+      .update({ current_attendance: newAttendance })
+      .eq("id", eventId)
+    
+    event.value.current_attendance = newAttendance
     toast.success(`You joined ${event.value.title}!`)
   }
 
@@ -584,20 +597,20 @@ onMounted(async () => {
               <span 
                 :class="[
                   'text-sm font-semibold px-3 py-1.5 rounded-full',
-                  goingCount >= event.max_capacity 
+                  (event.current_attendance || 0) >= event.max_capacity 
                     ? 'bg-red-600 text-white animate-pulse' 
-                    : goingCount / event.max_capacity >= 0.9
+                    : (event.current_attendance || 0) / event.max_capacity >= 0.9
                     ? 'bg-orange-600 text-white'
-                    : goingCount / event.max_capacity >= 0.7
+                    : (event.current_attendance || 0) / event.max_capacity >= 0.7
                     ? 'bg-yellow-600 text-white'
                     : 'bg-green-600 text-white'
                 ]"
               >
-                <span v-if="goingCount >= event.max_capacity">🔒 Full</span>
-                <span v-else-if="goingCount / event.max_capacity >= 0.9">⚠️ Almost Full</span>
-                <span v-else-if="goingCount / event.max_capacity >= 0.7">⏳ Filling Up</span>
+                <span v-if="(event.current_attendance || 0) >= event.max_capacity">🔒 Full</span>
+                <span v-else-if="(event.current_attendance || 0) / event.max_capacity >= 0.9">⚠️ Almost Full</span>
+                <span v-else-if="(event.current_attendance || 0) / event.max_capacity >= 0.7">⏳ Filling Up</span>
                 <span v-else>✓ Available</span>
-                ({{ goingCount }}/{{ event.max_capacity }})
+                ({{ event.current_attendance || 0 }}/{{ event.max_capacity }})
               </span>
             </div>
 
@@ -639,17 +652,17 @@ onMounted(async () => {
               :variant="isGoing ? 'secondary' : 'default'" 
               :class="[
                 'cursor-pointer',
-                !isGoing && event.max_capacity !== null && goingCount >= event.max_capacity 
+                !isGoing && event.max_capacity !== null && (event.current_attendance || 0) >= event.max_capacity 
                   ? 'opacity-50 cursor-not-allowed' 
                   : ''
               ]"
-              :disabled="!isGoing && event.max_capacity !== null && goingCount >= event.max_capacity"
+              :disabled="!isGoing && event.max_capacity !== null && (event.current_attendance || 0) >= event.max_capacity"
               @click="toggleJoinEvent"
             >
               {{ 
                 isGoing 
                   ? "Leave Event" 
-                  : event.max_capacity !== null && goingCount >= event.max_capacity
+                  : event.max_capacity !== null && (event.current_attendance || 0) >= event.max_capacity
                   ? "Event Full"
                   : "Join Event" 
               }}

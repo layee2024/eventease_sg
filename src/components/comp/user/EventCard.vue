@@ -27,7 +27,8 @@ const props = defineProps({
   liked: { type: Boolean, default: false },
   distance: Number,
   parentLoading: { type: Boolean, default: false },
-  maxCapacity: Number
+  maxCapacity: Number,
+  currentAttendance: Number
 })
 
 const emit = defineEmits(["update-saved"])
@@ -257,23 +258,23 @@ const friendHoverText = computed(() => {
 
       <div class="mt-2 flex items-center gap-2">
         <!-- Capacity Banner -->
-        <div v-if="maxCapacity !== null && maxCapacity !== undefined && !loadingOverall" class="flex items-center gap-2">
+        <div v-if="maxCapacity !== null && maxCapacity !== undefined && currentAttendance !== undefined && !loadingOverall" class="flex items-center gap-2">
           <span 
             :class="[
               'text-[11px] font-semibold px-2 py-0.5 rounded-full',
-              goingCount >= maxCapacity 
+              currentAttendance >= maxCapacity 
                 ? 'bg-red-600 text-white' 
-                : goingCount / maxCapacity >= 0.9
+                : currentAttendance / maxCapacity >= 0.9
                 ? 'bg-orange-600 text-white'
-                : goingCount / maxCapacity >= 0.7
+                : currentAttendance / maxCapacity >= 0.7
                 ? 'bg-yellow-600 text-white'
                 : 'bg-green-600 text-white'
             ]"
           >
-            <span v-if="goingCount >= maxCapacity">🔒 Full</span>
-            <span v-else-if="goingCount / maxCapacity >= 0.9">⚠️ Almost Full</span>
+            <span v-if="currentAttendance >= maxCapacity">🔒 Full</span>
+            <span v-else-if="currentAttendance / maxCapacity >= 0.9">⚠️ Almost Full</span>
             <span v-else>✓ Available</span>
-            ({{ goingCount }}/{{ maxCapacity }})
+            ({{ currentAttendance }}/{{ maxCapacity }})
           </span>
         </div>
 

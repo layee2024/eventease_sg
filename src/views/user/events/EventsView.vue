@@ -255,6 +255,7 @@ onMounted(async () => {
         :distance="getEventDistance(event)"
         :parentLoading="allLoading"
         :maxCapacity="event.max_capacity"
+        :currentAttendance="event.current_attendance"
         @update-saved="handleSavedUpdate"
       />
 
