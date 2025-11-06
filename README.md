@@ -19,6 +19,9 @@ VITE_GEMINI_API_KEY=AIzaSyAyBB4SdIbCDBLNaIgISpl2Rv9NfACaoBw
 ## Usernames and Passwords
 > You can create your own user using the /register page
 
-<ins>Testing Username and Password</ins><br>
+<ins>Testing Usernames and Passwords</ins><br>
 Username: x4yees@gmail.com<br>
-Password: 123456
+Password: 123456<br>
+
+Username: test@gmail.com<br>
+Password: 123456<br>
