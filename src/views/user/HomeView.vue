@@ -625,9 +625,10 @@ function initStarAnimation() {
               >
             </div>
 
+            
             <!-- Main Heading -->
             <h2
-              class="text-3xl xl:text-4xl font-bold text-white leading-tight text-nowrap"
+              class="text-2xl xl:text-4xl font-bold text-white leading-tight text-nowrap"
               :style="{ transitionDelay: '300ms' }"
             >
               Discovering exciting events
