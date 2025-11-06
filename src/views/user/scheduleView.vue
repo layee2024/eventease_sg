@@ -242,7 +242,7 @@ onMounted(async () => {
             </div>
 
             <!-- Schedule List -->
-            <div class="row pb-20">
+            <div class="row pb-30">
                 <div v-if="parsedSchedule.length" class="w-full">
                     <br />
                     <div v-if="parsedIntro" class="text-lg text-gray-700 italic mb-4 rounded-md font-semibold">
