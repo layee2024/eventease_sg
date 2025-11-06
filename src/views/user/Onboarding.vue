@@ -18,7 +18,7 @@ const totalSteps = 4 // incremented by 1
 const interests = ref([])
 const budget = ref("all")
 const transportModes = ref([])
-const profilePicture = ref("https://www.vecteezy.com/vector-art/4511281-default-avatar-photo-placeholder-profile-picture")
+const profilePicture = ref("/avatars/placeholder.png")
 const userId = ref(null)
 
 const categories = [
@@ -67,6 +67,7 @@ async function finishOnboarding() {
   }
   await savePreferences(data)
   toast.success("Your preferences have been saved.")
+  window.location.reload();
   router.push("/")
 }
 
