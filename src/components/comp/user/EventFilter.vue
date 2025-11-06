@@ -32,10 +32,8 @@ async function populateFilterFunction(){
   const { data, error } = await supabase.from('events').select("*");
 
   if (error){
-    console.log(error)
   }
   else{
-    console.log(data)
     const categories = [...new Set(data.map(event => event.category))]
     eventCat.value = categories
 

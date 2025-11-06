@@ -16,11 +16,6 @@ import EventDetails from '../views/user/events/EventDetails.vue'
 import ShuffleView from '../views/user/ShuffleView.vue'
 import OnboardingView from '../views/user/Onboarding.vue'
 import ScheduleView from '../views/user/scheduleView.vue'
-  
-
-
-// Organiser
-import DashboardView from '../views/organiser/DashboardView.vue'
 import PlannerView from '../views/user/PlannerView.vue'
 
 
@@ -100,16 +95,7 @@ const routes = [
     path: '/ScheduleView',
     name: 'ScheduleView',
     component: ScheduleView,
-  },
-
-
-
-  // Organiser
-  {
-    path: '/dashboard',
-    name: 'DashboardView',
-    component: DashboardView,
-  },
+  }
 ]
 
 const router = createRouter({
