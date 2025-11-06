@@ -26,9 +26,33 @@ const travelMode = ref("DRIVING")
 const routeDetails = ref(null)
 const showSteps = ref(false)
 
+const legendCollapsed = ref(false)
+const legendRef = ref(null)
+const windowWidth = ref(window.innerWidth)
+
+// Update window width on resize
+function updateWindowWidth() {
+  windowWidth.value = window.innerWidth
+}
+
+const isLegendVisible = computed(() => {
+  return windowWidth.value >= 768 || !legendCollapsed.value
+})
+
+function toggleLegend() {
+  if (windowWidth.value < 768) {
+    legendCollapsed.value = !legendCollapsed.value
+  }
+}
+
 onMounted(async () => {
-  await getCurrLoc() 
+  await getCurrLoc()
   console.log('User location fetched in MapView:', userLocation.value)
+  window.addEventListener('resize', updateWindowWidth)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateWindowWidth)
 })
 
 navigator.geolocation.getCurrentPosition((pos) => {
@@ -133,7 +157,7 @@ async function initMap() {
 // get all categories
 async function getCat() {
   const today = new Date().toISOString()
-  const { data, error } = await supabase.from("events").select("*").gte("end_date", today) 
+  const { data, error } = await supabase.from("events").select("*").gte("end_date", today)
   if (error) {
     console.error("Error fetching events:", error)
     return []
@@ -244,8 +268,13 @@ function filterBySearch() {
 function handleGlobalClick(event) {
   const mapEl = document.getElementById('map')
   const infoWindowEl = document.querySelector('.gm-style-iw')
-  if (mapEl?.contains(event.target) || infoWindowEl?.contains(event.target) || popupRef.value?.contains(event.target))
+  
+  if (mapEl?.contains(event.target) ||
+      infoWindowEl?.contains(event.target) ||
+      popupRef.value?.contains(event.target) ||
+      legendRef.value?.contains(event.target)) {
     return
+  }
 }
 
 function handleEscapeKey(event) {
@@ -339,10 +368,8 @@ watch([searchVal, eventCat], filterBySearch)
   <section>
     <div id="map-container" class="relative w-full h-[93vh]">
       <div id="map" class="inset-0 z-0 pt-2 h-[92vh] w-screen"></div>
-      <div
-        id="searchcontainer"
-        class="fixed z-40 top-[100px] sm:top-[80px] left-1/2 transform -translate-x-1/2 bg-white border border-gray-300 rounded-lg shadow-lg p-6 flex flex-col sm:flex-row sm:space-x-5 space-y-4 sm:space-y-0"
-      >
+      <div id="searchcontainer"
+        class="fixed z-40 top-[100px] sm:top-[80px] left-1/2 transform -translate-x-1/2 bg-white border border-gray-300 rounded-lg shadow-lg p-6 flex flex-col sm:flex-row sm:space-x-5 space-y-4 sm:space-y-0">
         <input v-model="searchVal" placeholder="Search" class="input" />
         <select v-model="eventCat" class="select cursor-pointer">
           <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
@@ -351,111 +378,136 @@ watch([searchVal, eventCat], filterBySearch)
 
       <!-- Route Summary Card -->
       <transition name="fade" mode="out-in">
-      <div
-        v-if="routeDetails"
-        @click="clearDirections"
-        class="fixed bottom-5 right-5 bg-white shadow-xl rounded-2xl border border-gray-200 w-[350px] overflow-hidden transition-all duration-300 cursor-pointer"
-      >
-        <Card class="pt-0">
-          <CardHeader class="py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white flex justify-between items-center">
-            <CardTitle class="text-lg font-semibold flex items-center gap-2">
-              Route Summary
-            </CardTitle>
-            <button
-              @click.stop="clearDirections"
-              class="text-white hover:text-gray-200 text-xl font-bold transition cursor-pointer"
-              title="Close"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </CardHeader>
+        <div v-if="routeDetails" @click="clearDirections"
+          class="fixed bottom-5 right-5 bg-white shadow-xl rounded-2xl border border-gray-200 w-[350px] overflow-hidden transition-all duration-300 cursor-pointer">
+          <Card class="pt-0">
+            <CardHeader
+              class="py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white flex justify-between items-center">
+              <CardTitle class="text-lg font-semibold flex items-center gap-2">
+                Route Summary
+              </CardTitle>
+              <button @click.stop="clearDirections"
+                class="text-white hover:text-gray-200 text-xl font-bold transition cursor-pointer" title="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor" class="size-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </CardHeader>
 
-          <!-- Travel Mode Buttons -->
-          <div class="flex justify-around items-center">
-            <button
-              v-for="mode in ['DRIVING','TRANSIT','BICYCLING','WALKING']"
-              :key="mode"
-              @click.stop="changeTravelMode(mode)"
-              class="cursor-pointer"
-              :class="[
-                'px-3 py-1.5 rounded-md text-sm font-medium transition',
-                travelMode === mode ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-400 dark:hover:bg-gray-500'
-              ]"
-            >
-              {{ mode === 'DRIVING' ? 'Car' :
-                 mode === 'TRANSIT' ? 'Bus/MRT' :
-                 mode === 'BICYCLING' ? 'Bicycle' : 'Walk' }}
-            </button>
-          </div>
-
-          <CardContent class="pb-2 text-sm text-gray-700 dark:text-gray-100 space-y-2">
-            <div>
-              <p><span class="font-semibold">From:</span> {{ routeDetails.start_address }}</p>
-              <p><span class="font-semibold">To:</span> {{ routeDetails.end_address }}</p>
+            <!-- Travel Mode Buttons -->
+            <div class="flex justify-around items-center">
+              <button v-for="mode in ['DRIVING', 'TRANSIT', 'BICYCLING', 'WALKING']" :key="mode"
+                @click.stop="changeTravelMode(mode)" class="cursor-pointer" :class="[
+                  'px-3 py-1.5 rounded-md text-sm font-medium transition',
+                  travelMode === mode ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-400 dark:hover:bg-gray-500'
+                ]">
+                {{ mode === 'DRIVING' ? 'Car' :
+                  mode === 'TRANSIT' ? 'Bus/MRT' :
+                    mode === 'BICYCLING' ? 'Bicycle' : 'Walk' }}
+              </button>
             </div>
-            <div class="flex justify-between text-indigo-600 dark:text-indigo-300 font-semibold mt-3">
-              <span>Distance: {{ routeDetails.distance.text }}</span>
-              <span>Duration: {{ routeDetails.duration.text }}</span>
-            </div>
-          </CardContent>
-        </Card>
 
-        <!-- Steps List -->
-        <Card v-if="showSteps" class="mt-2 border-indigo-200">
-          <CardHeader>
-            <CardTitle class="text-gray-800 text-base">Step-by-Step Directions</CardTitle>
-          </CardHeader>
-          <CardContent class="max-h-[200px] overflow-y-auto text-sm text-gray-600 space-y-2">
-            <ul class="list-disc pl-5">
-              <li v-for="(step, i) in routeDetails.steps" :key="i" v-html="step.instructions"></li>
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
+            <CardContent class="pb-2 text-sm text-gray-700 dark:text-gray-100 space-y-2">
+              <div>
+                <p><span class="font-semibold">From:</span> {{ routeDetails.start_address }}</p>
+                <p><span class="font-semibold">To:</span> {{ routeDetails.end_address }}</p>
+              </div>
+              <div class="flex justify-between text-indigo-600 dark:text-indigo-300 font-semibold mt-3">
+                <span>Distance: {{ routeDetails.distance.text }}</span>
+                <span>Duration: {{ routeDetails.duration.text }}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <!-- Steps List -->
+          <Card v-if="showSteps" class="mt-2 border-indigo-200">
+            <CardHeader>
+              <CardTitle class="text-gray-800 text-base">Step-by-Step Directions</CardTitle>
+            </CardHeader>
+            <CardContent class="max-h-[200px] overflow-y-auto text-sm text-gray-600 space-y-2">
+              <ul class="list-disc pl-5">
+                <li v-for="(step, i) in routeDetails.steps" :key="i" v-html="step.instructions"></li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
       </transition>
     </div>
 
     <!-- Map Legend -->
-    <div
-      id="map-legend"
-      class="fixed bottom-6 left-6 bg-white border border-gray-300 shadow-md rounded-lg px-4 py-3 text-sm text-gray-700 space-y-3 z-40"
-    >
-      <div class="font-semibold text-gray-800 mb-1">Legend</div>
-
-      <div class="flex items-center gap-2">
-        <div class="w-4 h-5">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full text-[#16A34A]">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+    <div id="map-legend" ref="legendRef"
+      class="fixed bottom-6 left-6 bg-white border border-gray-300 shadow-md rounded-lg px-4 py-3 text-sm text-gray-700 space-y-3 z-40 transition-all duration-300"
+      :class="[
+        windowWidth < 768 && legendCollapsed ? 'w-12 h-12' : 'w-48',
+        windowWidth < 768 && legendCollapsed ? 'overflow-hidden' : ''
+      ]">
+      
+      <!-- Header (clickable on mobile for collapse) -->
+      <div class="flex justify-between items-center cursor-pointer" @click="toggleLegend">
+        <div class="font-semibold text-gray-800" :class="windowWidth < 768 && legendCollapsed ? 'hidden' : ''">
+          Legend
+        </div>
+        <div class="transition-transform duration-300" :class="[
+          windowWidth < 768 ? '' : 'hidden',
+          legendCollapsed ? 'rotate-0' : 'rotate-180'
+        ]">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
           </svg>
         </div>
-        <span>Joined Events</span>
       </div>
 
-      <div class="flex items-center gap-2">
-        <div class="w-4 h-5">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full text-[#EA4335]">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-          </svg>
+      <!-- Legend Items with transition -->
+      <transition name="slide">
+        <div v-if="isLegendVisible" class="space-y-3">
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-5">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="w-full h-full text-[#16A34A]">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+              </svg>
+            </div>
+            <span>Joined Events</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-5">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="w-full h-full text-[#EA4335]">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+              </svg>
+            </div>
+            <span>Available Events</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-5">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="w-full h-full">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              </svg>
+            </div>
+            <span>Your Location</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-[3px] bg-indigo-500 rounded"></div>
+            <span>Route Path</span>
+          </div>
         </div>
-        <span>Available Events</span>
-      </div>
+      </transition>
 
-      <div class="flex items-center gap-2">
-        <div class="w-4 h-5">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-          </svg>
-        </div>
-        <span>Your Location</span>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <div class="w-4 h-[3px] bg-indigo-500 rounded"></div>
-        <span>Route Path</span>
+      <!-- Collapsed state icon -->
+      <div v-if="windowWidth < 768 && legendCollapsed" class="w-full h-full flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-600">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+        </svg>
       </div>
     </div>
   </section>
@@ -470,16 +522,40 @@ watch([searchVal, eventCat], filterBySearch)
   padding: 0.5rem 0.875rem;
   border: 1px solid #d1d5db;
 }
+
 .select {
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
   padding: 0.625rem 1rem;
   font-size: 0.875rem;
 }
-.fade-enter-active, .fade-leave-active {
+
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s;
 }
-.fade-enter-from, .fade-leave-to {
+
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
+}
+
+/* Slide transition for legend */
+.slide-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.slide-enter-from {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>
