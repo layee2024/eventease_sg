@@ -415,12 +415,12 @@ watch([searchVal, eventCat], filterBySearch)
               </button>
             </div>
 
-            <CardContent class="pb-2 text-xs text-gray-700 space-y-1">
+            <CardContent class="pb-2 text-xs text-gray-700 dark:text-gray-300 space-y-1">
               <div class="space-y-1">
                 <p class="truncate text-xs"><span class="font-semibold">From:</span> {{ routeDetails.start_address }}</p>
                 <p class="truncate text-xs"><span class="font-semibold">To:</span> {{ routeDetails.end_address }}</p>
               </div>
-              <div class="flex justify-between text-indigo-600 font-semibold mt-2 text-xs">
+              <div class="flex justify-between text-indigo-600 dark:text-indigo-300 font-semibold mt-2 text-xs">
                 <span>{{ routeDetails.distance.text }}</span>
                 <span>{{ routeDetails.duration.text }}</span>
               </div>

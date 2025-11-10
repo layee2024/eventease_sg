@@ -42,7 +42,6 @@ async function populateFilterFunction(){
   }
 }
 
-
 function applyFilter() {
   emits("update-filter", {
     category: category.value,
